@@ -1,0 +1,12 @@
+*.DS_Store
+*.ropeproject*
+*.pyc
+/data/*
+/results/*
+/doc/*
+/literature/*
+
+/.project
+/.pydevproject
+/.settings/org.eclipse.core.resources.prefs
+/src/.spyderproject

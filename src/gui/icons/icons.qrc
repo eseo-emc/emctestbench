@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="/">
+    <file>Amplifier.png</file>
+    <file>Generator.png</file>
+    <file>Measurer.png</file>
+    <file>Multimeter.png</file>
+    <file>Oscilloscope.png</file>
+    <file>Positioner.png</file>
+    <file>PowerSupply.png</file>
+    <file>RfGenerator.png</file>
+    <file>SpectrumAnalyzer.png</file>
+    <file>Stimulator.png</file>
+    <file>Switch.png</file>
+    <file>WattMeter.png</file>
+  </qresource>
+</RCC>
