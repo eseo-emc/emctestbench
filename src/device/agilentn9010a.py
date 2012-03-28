@@ -6,33 +6,32 @@ from utility.quantities import *
 
 class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     defaultName = 'Agilent N9010A Vector Signal Analyzer'
+    defaultAddress = 'TCPIP0::172.20.1.209::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N9010A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N9060-90027.pdf','Specifications':'http://cp.literature.agilent.com/litweb/pdf/N9010-90025.pdf'}
     
     def reset(self):
-        self.deviceHandle.write(':CAL:AUTO OFF')        
+        self.write(':CAL:AUTO OFF')        
         
-    def __del__(self):
-        print 'Closing the %s...' % self.__class__.__name__
-        self.deviceHandle.write(':CAL:AUTO ON') 
-        self.deviceHandle.close()
+    def restore(self):
+        self.write(':CAL:AUTO ON') 
     
     def align(self):
         
-        self.deviceHandle.write(':CAL') 
+        self.write(':CAL') 
     def waitUntilReady(self):
-        oldTimeOut = self.deviceHandle.timeout
-        self.deviceHandle.timeout = 60.0
-        self.deviceHandle.ask('*OPC?')  
-        self.deviceHandle.timeout = oldTimeOut
+        oldTimeOut = self._deviceHandle.timeout
+        self._deviceHandle.timeout = 60.0
+        self.ask('*OPC?')  
+        self._deviceHandle.timeout = oldTimeOut
         
         
     def averageComplexVoltage(self):
 #         iqInterlacedValues = self.deviceHandle.ask_for_values(':MEASure:WAVeform0?')
 
-#         self.deviceHandle.write(':CONFIGURE:SPEC')
+#         self.write(':CONFIGURE:SPEC')
 #         iqInterlacedValues = self.deviceHandle.ask_for_values(':READ:SPEC0?')
-        iqInterlacedValues = self.deviceHandle.ask_for_values(':FETCh:SPEC3?')
+        iqInterlacedValues = self.ask_for_values(':FETCh:SPEC3?')
         iValues = iqInterlacedValues[0::2]
         qValues = iqInterlacedValues[1::2]
         complexValues = numpy.array(iValues) + numpy.array(qValues)*1j

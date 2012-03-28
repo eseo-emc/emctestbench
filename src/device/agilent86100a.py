@@ -2,15 +2,17 @@ import numpy
 
 from device import ScpiDevice
 from oscilloscope import Oscilloscope
+from frequencycounter import FrequencyCounter
 
-class Agilent86100a(Oscilloscope,ScpiDevice):
+class Agilent86100a(Oscilloscope,FrequencyCounter,ScpiDevice):
     defaultName = 'Agilent 86100A Oscilloscope'
+    defaultAddress = 'GPIB1::7::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,86100A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/86100-90131.pdf'}
         
     def tryConnect(self):
         if super(Agilent86100a,self).tryConnect():
-            firmwareString = self.askIdentify().split(',')[-1]
+            firmwareString = self.askIdentity().split(',')[-1]
             assert firmwareString.startswith('A.')
             self.firmwareVersion = float(firmwareString[2:])
             assert self.firmwareVersion < 5.0
@@ -31,24 +33,24 @@ class Agilent86100a(Oscilloscope,ScpiDevice):
                 row contains the values.
         '''
         if response:
-            self.deviceHandle.write(':WAVeform:SOURce RESPonse%d' % channel)
+            self.write(':WAVeform:SOURce RESPonse%d' % channel)
         else:
-            self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
-        self.deviceHandle.write(':WAVeform:FORMat WORD')
+            self.write(':WAVeform:SOURce CHANnel%d' % channel)
+        self.write(':WAVeform:FORMat WORD')
         dataType = numpy.dtype('>i2')
         
         if response:
-            self.deviceHandle.write(':DIGitize RESPonse%d' % channel)
+            self.write(':DIGitize RESPonse%d' % channel)
         else:
-            self.deviceHandle.write(':DIGitize Channel%d' % channel)
-            self.deviceHandle.write(':CHANnel%d:DISPlay ON' % channel) # turn on channel display which is turned of by DIGitize
+            self.write(':DIGitize Channel%d' % channel)
+            self.write(':CHANnel%d:DISPlay ON' % channel) # turn on channel display which is turned of by DIGitize
 
         
-#         self.deviceHandle.write(':DIGitize CHAN%d' % channel) # essential!
-#         #self.deviceHandle.write(':DIGitize')
-#         self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
+#         self.write(':DIGitize CHAN%d' % channel) # essential!
+#         #self.write(':DIGitize')
+#         self.write(':WAVeform:SOURce CHANnel%d' % channel)
         
-        rawData = self.deviceHandle.ask(':WAVeform:DATA?')
+        rawData = self.ask(':WAVeform:DATA?')
                 
         # Extract useful data bytes
         assert rawData[0] == '#'
@@ -67,38 +69,45 @@ class Agilent86100a(Oscilloscope,ScpiDevice):
             @param axisName Name of the axis (i.e. 'X' or 'Y')
             @param axisData Numpy array of points on this axis.
             '''
-            increment = (float)(self.deviceHandle.ask(':WAVeform:%sINCrement?' % axisName))
-            reference = (float)(self.deviceHandle.ask(':WAVeform:%sREFerence?' % axisName))
-            origin = (float)(self.deviceHandle.ask(':WAVeform:%sORIgin?' % axisName))
+            increment = (float)(self.ask(':WAVeform:%sINCrement?' % axisName))
+            reference = (float)(self.ask(':WAVeform:%sREFerence?' % axisName))
+            origin = (float)(self.ask(':WAVeform:%sORIgin?' % axisName))
             return ((axisData - reference)*increment) + origin
 
         # Construct sample instant array
-        numberOfSamples = (int)(self.deviceHandle.ask(':WAVeform:POINts?'))
+        numberOfSamples = (int)(self.ask(':WAVeform:POINts?'))
         sampleNumbers = numpy.arange(0,numberOfSamples)
         assert len(sampleNumbers) == len(rawDataArray)
         
         return numpy.vstack((shiftAndScale('X',sampleNumbers),
                             shiftAndScale('Y',rawDataArray)))
-        
+    def measureJitter(self,channel=1,count=100):
+        self.write('MEASure:SCRatch')
+        self.write('MEASure:SOURce CHANNEL1')    
+        self.write('MEASure:CGRade:COMPlete {count:d}'.format(count=count))    
+        return float(self.ask('MEASure:CGRade:JITTer? RMS,CHANNEL{channel:d}'.format(channel=channel)))
+
     
 if __name__ == '__main__':
     from matplotlib import pyplot
     import time
     device = Agilent86100a()
     device.tryConnect()
-    
-    for iteration in range(1):
-        #time.sleep(1)
-        print iteration
-        calibratedResponse = device.getChannelWaveform(1,response=True)
-        rawSignal = device.getChannelWaveform(1)
+
+    print device.measureJitter(channel=1,count=500)
+    print 'OK'    
+#    for iteration in range(1):
+#        #time.sleep(1)
+#        print iteration
+#        calibratedResponse = device.getChannelWaveform(1,response=True)
+#        rawSignal = device.getChannelWaveform(1)
 #        signal2 = device.getChannelWaveform(2)
 #         signal,signal2 = device.getChannelWaveforms()
-        
-        
-    pyplot.plot(rawSignal[0,:],rawSignal[1,:],'b-')
-    pyplot.plot(calibratedResponse[0,:],calibratedResponse[1,:],'r-')
-    pyplot.show()
+#        
+#        
+#    pyplot.plot(rawSignal[0,:],rawSignal[1,:],'b-')
+#    pyplot.plot(calibratedResponse[0,:],calibratedResponse[1,:],'r-')
+#    pyplot.show()
 
 
 

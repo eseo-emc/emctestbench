@@ -4,14 +4,16 @@ import time
 
 class AgilentN6700b(PowerSupply,ScpiDevice):
     defaultName = 'Agilent N6700B Power Supply'
+    defaultAddress = 'TCPIP0::172.20.1.203::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N6700B,'
+    documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N6700-90902.pdf'}
             
     def setChannelParameters(self,channel,voltage,current):
-        self.deviceHandle.write('VOLT %f,(@%d); CURRENT %f,(@%d)' % (voltage,channel,current,channel))
+        self.write('VOLT %f,(@%d); CURRENT %f,(@%d)' % (voltage,channel,current,channel))
     def turnChannelOn(self,channel):
-        self.deviceHandle.write('OUTP ON,(@%d)' % channel)
+        self.write('OUTP ON,(@%d)' % channel)
     def turnChannelOff(self,channel):
-        self.deviceHandle.write('OUTP OFF,(@%d)' % channel)
+        self.write('OUTP OFF,(@%d)' % channel)
         
          
 

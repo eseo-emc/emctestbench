@@ -14,6 +14,7 @@ class NewportEsp300Error(object):
 
 class NewportEsp300(Positioner,ScpiDevice):
     defaultName = 'Newport ESP300 Motion Controller'
+    defaultAddress = 'GPIB1::1::INSTR'
     visaIdentificationStartsWith = 'M-IMS300PP, '
     documentation = {'Programmers Manual':'http://phubner.eng.ua.edu/Files/ESP300.pdf'}
         
@@ -21,7 +22,7 @@ class NewportEsp300(Positioner,ScpiDevice):
 #        #self.deviceHandle = visa.instrument('TCPIP0::172.20.1.202::inst0::INSTR')
 #        self.deviceHandle = visa.instrument('GPIB1::1::INSTR', timeout = 10)
     def askIdentity(self):
-        return self.deviceHandle.ask('1 ID ?')
+        return self.ask('1 ID ?')
 
     def createGroup(self):
         self.writeSafe('1 HN 1,2,3',acceptErrorDescription="GROUP NUMBER ALREADY ASSIGNED") # create group 1, all axes together
@@ -34,11 +35,8 @@ class NewportEsp300(Positioner,ScpiDevice):
     def initialize(self):
         self.turnOnAndHome()
             
-    def __del__(self):
-        print 'Closing the %s...' % self.__class__.__name__
-        self.deviceHandle.close()
     def popError(self):
-        lastErrorMessage = self.deviceHandle.ask('TB?').split(', ')
+        lastErrorMessage = self.ask('TB?').split(', ')
         
         errorCode = int(lastErrorMessage[0])
         if errorCode != 0:
@@ -48,7 +46,7 @@ class NewportEsp300(Positioner,ScpiDevice):
         else:
             return None
     def writeSafe(self,command,acceptErrorDescription=""):
-        self.deviceHandle.write(command)
+        self.write(command)
         error = self.popError()
         if error and error.errorDescription != acceptErrorDescription:
             raise Exception, '{error} upon command "{command}"'.format(error=error,command=command)
@@ -64,7 +62,7 @@ class NewportEsp300(Positioner,ScpiDevice):
     def motionDone(self,axis):
         if axis:
             query = '{axis} MD?'.format(axis=axis)
-            motionDoneString = self.deviceHandle.ask(query)
+            motionDoneString = self.ask(query)
             if motionDoneString == '1':
                 return True
             elif motionDoneString == '0':
@@ -89,7 +87,7 @@ class NewportEsp300(Positioner,ScpiDevice):
         
     def getLocation(self):
         self.createGroup()
-        coordinateStrings = self.deviceHandle.ask('1 HP?').split(', ')
+        coordinateStrings = self.ask('1 HP?').split(', ')
         self.deleteGroup()
         return numpy.array([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])])
 

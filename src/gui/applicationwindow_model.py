@@ -7,7 +7,9 @@ class DeviceItem(QStandardItem):
         self.setText(str(device))
         self.setData(device)
         self.setToolTip(device.detailedInformation)
-        self.setIcon(QIcon('icons/'+device.iconName+'.png'))
+        self.setIcon(QIcon(':/'+device.iconName+'.png'))
+    def customContextMenuRequested(self):
+        print 'customContextMenuRequested'
     @property
     def device(self):
         return self.data().toPyObject()
@@ -25,25 +27,32 @@ class ApplicationWindowModel(object):
         self.results = QStandardItem('Results')
         self.systemTreeModel.appendRow(self.results)
         
-        for device in knownDevices:
+        for device in knownDevices.values():
             self.devices.appendRow(DeviceItem(device))
 
     def refresh(self):
         self.tryToConnectDevices()
         
     def tryToConnectDevices(self):
-        for deviceItemNumber in range(self.devices.rowCount()):
+        for deviceItemNumber in [0]: #range(self.devices.rowCount()):
             device = self.devices.child(deviceItemNumber).device
             self.statusMethod('Refreshing ' + str(device))
             try:
                 device.tryConnect()
             except Exception, errorDetail:
                 self.statusMethod(str(errorDetail))
+    def treeContextMenuRequested(self,point):
+        print 'customContextMenuRequested'
+        index = self.systemTreeModel.indexAt(point)
+        print index
+        print index.isValid()
                 
 if __name__ == '__main__':
-    def statusMethod(message):
-        print message
-    model = ApplicationWindowModel(statusMethod)
-    model.tryToConnectDevices()
+#    def statusMethod(message):
+#        print message
+#    model = ApplicationWindowModel(statusMethod)
+#    model.tryToConnectDevices()
     
-#    DeviceItem(knownDevices[0])
+    knownDevices[1].tryConnect()
+    print knownDevices[1]
+    knownDevices[1].drawAttention()

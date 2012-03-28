@@ -3,7 +3,6 @@
 #    pyuic4 -o applicationwindow_view.py applicationwindow_view.ui   
 # To compile the resources:
 #    pyrcc4 -o icons_rc.py icons\icons.qrc
-
 from PyQt4.QtGui import QMainWindow, QMessageBox
 from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
@@ -20,8 +19,9 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         self.model = ApplicationWindowModel(showError)
         
         self.systemTree.setModel(self.model.systemTreeModel)
+        self.systemTree.customContextMenuRequested.connect(self.model.treeContextMenuRequested)
         self.refreshButton.clicked.connect(self.model.refresh)        
-        
+#        self.showFullScreen()
         self.statusBar().showMessage("EMC Testbench started", 2000)
 
         

@@ -1,73 +1,81 @@
 from device import ScpiDevice
-from switch import Switch
+from switch import SwitchPlatform,Switch
 
-class AgilentL4490a(Switch,ScpiDevice):
-    defaultName = "Agilent L4490a Switching Platform"
+class AgilentSwitch(Switch):
+    def __init__(self,parent,mapping):
+        self.parent = parent
+        Switch.__init__(self,mapping)
+
+    def setPosition(self,positionName):
+        self.parent.write('ROUT:CLOS (@{positionCode:d})'.format(positionCode=self[positionName]))
+    def _readPosition(self,positionName):
+        closeString = self.parent.ask('ROUT:CLOS? (@{positionCode:d})'.format(positionCode=self[positionName]))
+        return closeString == '1'
+
+class AgilentL4490a(SwitchPlatform,ScpiDevice,dict):
+    defaultName = "Agilent L4490A Switching Platform"
+    defaultAddress = 'TCPIP0::172.20.1.201::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,L4490A,'
     
-    def __init__(self,visaAddress):
+    def __init__(self,visaAddress=None):
         super(AgilentL4490a,self).__init__(visaAddress)
 
-        self._switchMapping = { \
-            'GeneratorToBridge':    1103, 
-            'GeneratorToPrana':     1105, 
-            'GeneratorToMilmega':   1106, 
-            'GeneratorOpen':        1108, 
-                                         
-            'DUTtoSAorVNA':         1112,
-            'BridgeToDUT':          1113, 
-            'PranaToDUT':           1115, 
-            'MilmegaToDUT':         1116, 
-            'DUTOpen':              1118, 
-                                         
-            'PranaIncidentToPM':    1125, 
-            'MilmegaIncidentToPM':  1126, 
-            'IncidentOpen':         1128, 
-                                         
-            'BridgeReflectedToPM':  1133, 
-            'PranaReflectedToPM':   1135, 
-            'MilmegaReflectedToPM': 1136, 
-            'ReflectedOpen':        1138 \
+        self.update({ \
+            'generator':AgilentSwitch(self,{ \
+                'bridge':    1103, 
+                'Prana':     1105, 
+                'Milmega':   1106, 
+                'open':      1108 \
+            }),
+            'DUT':AgilentSwitch(self,{ \
+                'SAorVNA':   1112,
+                'bridge':    1113, 
+                'Prana':     1115, 
+                'Milmega':   1116, 
+                'open':      1118 \
+            }),
+            'powerMeterIncident':AgilentSwitch(self,{ \
+                'Prana':     1125, 
+                'Milmega':   1126, 
+                'open':      1128 \
+            }),
+            'powerMeterReflected':AgilentSwitch(self,{ \
+                'bridge':    1133, 
+                'Prana':     1135, 
+                'Milmega':   1136, 
+                'open':      1138 \
+            })
+        })
+        
+        self._presets = { \
+            'bridge'  : {'DUT':'bridge',  'powerMeterReflected':'bridge', 'generator':'bridge'},
+            'Prana'   : {'DUT':'Prana',   'powerMeterIncident':'Prana',   'powerMeterReflected':'Prana',   'generator':'Prana'},
+            'Milmega' : {'DUT':'Milmega', 'powerMeterIncident':'Milmega', 'powerMeterReflected':'Milmega', 'generator':'Milmega'} \
         }
         
-    def reset(self):
-        self.deviceHandle.write('ROUT:CHAN:VER:ENAB ON,(@1102:1138)') #TODO: take minimum an maximum of switchMapping
+    def setPreset(self,presetName):
+        preset = self._presets[presetName]
+        for switchName,switchPosition in preset.items():
+            self[switchName].setPosition(switchPosition)
+    def checkPreset(self,presetName):
+        preset = self._presets[presetName]
+        for switchName,switchPosition in preset.items():
+            if self[switchName].getPosition() != switchPosition:
+                return False
+        return True
         
-    def closeSwitch(self,switchName):
-        self.deviceHandle.write('ROUT:CLOS (@%d)' % self._switchMapping[switchName]);
-    def readSwitch(self,switchName):
-        closeString = self.deviceHandle.ask('ROUT:CLOS? (@%d)' % self._switchMapping[switchName]);
-        return closeString == '1'
+        
+    def tryConnect(self):
+        if super(AgilentL4490a,self).tryConnect():
+            self.write('ROUT:CHAN:VER:ENAB ON,(@1102:1138)') #TODO: take minimum an maximum of switchMapping
+            return True
+
         
   
 if __name__ == '__main__':
     switchPlatform = AgilentL4490a()
     assert switchPlatform.tryConnect()
-    switchPlatform.reset()
-    switchPlatform.closeSwitch('DUTtoSAorVNA')
-    print switchPlatform.readSwitch('DUTtoSAorVNA')
-    
-    
-
-#     
-#     ampli prana 5
-#     * ID
-#     MHF # on
-#     AHF # off
-#     
-#     ampli milmega 6
-#     OUT4 1 # LINE ON
-#     OUT4 0 # LINE OFF
-#     OUT1 1 # RF ON
-#     OUT1 0 # RF OFF
-#     OUT3 0 # Band 1
-#     OUT3 1 # Band 2
-#     
-#     frequency meter 206
-#     
-#     multimeter 207
-#     
-#     dso 208
-    
-    
-    
+#    switchPlatform['DUT'].openSwitch() #
+#    switchPlatform['DUT'].setPosition('SAorVNA')
+    switchPlatform.setPreset('bridge')
+    print switchPlatform['DUT'].getPosition()

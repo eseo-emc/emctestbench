@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'applicationwindow_view.ui'
 #
-# Created: Fri Mar 09 09:07:03 2012
+# Created: Mon Mar 26 13:41:41 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,7 @@ class Ui_ApplicationWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.systemTree.setFont(font)
+        self.systemTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.systemTree.setIconSize(QtCore.QSize(18, 18))
         self.systemTree.setObjectName(_fromUtf8("systemTree"))
         self.systemTree.header().setVisible(False)
@@ -49,6 +50,13 @@ class Ui_ApplicationWindow(object):
         self.inspector.setFrameShape(QtGui.QFrame.StyledPanel)
         self.inspector.setFrameShadow(QtGui.QFrame.Raised)
         self.inspector.setObjectName(_fromUtf8("inspector"))
+        self.pushButton = QtGui.QPushButton(self.inspector)
+        self.pushButton.setGeometry(QtCore.QRect(54, 200, 91, 31))
+        self.pushButton.setText(QtGui.QApplication.translate("ApplicationWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Amplifier.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButton.setIcon(icon)
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.gridLayout.addWidget(self.splitter, 0, 0, 1, 1)
         ApplicationWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ApplicationWindow)

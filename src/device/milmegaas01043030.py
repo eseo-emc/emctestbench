@@ -4,25 +4,26 @@ import time
 
 class MilmegaAS0104_30_30(Amplifier,ScpiDevice):
     defaultName = 'Milmega AS0104 30/30'
+    defaultAddress = 'GPIB1::6::INSTR'
     visaIdentificationStartsWith = '"MILMEGA,RF AMPLIFIER,'
            
     def turnRfOn(self):
-        self.deviceHandle.write('OUT1 1')
+        self.write('OUT1 1')
     def turnRfOff(self):
-        self.deviceHandle.write('OUT1 0')
+        self.write('OUT1 0')
     
     def turnLineOn(self):
-        self.deviceHandle.write('OUT4 1')
+        self.write('OUT4 1')
     def turnLineOff(self):
-        self.deviceHandle.write('OUT4 0')
+        self.write('OUT4 0')
         
     def switchToBand1(self):
-        self.deviceHandle.write('OUT3 0')
+        self.write('OUT3 0')
     def switchToBand2(self):
-        self.deviceHandle.write('OUT3 1')    
+        self.write('OUT3 1')    
 
 if __name__ == '__main__':
-    amplifier = MilmegaAS0104_30_30('GPIB1::6::INSTR')
+    amplifier = MilmegaAS0104_30_30()
     print amplifier.iconName
     assert amplifier.tryConnect()
     amplifier.turnLineOn()

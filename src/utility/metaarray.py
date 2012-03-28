@@ -422,13 +422,13 @@ class MetaArray(ndarray):
 	
 	
 if __name__ == '__main__':
-#	demoArray = MetaArray((4,2), info=[
-#			axis('t', values=[0,1,2,3], units='s',title='Time'), 
-#			axis('Signal', cols=[('V0', 'V', 'Voltage 0'),('V1', 'V', 'Voltage 1')])
-#		])
-#	demoArray['Signal':'V0'] = [1,3,2,4]
-#	demoArray['Signal':'V1'] = [7,6,5,4]
-#
+	demoArray = MetaArray((4,2), info=[
+			axis('t', values=[0,1,2,3], units='s',title='Time'), 
+			axis('Signal', cols=[('V0', 'V', 'Voltage 0'),('V1', 'V', 'Voltage 1')])
+		])
+	demoArray['Signal':'V0'] = [1,3,2,4]
+	demoArray['Signal':'V1'] = [7,6,5,4]
+
 #	demoArray2 = MetaArray((4,2,2), info=[
 #			axis('t', values=[0,1,2,3], units='s',title='Time'), 
 #			axis('Signal', cols=[('V0', 'V', 'Voltage 0'),('V1', 'V', 'Voltage 1')]),
@@ -441,15 +441,15 @@ if __name__ == '__main__':
 #	
 #	#print demoArray
 #	
-#	demoArray.writeToExcel('../../results/testBook.xls')
-	
-	demoArray = MetaArray((4,0), info=[
-				axis('t', values=[0,1,2,3], units='s',title='Time'), 
-				axis('Signal', cols=[])
-			])
-	demoArray = demoArray.append([1,3,2,4], 'Signal')
-	demoArray = demoArray.append([7,6,5,4], 'Signal')
-#	demoArray['Signal':'V0'] = 
-#	demoArray['Signal':'V1'] = [7,6,5,4]
-	print demoArray
-
+	demoArray.writeToExcel('../results/testBook.xls')
+#	
+#	demoArray = MetaArray((4,0), info=[
+#				axis('t', values=[0,1,2,3], units='s',title='Time'), 
+#				axis('Signal', cols=[])
+#			])
+#	demoArray = demoArray.append([1,3,2,4], 'Signal')
+#	demoArray = demoArray.append([7,6,5,4], 'Signal')
+##	demoArray['Signal':'V0'] = 
+##	demoArray['Signal':'V1'] = [7,6,5,4]
+#	print demoArray
+#

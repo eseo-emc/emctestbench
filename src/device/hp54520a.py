@@ -5,6 +5,7 @@ from oscilloscope import Oscilloscope
 
 class Hp54520a(Oscilloscope,ScpiDevice):
     defaultName = 'HP 54520A Oscilloscope'
+    defaultAddress = 'GPIB1::7::INSTR'
     visaIdentficationStartsWith = 'HEWLETT-PACKARD,54520A'
               
     def getChannelWaveform(self,channel):
@@ -16,18 +17,18 @@ class Hp54520a(Oscilloscope,ScpiDevice):
         '''
         #TODO: use DIGitize somewhere
         
-        self.deviceHandle.write(':ACQuire:TYPE NORMal')
-#        self.deviceHandle.write(':WAVeform:FORMat ASCII')
-#        self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
+        self.write(':ACQuire:TYPE NORMal')
+#        self.write(':WAVeform:FORMat ASCII')
+#        self.write(':WAVeform:SOURce CHANnel%d' % channel)
 #        return self.deviceHandle.ask_for_values(':WAVeform:DATA?',visa.ascii)
  
-        self.deviceHandle.write(':WAVeform:FORMat WORD')
+        self.write(':WAVeform:FORMat WORD')
         dataType = numpy.dtype('>H')
         
-        self.deviceHandle.write(':DIGitize CHAN%d' % channel) # essential!
-        #self.deviceHandle.write(':DIGitize')
-        self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
-        rawData = self.deviceHandle.ask(':WAVeform:DATA?')
+        self.write(':DIGitize CHAN%d' % channel) # essential!
+        #self.write(':DIGitize')
+        self.write(':WAVeform:SOURce CHANnel%d' % channel)
+        rawData = self.ask(':WAVeform:DATA?')
                 
         # Extract useful data bytes
         assert rawData[0] == '#'
@@ -54,15 +55,15 @@ class Hp54520a(Oscilloscope,ScpiDevice):
             @param axisName Name of the axis (i.e. 'X' or 'Y')
             @param axisData Numpy array of points on this axis.
             '''
-            increment = (float)(self.deviceHandle.ask(':WAVeform:%sINCrement?' % axisName))
-            reference = (float)(self.deviceHandle.ask(':WAVeform:%sREFerence?' % axisName))
-            origin = (float)(self.deviceHandle.ask(':WAVeform:%sORIgin?' % axisName))
+            increment = (float)(self.ask(':WAVeform:%sINCrement?' % axisName))
+            reference = (float)(self.ask(':WAVeform:%sREFerence?' % axisName))
+            origin = (float)(self.ask(':WAVeform:%sORIgin?' % axisName))
             return ((axisData - reference)*increment) + origin
 
 
     
         # Construct sample instant array
-        numberOfSamples = (int)(self.deviceHandle.ask(':WAVeform:POINts?'))
+        numberOfSamples = (int)(self.ask(':WAVeform:POINts?'))
         sampleNumbers = numpy.arange(0,numberOfSamples)
         assert len(sampleNumbers) == len(rawDataArray)
         
@@ -78,22 +79,22 @@ class Hp54520a(Oscilloscope,ScpiDevice):
         '''
         #TODO: use DIGitize somewhere
         
-        self.deviceHandle.write(':ACQuire:TYPE NORMal')
-#        self.deviceHandle.write(':WAVeform:FORMat ASCII')
-#        self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
+        self.write(':ACQuire:TYPE NORMal')
+#        self.write(':WAVeform:FORMat ASCII')
+#        self.write(':WAVeform:SOURce CHANnel%d' % channel)
 #        return self.deviceHandle.ask_for_values(':WAVeform:DATA?',visa.ascii)
  
-        self.deviceHandle.write(':WAVeform:FORMat WORD')
+        self.write(':WAVeform:FORMat WORD')
         dataType = numpy.dtype('>H')
         
         
-        self.deviceHandle.write('DISPlay:SCReen OFF')
-        self.deviceHandle.write(':DIGitize CHANNEL1,CHANNEL2') # essential!
-        #self.deviceHandle.write(':DIGitize')
+        self.write('DISPlay:SCReen OFF')
+        self.write(':DIGitize CHANNEL1,CHANNEL2') # essential!
+        #self.write(':DIGitize')
         
         def getChannelData(channel):
-            self.deviceHandle.write(':WAVeform:SOURce CHANnel%d' % channel)
-            rawData = self.deviceHandle.ask(':WAVeform:DATA?')
+            self.write(':WAVeform:SOURce CHANnel%d' % channel)
+            rawData = self.ask(':WAVeform:DATA?')
                     
             # Extract useful data bytes
             assert rawData[0] == '#'
@@ -120,15 +121,15 @@ class Hp54520a(Oscilloscope,ScpiDevice):
                 @param axisName Name of the axis (i.e. 'X' or 'Y')
                 @param axisData Numpy array of points on this axis.
                 '''
-                increment = (float)(self.deviceHandle.ask(':WAVeform:%sINCrement?' % axisName))
-                reference = (float)(self.deviceHandle.ask(':WAVeform:%sREFerence?' % axisName))
-                origin = (float)(self.deviceHandle.ask(':WAVeform:%sORIgin?' % axisName))
+                increment = (float)(self.ask(':WAVeform:%sINCrement?' % axisName))
+                reference = (float)(self.ask(':WAVeform:%sREFerence?' % axisName))
+                origin = (float)(self.ask(':WAVeform:%sORIgin?' % axisName))
                 return ((axisData - reference)*increment) + origin
     
     
         
             # Construct sample instant array
-            numberOfSamples = (int)(self.deviceHandle.ask(':WAVeform:POINts?'))
+            numberOfSamples = (int)(self.ask(':WAVeform:POINts?'))
             sampleNumbers = numpy.arange(0,numberOfSamples)
             assert len(sampleNumbers) == len(rawDataArray)
             

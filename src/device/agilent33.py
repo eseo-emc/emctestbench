@@ -13,19 +13,33 @@ class Agilent33(Generator,ScpiDevice):
         @param peakAmplitude in Vp (beware! not in Vpp)
         @param offset in V
         '''        
-        self.deviceHandle.write('APPL:%s %e HZ, %e VPP, %e V' %
+        self.write('APPL:%s %e HZ, %e VPP, %e V' %
                                 (waveType,frequency,peakAmplitude*2,offset))
     def enableOutput(self,enable=True):
         if enable:
-            self.deviceHandle.write('OUTPut ON')
+            self.write('OUTPut ON')
         else:
-            self.deviceHandle.write('OUTPut OFF')
+            self.write('OUTPut OFF')
+
+class Agilent33220A(Agilent33):
+    defaultName = 'Agilent 33220A waveform generator'
+    defaultAddress = 'TCPIP0::172.20.1.204::inst0::INSTR'
+    visaIdentificationStartsWith = 'Agilent Technologies,33220A'
+    def displayText(self,message):
+        self.write('SYSTem:RWLock')
+        super(Agilent33220A,self).displayText(message)
+        
+class Agilent33250A(Agilent33):
+    defaultName = 'Agilent 33250A waveform generator'
+    defaultAddress = 'GPIB1::10::INSTR'
+    visaIdentificationStartsWith = 'Agilent Technologies,33250A'
 
 if __name__ == '__main__':
-    device = Agilent33()
+    device = Agilent33250A()
     assert device.tryConnect()
-    device.enableOutput(False)
-    device.setWaveform(25e6, 2.5, 1)
-    device.setWaveform(25e6, 2.5, 2.5,'SQU')
+#    device.enableOutput(False)
+#    device.setWaveform(25e6, 2.5, 1)
+#    device.setWaveform(25e6, 2.5, 2.5,'SQU')
+    device.deviceHandle.write()
     
     

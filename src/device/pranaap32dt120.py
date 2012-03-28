@@ -4,19 +4,21 @@ import time
 
 class PranaAP32DT120(Amplifier,ScpiDevice):
     defaultName = 'Prana AP32 DT120 Power Amplifier'
+    defaultAddress = 'GPIB1::5::INSTR'
     visaIdentificationStartsWith = 'AP32 DT120'
     def askIdentity(self):
-        return self.deviceHandle.ask('*ID?')
+        return self.ask('*ID?')
         
     def turnRfOn(self):
-        self.deviceHandle.write('MHF')
+        self.write('MHF')
     def turnRfOff(self):
-        self.deviceHandle.write('AHF')
+        self.write('AHF')
         
   
 if __name__ == '__main__':
     amplifier = PranaAP32DT120()
-    assert amplifier.tryConnect()
+    print amplifier.tryConnect()
+    print amplifier.askIdentity()
     
     amplifier.turnRfOn()
     time.sleep(5)
