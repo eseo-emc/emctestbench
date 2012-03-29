@@ -1,5 +1,7 @@
 from PyQt4.QtGui import QStandardItemModel,QStandardItem,QIcon
+
 from device import knownDevices
+import logging
 
 class DeviceItem(QStandardItem):
     def __init__(self,device):
@@ -7,7 +9,7 @@ class DeviceItem(QStandardItem):
         self.setText(str(device))
         self.setData(device)
         self.setToolTip(device.detailedInformation)
-        self.setIcon(QIcon(':/'+device.iconName+'.png'))
+        self.setIcon(QIcon(':/devices/'+device.iconName+'.png'))
     def customContextMenuRequested(self):
         print 'customContextMenuRequested'
     @property
@@ -15,10 +17,10 @@ class DeviceItem(QStandardItem):
         return self.data().toPyObject()
 
 
+    
+
 class ApplicationWindowModel(object):
-    def __init__(self,statusMethod):
-        self.statusMethod = statusMethod
-        
+    def __init__(self):     
         self.systemTreeModel = QStandardItemModel()
         self.devices = QStandardItem('Devices')
         self.systemTreeModel.appendRow(self.devices)        
@@ -36,7 +38,7 @@ class ApplicationWindowModel(object):
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):
             device = self.devices.child(deviceItemNumber).device
-            self.statusMethod('Refreshing ' + str(device))
+            logging.LogItem('Refreshing ' + str(device),logging.info)
             try:
                 device.tryConnect()
             except Exception, errorDetail:

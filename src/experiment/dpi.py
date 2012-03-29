@@ -2,6 +2,7 @@ from device import knownDevices
 from experiment import Experiment
 from transmittedpower import TransmittedPower
 from utility import Power
+import numpy
 
 class VoltageCriterion(Experiment):
     def __init__(self,voltageMargin=0.05):
@@ -47,7 +48,7 @@ class Dpi(Experiment):
             # make it work
             for tryPower in inclusiveRange(startPower,self.dBmForwardPowerLimits[0],-stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-                print tryPower
+#                print tryPower
                 if self.passCriterion.measure()['pass']:
                     break
             else:
@@ -57,7 +58,7 @@ class Dpi(Experiment):
             # make it fail
             for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.dBmForwardPowerLimits[1],stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-                print tryPower
+#                print tryPower
                 self.rfGenerator.enableOutput()
                 if not self.passCriterion.measure()['pass']:
                     break
@@ -88,6 +89,7 @@ if __name__ == '__main__':
     experiment = Dpi(numpy.arange(300e3,1e9,100e6),(-30,+15))
     experiment.prepare()
     results = experiment.measure()
+    print results
     
     import csv
     import datetime

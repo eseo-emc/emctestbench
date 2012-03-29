@@ -1,16 +1,21 @@
 <RCC>
   <qresource prefix="/">
-    <file>Amplifier.png</file>
-    <file>Generator.png</file>
-    <file>Measurer.png</file>
-    <file>Multimeter.png</file>
-    <file>Oscilloscope.png</file>
-    <file>Positioner.png</file>
-    <file>PowerSupply.png</file>
-    <file>RfGenerator.png</file>
-    <file>SpectrumAnalyzer.png</file>
-    <file>Stimulator.png</file>
-    <file>Switch.png</file>
-    <file>WattMeter.png</file>
+    <file>devices/WattMeter.png</file>
+    <file>devices/Amplifier.png</file>
+    <file>devices/Generator.png</file>
+    <file>devices/Measurer.png</file>
+    <file>devices/Multimeter.png</file>
+    <file>devices/Oscilloscope.png</file>
+    <file>devices/Positioner.png</file>
+    <file>devices/PowerSupply.png</file>
+    <file>devices/RfGenerator.png</file>
+    <file>devices/SpectrumAnalyzer.png</file>
+    <file>devices/Stimulator.png</file>
+    <file>devices/Switch.png</file>
+    <file>logging/Warning.png</file>
+    <file>logging/Debug.png</file>
+    <file>logging/Error.png</file>
+    <file>logging/Info.png</file>
+    <file>logging/Success.png</file>
   </qresource>
 </RCC>

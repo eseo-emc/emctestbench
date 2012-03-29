@@ -6,6 +6,7 @@
 from PyQt4.QtGui import QMainWindow, QMessageBox
 from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
+from gui import logging
 
 class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
     def __init__(self):
@@ -14,19 +15,21 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         
         self.action_About.triggered.connect(self.about)
         
-        def showError(message):
-            self.statusBar().showMessage(message,2000)
-        self.model = ApplicationWindowModel(showError)
+        self.model = ApplicationWindowModel()
         
         self.systemTree.setModel(self.model.systemTreeModel)
         self.systemTree.customContextMenuRequested.connect(self.model.treeContextMenuRequested)
         self.refreshButton.clicked.connect(self.model.refresh)        
-#        self.showFullScreen()
-        self.statusBar().showMessage("EMC Testbench started", 2000)
 
+        logging.LogItem("EMC Testbench started",logging.warning)
+        logging.LogItem("EMC Testbench was initiated by ESEO",logging.info)
+        logging.LogItem("Debug message",logging.debug)
+        self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(1))
+        self.actionInfo.triggered.connect(lambda : self.logView.setLevel(2))
+        self.actionDebug.triggered.connect(lambda : self.logView.setLevel(3))
         
     def aboutToQuit(self):
-        self.statusBar().showMessage('Bye!')
+        logging.LogItem('Bye!')
     def about(self):
         progname = 'EMC Testbench'
         progversion = 0.1

@@ -38,4 +38,4 @@ knownDevices = { \
     'positioner' : NewportEsp300(),
 }
 
-from test.simpledpi import knownDevices
+#from test.simpledpi import knownDevices
