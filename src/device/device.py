@@ -4,24 +4,44 @@
 
 import visa
 import time
+from gui import logging
+from PyQt4.QtCore import QObject,pyqtSignal
+import sys
 
-class Device(object):
-    '''
-    Abstract superclass for all physical measurement device agents.
-    '''
+class Device(QObject):
+    changed = pyqtSignal()  
+    
     def __init__(self,name=None):
+        QObject.__init__(self)
+        self._online = False
         if not name:
             self.name = self.defaultName
         else:
             self.name = name
     def __str__(self):
-        return self.name
+        return self.name + (' (Offline)' if not(self.online) else '')
     @property
     def detailedInformation(self):
         return self.__class__.__name__
     @property
     def iconName(self):
         return 'Stimulator'
+        
+    @property
+    def online(self):
+        return self._online
+    @online.setter
+    def online(self,newOnlineValue):
+        if self._online != newOnlineValue:
+            self._online = newOnlineValue
+            self.changed.emit()
+    def test(self):
+        print 'Test'
+    def putOnline(self):
+        logging.LogItem(str(self)+' has no putOnline implementation.',logging.warning)
+        return False
+    def drawAttention(self):
+        logging.LogItem(str(self)+' has no drawAttention implementation.',logging.warning)
     
 class ScpiDevice(Device):
     def __init__(self,visaAddress=None,name=None):
@@ -29,7 +49,6 @@ class ScpiDevice(Device):
         if visaAddress == None:
             visaAddress = self.defaultAddress
         self.visaAddress = visaAddress
-        self.connected = False
         self._deviceHandle = None
     @property
     def detailedInformation(self):
@@ -38,52 +57,73 @@ class ScpiDevice(Device):
     
     def write(self,message):
         if not self._deviceHandle:
-            assert self.tryConnect()
-#        else:
-#            print 'Would write to {address}: "{message}"'.format(message=message,address=self.visaAddress)
-        self._deviceHandle.write(message)
+            self.putOnline()
+        if self.online:
+            self._deviceHandle.write(message)
+        else:
+            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
+            raise
     def ask(self,message):
         if not self._deviceHandle:
-            assert self.tryConnect()
+            self.putOnline()
+            assert self.online
 #        else:
 #            print 'Would ask from {address}: "{message}"'.format(message=message,address=self.visaAddress)
-        return self._deviceHandle.ask(message)
+        try:
+            answer = self._deviceHandle.ask(message)
+        except:
+            logging.LogItem(str(sys.exc_info()[1]),logging.error)
+            raise
+        return answer
             
     def ask_for_values(self,message):
         return self._deviceHandle.ask_for_values(message)
     
-    def tryConnect(self):
+    def _putOffline(self):
+        if self._deviceHandle:
+            self._deviceHandle.close()
+            self._deviceHandle = None
+        self.online = False
+        
+    def putOnline(self):
+        self._putOffline() #TODO: find a way of checking the status of a connection, disconnecting every time is a bit expensive
+        logging.LogItem('Trying to connect to '+self.visaAddress+'...',logging.debug)
         if self._deviceHandle == None:
             try:
                 self._deviceHandle = visa.instrument(self.visaAddress)
             except Exception:
                 pass
         if self._deviceHandle:
-            self.connected = self.identify()
+            logging.LogItem('Connected, verifiying identity of '+self.visaAddress+'...',logging.debug)
+            self.online = self.identify()
         else:
-            self.connected = None
-        return self.connected
+            logging.LogItem(self.visaAddress+' was offline',logging.info)
+            self.online = False
+            
     def popError(self):
         return self.ask('SYSTem:ERRor?')
-    def __str__(self):
-        return self.name + (' (Offline)' if not(self.connected) else '')
+
     def __del__(self):
-        if self.connected:
-            self._deviceHandle.close()
+        self._putOffline()
     def reset(self):
         self.write('*RST')
     def askIdentity(self):
         return self.ask('*IDN?')
     def identify(self):
-        return self.askIdentity().startswith(self.visaIdentificationStartsWith)
+        identityString = self.askIdentity()
+        if identityString.startswith(self.visaIdentificationStartsWith):
+            logging.LogItem('Identify succes, got "'+identityString+'".',logging.debug)
+            return True
+        else:
+            logging.LogItem('Failed to identify, got "'+identityString+'", expected it to start with "'+self.visaIdentificationStartsWith+'"',logging.warning)
+            return False
         
     def drawAttention(self):
-        if self.connected:
-            self.displayText(self.name)
-            self.beep()
-            time.sleep(2)
-            self.write('DISPlay:TEXT:CLEar')
-            self.beep()
+        self.displayText(self.name)
+        self.beep()
+        time.sleep(2)
+        self.write('DISPlay:TEXT:CLEar')
+        self.beep()
     def beep(self):
         self.write('SYSTem:BEEPer')
     def displayText(self,message):
@@ -98,6 +138,5 @@ if __name__ == '__main__':
 #    testDevice = Agilent33250A('GPIB1::10::INSTR')
 #    testDevice = AgilentL4411a('TCPIP0::172.20.1.207::inst0::INSTR')
 #    testDevice = AgilentN6700b('TCPIP0::172.20.1.203::inst0::INSTR')
-    testDevice.tryConnect()
     print testDevice
     testDevice.drawAttention()

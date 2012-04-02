@@ -40,7 +40,6 @@ if __name__ == '__main__':
     from matplotlib import pyplot
     import time
     device = AgilentE4419b()
-    assert device.tryConnect()
     device.reset()
     
     for iteration in range(100):

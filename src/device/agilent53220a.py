@@ -33,7 +33,7 @@ class Agilent53220a(FrequencyCounter,ScpiDevice):
     
 if __name__ == '__main__':
     device = Agilent53220a()
-    assert device.tryConnect()
+
     print device.popError()
 #    device.drawAttention()    
 #    device.reset()

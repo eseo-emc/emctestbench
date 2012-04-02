@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'applicationwindow_view.ui'
 #
-# Created: Thu Mar 29 16:49:20 2012
+# Created: Fri Mar 30 15:29:53 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,15 +34,17 @@ class Ui_ApplicationWindow(object):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.systemTree = QtGui.QTreeView(self.layoutWidget)
+        self.systemTree = SystemTreeWidget(self.layoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.systemTree.setFont(font)
         self.systemTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.systemTree.setIconSize(QtCore.QSize(18, 18))
+        self.systemTree.setColumnCount(1)
         self.systemTree.setObjectName(_fromUtf8("systemTree"))
+        self.systemTree.headerItem().setText(0, _fromUtf8("1"))
         self.systemTree.header().setVisible(False)
-        self.systemTree.header().setStretchLastSection(True)
+        self.systemTree.header().setMinimumSectionSize(1)
         self.verticalLayout.addWidget(self.systemTree)
         self.refreshButton = QtGui.QPushButton(self.layoutWidget)
         self.refreshButton.setText(QtGui.QApplication.translate("ApplicationWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
@@ -124,4 +126,5 @@ class Ui_ApplicationWindow(object):
         pass
 
 from gui.logwidget import LogWidget
+from gui.systemtreewidget import SystemTreeWidget
 import icons_rc

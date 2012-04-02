@@ -38,7 +38,6 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
 
 if __name__ == '__main__':
     device = AgilentN5181a()
-    assert device.tryConnect()
     print device.getFrequency()
 #    device.setPower(Power(21,'dBm'))
 #    print device.getPower()

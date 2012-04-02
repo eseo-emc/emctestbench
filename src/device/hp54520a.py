@@ -6,7 +6,7 @@ from oscilloscope import Oscilloscope
 class Hp54520a(Oscilloscope,ScpiDevice):
     defaultName = 'HP 54520A Oscilloscope'
     defaultAddress = 'GPIB1::7::INSTR'
-    visaIdentficationStartsWith = 'HEWLETT-PACKARD,54520A'
+    visaIdentificationStartsWith = 'HEWLETT-PACKARD,54520A'
               
     def getChannelWaveform(self,channel):
         '''
@@ -141,7 +141,6 @@ if __name__ == '__main__':
     from matplotlib import pyplot
     import time
     device = Hp54520a()
-    assert device.tryConnect()
     
     
     for iteration in range(1):

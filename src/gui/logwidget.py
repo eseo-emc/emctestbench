@@ -1,12 +1,21 @@
 from PyQt4.QtGui import QTableWidget,QTableWidgetItem,QHeaderView,QIcon
+from PyQt4.QtCore import QObject
 import logging
+
+
+class StdOutLogView(QObject):
+    def __init__(self):
+        QObject.__init__(self)
+        self.logModel = logging.LogModel.Instance()
+        self.logModel.itemAdded.connect(self.update)
+    def update(self,item):
+        print str(item)
 
 class LogWidget(QTableWidget):
     def __init__(self,parent):
         QTableWidget.__init__(self,parent)
         self.logModel = logging.LogModel.Instance()
-        self.logModel.itemAdded.connect(self.update)
-        
+        self.logModel.itemAdded.connect(self.update)      
         self.maximumLevel = 3
     def setLevel(self,level):
         self.maximumLevel = level
@@ -21,6 +30,7 @@ class LogWidget(QTableWidget):
         itemNumber = 0
         for logItem in self.logModel.logItems:
             if logItem.level <= self.maximumLevel:
+#                if self.rowCount <= itemNumber:
                 self.insertRow(itemNumber)
                 
                 levelItem = QTableWidgetItem(logging.logLevels[logItem.level])

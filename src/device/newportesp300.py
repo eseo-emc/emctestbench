@@ -100,7 +100,6 @@ class NewportEsp300(Positioner,ScpiDevice):
         
 if __name__ == '__main__':
     test = NewportEsp300()
-    assert test.tryConnect()
 #     test.initialize()
 #     while True:
 #         test.initialize()

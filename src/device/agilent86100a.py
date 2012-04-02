@@ -10,8 +10,8 @@ class Agilent86100a(Oscilloscope,FrequencyCounter,ScpiDevice):
     visaIdentificationStartsWith = 'Agilent Technologies,86100A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/86100-90131.pdf'}
         
-    def tryConnect(self):
-        if super(Agilent86100a,self).tryConnect():
+    def putOnline(self):
+        if super(Agilent86100a,self).putOnline():
             firmwareString = self.askIdentity().split(',')[-1]
             assert firmwareString.startswith('A.')
             self.firmwareVersion = float(firmwareString[2:])
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     from matplotlib import pyplot
     import time
     device = Agilent86100a()
-    device.tryConnect()
+    device.putOnline()
 
     print device.measureJitter(channel=1,count=500)
     print 'OK'    

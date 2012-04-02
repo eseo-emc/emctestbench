@@ -25,7 +25,6 @@ class MilmegaAS0104_30_30(Amplifier,ScpiDevice):
 if __name__ == '__main__':
     amplifier = MilmegaAS0104_30_30()
     print amplifier.iconName
-    assert amplifier.tryConnect()
     amplifier.turnLineOn()
     time.sleep(1)
     amplifier.turnRfOn()

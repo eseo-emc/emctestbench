@@ -3,14 +3,15 @@ from experiment import Experiment
 from transmittedpower import TransmittedPower
 from utility import Power
 import numpy
+from gui import logging
 
 class VoltageCriterion(Experiment):
-    def __init__(self,voltageMargin=0.05):
-        self.voltMeter = knownDevices['multimeter']
-        self.voltageMargin = voltageMargin
-        
+    name = 'Voltage offset criterion'
+    def connect(self):
+        self.voltMeter = knownDevices['multimeter']        
         self.undisturbedOutputVoltage = None
-    def prepare(self):
+    def prepare(self,voltageMargin=0.05):
+        self.voltageMargin = voltageMargin
         self.undisturbedOutputVoltage = self.voltMeter.measure()
     def measure(self):
         outputVoltage = self.voltMeter.measure()
@@ -19,22 +20,25 @@ class VoltageCriterion(Experiment):
 
 
 class Dpi(Experiment):
-    def __init__(self,frequencies,dBmForwardPowerLimits):
+    name = 'Direct Power Injection'
+    def connect(self):
+        self.rfGenerator = knownDevices['rfGenerator']   
+        self.switchPlatform = knownDevices['switchPlatform'] 
+        
+        self.transmittedPower = TransmittedPower()
+        self.transmittedPower.connect()
+        self.passCriterion = VoltageCriterion()        
+        self.passCriterion.connect()
+    def prepare(self,frequencies=[300e3],dBmForwardPowerLimits=(-30,+0)):
         self.frequencies = frequencies
         self.dBmForwardPowerLimits = dBmForwardPowerLimits        
         
-        self.rfGenerator = knownDevices['rfGenerator']   
-        self.switchPlatform = knownDevices['switchPlatform'] 
-                
-        self.transmittedPower = TransmittedPower()
+        
         self.switchPlatform.setPreset('bridge')
-        
-        self.passCriterion = VoltageCriterion()
-        
-
-    def prepare(self):
         self.rfGenerator.enableOutput(False)
+        
         self.passCriterion.prepare()
+        self.transmittedPower.connect()
         
     def measure(self):
         guessPower = self.dBmForwardPowerLimits[0]
@@ -48,7 +52,7 @@ class Dpi(Experiment):
             # make it work
             for tryPower in inclusiveRange(startPower,self.dBmForwardPowerLimits[0],-stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-#                print tryPower
+                logging.LogItem('Try to make it work with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 if self.passCriterion.measure()['pass']:
                     break
             else:
@@ -58,7 +62,7 @@ class Dpi(Experiment):
             # make it fail
             for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.dBmForwardPowerLimits[1],stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-#                print tryPower
+                logging.LogItem('Try to make it fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 self.rfGenerator.enableOutput()
                 if not self.passCriterion.measure()['pass']:
                     break
@@ -73,6 +77,7 @@ class Dpi(Experiment):
         measurements = []
         for frequency in self.frequencies:
             self.rfGenerator.setFrequency(frequency)
+            logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.measure()
             measurement.update({'frequency':frequency,'pass':self.passCriterion.measure()['pass'],'generatorPower':Power(generatorPower,'dBm')})
@@ -82,12 +87,16 @@ class Dpi(Experiment):
         
         
 if __name__ == '__main__':
+    logging.LogModel.Instance().gui = False
 #    experiment = VoltageCriterion()
 #    experiment.prepare()
 #    print experiment.measure()
+
+
     import numpy
-    experiment = Dpi(numpy.arange(300e3,1e9,100e6),(-30,+15))
-    experiment.prepare()
+    experiment = Dpi()
+    experiment.connect()
+    experiment.prepare(numpy.arange(300e3,150e6,100e6),(-30,+15))
     results = experiment.measure()
     print results
     

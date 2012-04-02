@@ -19,7 +19,6 @@ class AgilentN6700b(PowerSupply,ScpiDevice):
 
 if __name__ == '__main__':
     powerSupply = AgilentN6700b()
-    assert powerSupply.tryConnect()
     powerSupply.setChannelParameters(1,1.5,.1)
     powerSupply.turnChannelOn(1)
     time.sleep(1)

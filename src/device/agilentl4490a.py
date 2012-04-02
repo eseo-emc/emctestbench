@@ -12,15 +12,14 @@ class AgilentSwitch(Switch):
         closeString = self.parent.ask('ROUT:CLOS? (@{positionCode:d})'.format(positionCode=self[positionName]))
         return closeString == '1'
 
-class AgilentL4490a(SwitchPlatform,ScpiDevice,dict):
-    defaultName = "Agilent L4490A Switching Platform"
+class AgilentL4490a(SwitchPlatform,ScpiDevice):
+    defaultName = 'Agilent L4490A Switching Platform'
     defaultAddress = 'TCPIP0::172.20.1.201::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,L4490A,'
     
     def __init__(self,visaAddress=None):
-        super(AgilentL4490a,self).__init__(visaAddress)
-
-        self.update({ \
+        ScpiDevice.__init__(self)
+        SwitchPlatform.__init__(self,{ \
             'generator':AgilentSwitch(self,{ \
                 'bridge':    1103, 
                 'Prana':     1105, 
@@ -65,16 +64,15 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice,dict):
         return True
         
         
-    def tryConnect(self):
-        if super(AgilentL4490a,self).tryConnect():
+    def putOnline(self):
+        ScpiDevice.putOnline(self)
+        if self.online:
             self.write('ROUT:CHAN:VER:ENAB ON,(@1102:1138)') #TODO: take minimum an maximum of switchMapping
-            return True
 
         
   
 if __name__ == '__main__':
     switchPlatform = AgilentL4490a()
-    assert switchPlatform.tryConnect()
 #    switchPlatform['DUT'].openSwitch() #
 #    switchPlatform['DUT'].setPosition('SAorVNA')
     switchPlatform.setPreset('bridge')

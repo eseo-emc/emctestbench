@@ -1,4 +1,14 @@
 class SwitchPlatform(object):
+    def __init__(self,switches):
+        self._switches = switches
+    def keys(self):
+        return self._switches.keys()
+    def __getitem__(self,key):
+        return self._switches[key]
+    def __iter__(self):
+        return self._switches.__iter__()
+      
+    
     @property
     def iconName(self):
         return 'Switch'

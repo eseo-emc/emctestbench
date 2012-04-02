@@ -45,7 +45,6 @@ class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     
 if __name__ == '__main__':
     analyzer = AgilentN9010a()
-    assert analyzer.tryConnect()
     analyzer.reset()
     
     analyzer.align()

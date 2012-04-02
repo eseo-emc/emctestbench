@@ -19,23 +19,24 @@ from agilentn6700b import AgilentN6700b
 from agilent86100a import Agilent86100a
 from pranaap32dt120 import PranaAP32DT120
 
-knownDevices = { \
-    'lfGenerator0' : Agilent33250A(), 
-    'lfGenerator1' : Agilent33220A('TCPIP0::172.20.1.204::inst0::INSTR','Agilent 33220 LF Generator top'),
-    'lfGenerator2' : Agilent33220A('TCPIP0::172.20.1.205::inst0::INSTR','Agilent 33220 LF Generator bottom'),
-    'rfGenerator' : AgilentN5181a(),
-    'switchPlatform' : AgilentL4490a(),
-    'powerSupply' : AgilentN6700b(),
-    'oscilloscope1' : Agilent86100a(),
-    'oscilloscope2' : Hp54520a(),
-    'wattMeter' : AgilentE4419b(),
-    'multimeter' : AgilentL4411a(),
-    'frequencyCounter' : Agilent53220a(),
-    'spectrumAnalyzer0' : AgilentN9010a(),
-    'spectrumAnalyzer1' : Hp8591a(),
-    'amplifier1' : MilmegaAS0104_30_30(),    
-    'amplifier0' : PranaAP32DT120(),
-    'positioner' : NewportEsp300(),
-}
+from collections import OrderedDict
+knownDevices = OrderedDict([ \
+    ('lfGenerator0', Agilent33250A()), 
+    ('lfGenerator1', Agilent33220A('TCPIP0::172.20.1.204::inst0::INSTR','Agilent 33220 LF Generator top')),
+    ('lfGenerator2', Agilent33220A('TCPIP0::172.20.1.205::inst0::INSTR','Agilent 33220 LF Generator bottom')),
+    ('rfGenerator', AgilentN5181a()),
+    ('switchPlatform', AgilentL4490a()),
+    ('powerSupply', AgilentN6700b()),
+    ('oscilloscope1', Agilent86100a()),
+    ('oscilloscope2', Hp54520a()),
+    ('wattMeter', AgilentE4419b()),
+    ('multimeter', AgilentL4411a()),
+    ('frequencyCounter', Agilent53220a()),
+    ('spectrumAnalyzer0', AgilentN9010a()),
+    ('spectrumAnalyzer1', Hp8591a()),
+    ('amplifier1', MilmegaAS0104_30_30()),    
+    ('amplifier0', PranaAP32DT120()),
+    ('positioner', NewportEsp300()),
+])
 
 #from test.simpledpi import knownDevices

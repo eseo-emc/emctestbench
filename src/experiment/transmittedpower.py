@@ -4,6 +4,7 @@ from experiment import Experiment
 import numpy
 
 class TransmittedPower(Experiment):
+    name = 'Transmitted Power Calculation'
     calibrationFrequencies = numpy.arange(9e3,6e9,10e6)  
     bridgeInsertionTransfer = numpy.array([ 0.77377226,  0.699627  ,  0.68171492,  0.66715284,  0.6528385 ,
         0.63686549,  0.62742583,  0.61976625,  0.61183938,  0.6065615 ,
@@ -331,11 +332,12 @@ class TransmittedPower(Experiment):
         return numpy.interp(frequency,self.calibrationFrequencies,self.bridgeCouplingFactor)
         
     
-    def __init__(self):
+    def connect(self):
         self.switchPlatform = knownDevices['switchPlatform']
         self.wattMeter = knownDevices['wattMeter']
-        self.wattMeter.reset()
         self.rfGenerator = knownDevices['rfGenerator']
+    def prepare(self):
+        self.wattMeter.reset()
     def measure(self):
         if self.switchPlatform.checkPreset('bridge'):
             generatorPower = self.rfGenerator.getPower()
@@ -392,6 +394,8 @@ class TransmittedPower(Experiment):
     
 if __name__ == '__main__':
     experiment = TransmittedPower()
+    experiment.connect()
+    experiment.prepare()
     experiment.switchPlatform.setPreset('bridge')
 #    print experiment.readValues()
     print experiment.tryTransmittedPower(Power(10,'dBm')).dBm()

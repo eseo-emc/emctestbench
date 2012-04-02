@@ -2,38 +2,16 @@ from PyQt4.QtGui import QStandardItemModel,QStandardItem,QIcon
 
 from device import knownDevices
 import logging
-
-class DeviceItem(QStandardItem):
-    def __init__(self,device):
-        QStandardItem.__init__(self)
-        self.setText(str(device))
-        self.setData(device)
-        self.setToolTip(device.detailedInformation)
-        self.setIcon(QIcon(':/devices/'+device.iconName+'.png'))
-    def customContextMenuRequested(self):
-        print 'customContextMenuRequested'
-    @property
-    def device(self):
-        return self.data().toPyObject()
-
-
-    
+from experimentcollection import ExperimentCollection
+from devicecollection import DeviceCollection
 
 class ApplicationWindowModel(object):
     def __init__(self):     
-        self.systemTreeModel = QStandardItemModel()
-        self.devices = QStandardItem('Devices')
-        self.systemTreeModel.appendRow(self.devices)        
-        self.experiments = QStandardItem('Experiments')
-        self.systemTreeModel.appendRow(self.experiments)
-        self.results = QStandardItem('Results')
-        self.systemTreeModel.appendRow(self.results)
-        
-        for device in knownDevices.values():
-            self.devices.appendRow(DeviceItem(device))
-
+        ExperimentCollection.Instance().discover()
+        DeviceCollection.Instance().discover()
+                
     def refresh(self):
-        self.tryToConnectDevices()
+        DeviceCollection.Instance().refresh()
         
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):
@@ -42,7 +20,7 @@ class ApplicationWindowModel(object):
             try:
                 device.tryConnect()
             except Exception, errorDetail:
-                self.statusMethod(str(errorDetail))
+                logging.LogItem(str(errorDetail),logging.error)
     def treeContextMenuRequested(self,point):
         print 'customContextMenuRequested'
         index = self.systemTreeModel.indexAt(point)

@@ -7,6 +7,7 @@ from PyQt4.QtGui import QMainWindow, QMessageBox
 from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
 from gui import logging
+from gui import logwidget
 
 class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
     def __init__(self):
@@ -17,16 +18,12 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         
         self.model = ApplicationWindowModel()
         
-        self.systemTree.setModel(self.model.systemTreeModel)
-        self.systemTree.customContextMenuRequested.connect(self.model.treeContextMenuRequested)
         self.refreshButton.clicked.connect(self.model.refresh)        
 
-        logging.LogItem("EMC Testbench started",logging.warning)
-        logging.LogItem("EMC Testbench was initiated by ESEO",logging.info)
-        logging.LogItem("Debug message",logging.debug)
-        self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(1))
-        self.actionInfo.triggered.connect(lambda : self.logView.setLevel(2))
-        self.actionDebug.triggered.connect(lambda : self.logView.setLevel(3))
+        logging.LogItem("EMC Testbench started",logging.info)
+        self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(logging.warning))
+        self.actionInfo.triggered.connect(lambda : self.logView.setLevel(logging.info))
+        self.actionDebug.triggered.connect(lambda : self.logView.setLevel(logging.debug))
         
     def aboutToQuit(self):
         logging.LogItem('Bye!')

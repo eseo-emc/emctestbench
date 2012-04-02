@@ -32,7 +32,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QTreeView" name="systemTree">
+         <widget class="SystemTreeWidget" name="systemTree">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -47,19 +47,20 @@
             <height>18</height>
            </size>
           </property>
+          <property name="columnCount">
+           <number>1</number>
+          </property>
           <attribute name="headerVisible">
            <bool>false</bool>
           </attribute>
-          <attribute name="headerStretchLastSection">
-           <bool>true</bool>
+          <attribute name="headerMinimumSectionSize">
+           <number>1</number>
           </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="refreshButton">
-          <property name="text">
-           <string>Refresh</string>
-          </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
          </widget>
         </item>
        </layout>
@@ -77,6 +78,11 @@
         </property>
        </widget>
        <widget class="LogWidget" name="logView">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
@@ -204,6 +210,11 @@
    <class>LogWidget</class>
    <extends>QTableWidget</extends>
    <header>gui.logwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SystemTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>gui.systemtreewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

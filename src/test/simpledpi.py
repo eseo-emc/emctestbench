@@ -60,11 +60,17 @@ class DummySwitchPlatform(SwitchPlatform,Device):
         
 class DummyWattMeter(WattMeter,Device):
     defaultName = 'Dummy Wattmeter'
+    def putOnline(self):
+        time.sleep(1)
+        self.online = True
+    
     def __init__(self,rfGenerator,switchPlatform):
+        Device.__init__(self)
+        WattMeter.__init__(self)
         self.rfGenerator = rfGenerator
         self.switchPlatform = switchPlatform
         self._wasReset = 0.0
-        Device.__init__(self)
+
     def reset(self):
         self._wasReset = 1.0
     def getPower(self,channel=None):

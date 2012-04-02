@@ -36,7 +36,7 @@ class Agilent33250A(Agilent33):
 
 if __name__ == '__main__':
     device = Agilent33250A()
-    assert device.tryConnect()
+
 #    device.enableOutput(False)
 #    device.setWaveform(25e6, 2.5, 1)
 #    device.setWaveform(25e6, 2.5, 2.5,'SQU')
