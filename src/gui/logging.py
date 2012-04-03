@@ -29,7 +29,7 @@ class LogModel(QObject):
 class LogItem(object):
     def __init__(self,message,level=3):
         self.timeStamp = datetime.now()
-        self.message = message
+        self.message = str(message)
         self.level = level    
         LogModel.Instance().appendLogItem(self)
     def __str__(self):

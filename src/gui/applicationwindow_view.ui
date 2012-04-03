@@ -15,14 +15,11 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <property name="margin">
      <number>0</number>
     </property>
     <item>
-     <widget class="QSplitter" name="mainSplitter">
+     <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -65,16 +62,22 @@
         </item>
        </layout>
       </widget>
-      <widget class="QSplitter" name="rightSplitter">
+      <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QFrame" name="inspector">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+       <widget class="QWidget" name="inspector" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+        <property name="minimumSize">
+         <size>
+          <width>640</width>
+          <height>480</height>
+         </size>
         </property>
        </widget>
        <widget class="LogWidget" name="logView">

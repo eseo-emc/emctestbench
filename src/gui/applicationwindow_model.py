@@ -10,9 +10,6 @@ class ApplicationWindowModel(object):
         ExperimentCollection.Instance().discover()
         DeviceCollection.Instance().discover()
                 
-    def refresh(self):
-        DeviceCollection.Instance().refresh()
-        
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):
             device = self.devices.child(deviceItemNumber).device

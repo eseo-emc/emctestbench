@@ -1,5 +1,7 @@
+from PyQt4.QtCore import pyqtSignal,pyqtProperty
+
 from device import knownDevices
-from experiment import Experiment
+from experiment import Experiment,Property
 from transmittedpower import TransmittedPower
 from utility import Power
 import numpy
@@ -18,9 +20,38 @@ class VoltageCriterion(Experiment):
         return {'pass':abs(outputVoltage -self.undisturbedOutputVoltage) <= self.voltageMargin,
                 'outputVoltage (V)':outputVoltage}
 
+class SweepRange(object):
+    def __init__(self,startValue=0,stopValue=1,numberOfPoints=101,logarithmic=False,changedSignal=None):
+        self.start = Property(startValue,changedSignal=changedSignal)
+        self.stop = Property(stopValue,changedSignal=changedSignal)
+        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal)
+        self.logarithmic = Property(logarithmic,changedSignal=changedSignal)
+    @property
+    def values(self):
+        if self.logarithmic:
+            return numpy.exp(numpy.linspace(numpy.log(self.start.value),numpy.log(self.stop.value),self.numberOfPoints.value))
+        else:
+            return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
 
 class Dpi(Experiment):
+    resultChanged = pyqtSignal()
+#    resultAdded = pyqtSignal(object)
+    
     name = 'Direct Power Injection'
+    def __init__(self):
+        Experiment.__init__(self)
+        
+        self.powerMinimum = Property(-30.,changedSignal=self.resultChanged) 
+        self.powerMaximum = Property(+0.,changedSignal=self.resultChanged)
+        self.frequencies = SweepRange(30e3,1e9,changedSignal=self.resultChanged) 
+
+        
+    def result(self):
+        return {\
+            'powerLimits':(self.powerMinimum.value,self.powerMaximum.value),
+            'frequencies':self.frequencies,
+            'forwardPowers':[1.0]*self.frequencies.numberOfPoints.value }
+        
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
@@ -29,11 +60,7 @@ class Dpi(Experiment):
         self.transmittedPower.connect()
         self.passCriterion = VoltageCriterion()        
         self.passCriterion.connect()
-    def prepare(self,frequencies=[300e3],dBmForwardPowerLimits=(-30,+0)):
-        self.frequencies = frequencies
-        self.dBmForwardPowerLimits = dBmForwardPowerLimits        
-        
-        
+    def prepare(self):
         self.switchPlatform.setPreset('bridge')
         self.rfGenerator.enableOutput(False)
         
@@ -41,7 +68,7 @@ class Dpi(Experiment):
         self.transmittedPower.connect()
         
     def measure(self):
-        guessPower = self.dBmForwardPowerLimits[0]
+        guessPower = self.powerMinimum.value
         stepSizes = [5.0,1.0,0.5,.25]
         def inclusiveRange(start,stop,step):
             if start != stop:
@@ -50,7 +77,7 @@ class Dpi(Experiment):
                 return numpy.array([stop])
         def findFailureFromBelow(startPower,stepIndex=0):
             # make it work
-            for tryPower in inclusiveRange(startPower,self.dBmForwardPowerLimits[0],-stepSizes[stepIndex]):
+            for tryPower in inclusiveRange(startPower,self.powerMinimum.value,-stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
                 logging.LogItem('Try to make it work with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 if self.passCriterion.measure()['pass']:
@@ -60,7 +87,7 @@ class Dpi(Experiment):
                 return tryPower
                 
             # make it fail
-            for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.dBmForwardPowerLimits[1],stepSizes[stepIndex]):
+            for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.powerMaximum.value,stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
                 logging.LogItem('Try to make it fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 self.rfGenerator.enableOutput()
@@ -93,25 +120,27 @@ if __name__ == '__main__':
 #    print experiment.measure()
 
 
-    import numpy
+#    import numpy
     experiment = Dpi()
-    experiment.connect()
-    experiment.prepare(numpy.arange(300e3,150e6,100e6),(-30,+15))
-    results = experiment.measure()
-    print results
-    
-    import csv
-    import datetime
-    fileName = 'Y:/emctestbench/results/dpi'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.xls'
-    tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
-    writer = csv.DictWriter(open(fileName,'wb'),tableHeaders,dialect='excel-tab')
-    writer.writeheader()
-    for result in results:
-        writer.writerow({'frequency (Hz)':result['frequency'],
-                         'generator (dBm)':result['generatorPower'].dBm(),
-                         'forward (dBm)':result['forwardPower'].dBm(),
-                         'reflected (dBm)':result['reflectedPower'].dBm(),
-                         'transmitted (dBm)':result['transmittedPower'].dBm(),
-                         'fail':(0 if result['pass'] else 1) })
-    
+    experiment.powerMinimum.value = -50
+    print experiment.powerMinimum
+#    experiment.connect()
+#    experiment.prepare(numpy.arange(300e3,150e6,100e6),(-30,+15))
+#    results = experiment.measure()
+#    print results
+#    
+#    import csv
+#    import datetime
+#    fileName = 'Y:/emctestbench/results/dpi'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.xls'
+#    tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
+#    writer = csv.DictWriter(open(fileName,'wb'),tableHeaders,dialect='excel-tab')
+#    writer.writeheader()
+#    for result in results:
+#        writer.writerow({'frequency (Hz)':result['frequency'],
+#                         'generator (dBm)':result['generatorPower'].dBm(),
+#                         'forward (dBm)':result['forwardPower'].dBm(),
+#                         'reflected (dBm)':result['reflectedPower'].dBm(),
+#                         'transmitted (dBm)':result['transmittedPower'].dBm(),
+#                         'fail':(0 if result['pass'] else 1) })
+#    
                         

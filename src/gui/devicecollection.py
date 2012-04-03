@@ -2,6 +2,8 @@ from utility import Singleton
 from PyQt4.QtCore import QObject,pyqtSignal
 from device import knownDevices,Device
 
+from PyQt4.QtGui import QApplication
+
 import logging
 import inspect
 
@@ -20,6 +22,7 @@ class DeviceCollection(QObject):
     def refresh(self):
         for device in self.devices.values():
             device.putOnline()
+            QApplication.processEvents()
         
 if __name__ == '__main__':
     DeviceCollection.Instance().discover()

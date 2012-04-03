@@ -8,6 +8,9 @@ from gui import logging
 from PyQt4.QtCore import QObject,pyqtSignal
 import sys
 
+def Measurable(function):
+    return 
+
 class Device(QObject):
     changed = pyqtSignal()  
     
