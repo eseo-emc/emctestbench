@@ -1,5 +1,4 @@
 from PyQt4.QtGui import QTreeWidget,QTreeWidgetItem,QIcon,QMenu,QAction,QDesktopServices
-from PyQt4.Qt import Qt
 from PyQt4.QtCore import QUrl, pyqtSignal
 
 from experimentcollection import ExperimentCollection
@@ -14,8 +13,6 @@ class SystemTreeItem(QTreeWidgetItem):
         if parent:
             self.parent = (lambda : parent)
     def addContextMenuActions(self,menu):
-        print self.parent
-        print self.parent()
         refreshAction = QAction('Refresh all',menu)
         refreshAction.triggered.connect(DeviceCollection.Instance().refresh)
         menu.addAction(refreshAction)
@@ -57,7 +54,7 @@ class DeviceItem(SystemTreeItem):
             documentationMenu = QMenu('Documentation',menu)
             for name,url in self.device.documentation.items():
                 urlAction = QAction(name,menu)
-                
+                      
                 urlAction.triggered.connect(lambda : QDesktopServices.openUrl(QUrl(url)))
                 documentationMenu.addAction(urlAction)
             menu.addAction(documentationMenu.menuAction())
