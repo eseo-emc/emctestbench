@@ -1,4 +1,4 @@
-from PyQt4.QtCore import QObject
+from PyQt4.QtCore import QObject,QThread
 
 class Property(object):
     def __init__(self,defaultValue,changedSignal=None):
@@ -16,7 +16,7 @@ class Property(object):
             self._changedSignal.emit()
     
 
-class Experiment(QObject):
+class Experiment(QThread):
     name = None
     def prepare():
         raise NotImplementedError

@@ -36,6 +36,7 @@ class SweepRange(object):
 
 class Dpi(Experiment):
     resultChanged = pyqtSignal()
+    progressed = pyqtSignal(int)
 #    resultAdded = pyqtSignal(object)
     
     name = 'Direct Power Injection'
@@ -44,6 +45,8 @@ class Dpi(Experiment):
         self.powerMinimum = Property(-30.,changedSignal=self.resultChanged) 
         self.powerMaximum = Property(+15.,changedSignal=self.resultChanged)
         self.frequencies = SweepRange(300e3,150e6,11,changedSignal=self.resultChanged) 
+        
+        self.stopRequested = False
 
         
     def result(self):
@@ -71,8 +74,11 @@ class Dpi(Experiment):
         
         self.passCriterion.prepare()
         self.transmittedPower.connect()
-        
-    def measure(self):
+
+    def stop(self):
+        self.stopRequested = True
+    
+    def run(self):
         guessPower = self.powerMinimum.value
         stepSizes = [5.0,1.0,0.5,.25]
         def inclusiveRange(start,stop,step):
@@ -108,7 +114,10 @@ class Dpi(Experiment):
                 return tryPower
                 
         self.measurements = []
-        for frequency in self.frequencies.values:
+        self.progressed.emit(0)
+        for number,frequency in enumerate(self.frequencies.values):
+            if self.stopRequested:
+                break
             self.rfGenerator.setFrequency(frequency)
             logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
@@ -116,9 +125,12 @@ class Dpi(Experiment):
             measurement.update({'frequency':frequency,'pass':self.passCriterion.measure()['pass'],'generatorPower':Power(generatorPower,'dBm')})
             self.measurements.append(measurement)
             self.resultChanged.emit()
-            QApplication.processEvents()
-        self.rfGenerator.enableOutput(False)
 
+            self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
+            
+        self.rfGenerator.enableOutput(False)
+        
+        self.stopRequested = False
         
         
 if __name__ == '__main__':

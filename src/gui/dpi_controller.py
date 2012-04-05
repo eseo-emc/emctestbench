@@ -31,12 +31,39 @@ class DpiController(QWidget,Ui_Form):
         self.updateGraph()
         self.model.resultChanged.connect(self.updateGraph)
         
+        self.model.progressed.connect(self.progress.setValue)
+        
+        self.measurementStopped()
+        self.model.started.connect(self.measurementStarted)
+        self.model.finished.connect(self.measurementStopped)
+
+
+    def enableInputs(self,enable):
+        self.frequencyMinimum.setEnabled(enable)             
+        self.frequencyMaximum.setEnabled(enable)             
+        self.powerMinimum.setEnabled(enable)             
+        self.powerMaximum.setEnabled(enable)             
+        self.logarithmic.setEnabled(enable)             
+        
+    def measurementStarted(self):
+        self.startStop.setText('Stop')
+        self.startStop.clicked.disconnect()
+        self.startStop.clicked.connect(self.model.stop)
+        self.enableInputs(False)
+        
+    def measurementStopped(self):
+        self.startStop.setText('Start')
+        try:
+            self.startStop.clicked.disconnect()
+        except:
+            pass
         self.startStop.clicked.connect(self.startMeasurement)
+        self.enableInputs(True)
         
     def startMeasurement(self):
         self.model.connect()
         self.model.prepare()
-        self.model.measure()
+        self.model.start()
         
 #        x = numpy.linspace(-10, 10)
 #        self.dpiGraph.axes.plot(x, x**2,label='Square')

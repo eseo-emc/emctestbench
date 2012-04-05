@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'dpi_view.ui'
 #
-# Created: Tue Apr 03 16:07:03 2012
+# Created: Thu Apr 05 14:46:48 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(640, 480)
+        Form.resize(667, 480)
         Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.gridLayout = QtGui.QGridLayout(Form)
         self.gridLayout.setContentsMargins(0, -1, 0, 0)
@@ -101,10 +101,9 @@ class Ui_Form(object):
         self.startStop.setObjectName(_fromUtf8("startStop"))
         self.gridLayout.addWidget(self.startStop, 4, 3, 1, 1)
         self.progress = QtGui.QProgressBar(Form)
-        self.progress.setProperty("value", 24)
         self.progress.setObjectName(_fromUtf8("progress"))
         self.gridLayout.addWidget(self.progress, 4, 4, 1, 1)
-        self.dpiGraph = PlotWidget(Form)
+        self.dpiGraph = MatplotlibWidget(Form)
         self.dpiGraph.setObjectName(_fromUtf8("dpiGraph"))
         self.gridLayout.addWidget(self.dpiGraph, 5, 0, 1, 5)
 
@@ -114,5 +113,4 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         pass
 
-from gui.plotwidget import PlotWidget
-
+from matplotlibwidget import MatplotlibWidget
