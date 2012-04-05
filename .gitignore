@@ -10,3 +10,4 @@
 /.pydevproject
 /.settings/org.eclipse.core.resources.prefs
 /src/.spyderproject
+/src/device/configuration.py

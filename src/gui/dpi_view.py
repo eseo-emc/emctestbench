@@ -104,7 +104,7 @@ class Ui_Form(object):
         self.progress.setProperty("value", 24)
         self.progress.setObjectName(_fromUtf8("progress"))
         self.gridLayout.addWidget(self.progress, 4, 4, 1, 1)
-        self.dpiGraph = MatplotlibWidget(Form)
+        self.dpiGraph = PlotWidget(Form)
         self.dpiGraph.setObjectName(_fromUtf8("dpiGraph"))
         self.gridLayout.addWidget(self.dpiGraph, 5, 0, 1, 5)
 
@@ -114,4 +114,5 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         pass
 
-from matplotlibwidget import MatplotlibWidget
+from gui.plotwidget import PlotWidget
+

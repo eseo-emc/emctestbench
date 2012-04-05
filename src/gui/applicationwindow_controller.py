@@ -27,14 +27,22 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(logging.warning))
         self.actionInfo.triggered.connect(lambda : self.logView.setLevel(logging.info))
         self.actionDebug.triggered.connect(lambda : self.logView.setLevel(logging.debug))
+        
     def experimentSelected(self,experiment):
+#        self.logView.deleteLater()
+#        self.logView = None
+        if hasattr(self,'activeExperiment'):
+            self.activeExperiment.deleteLater()
+            del(self.activeExperiment)
         experimentName = experiment.__class__.__name__
         try:
             exec('''
 from {moduleName} import {controllerName}
-self.activeExperiment = {controllerName}(self.inspector)'''.format(moduleName=string.lower(experimentName)+'_controller',controllerName=experimentName+'Controller'))
+self.activeExperiment = {controllerName}(self.splitter)
+self.splitter.insertWidget(0,self.activeExperiment)'''.format(moduleName=string.lower(experimentName)+'_controller',controllerName=experimentName+'Controller'))
         except:
             logging.LogItem(sys.exc_info()[1],logging.error)
+            
         
     def aboutToQuit(self):
         logging.LogItem('Bye!')

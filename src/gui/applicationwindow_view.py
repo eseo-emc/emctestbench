@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'applicationwindow_view.ui'
 #
-# Created: Tue Apr 03 10:38:03 2012
+# Created: Thu Apr 05 09:53:01 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,9 @@ class Ui_ApplicationWindow(object):
     def setupUi(self, ApplicationWindow):
         ApplicationWindow.setObjectName(_fromUtf8("ApplicationWindow"))
         ApplicationWindow.resize(1024, 768)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        ApplicationWindow.setFont(font)
         ApplicationWindow.setWindowTitle(QtGui.QApplication.translate("ApplicationWindow", "EMC Testbench", None, QtGui.QApplication.UnicodeUTF8))
         self.centralwidget = QtGui.QWidget(ApplicationWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -34,9 +37,6 @@ class Ui_ApplicationWindow(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.systemTree = SystemTreeWidget(self.layoutWidget)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.systemTree.setFont(font)
         self.systemTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.systemTree.setIconSize(QtCore.QSize(18, 18))
         self.systemTree.setColumnCount(1)
@@ -48,18 +48,7 @@ class Ui_ApplicationWindow(object):
         self.splitter = QtGui.QSplitter(self.splitter_2)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName(_fromUtf8("splitter"))
-        self.inspector = QtGui.QWidget(self.splitter)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.inspector.sizePolicy().hasHeightForWidth())
-        self.inspector.setSizePolicy(sizePolicy)
-        self.inspector.setMinimumSize(QtCore.QSize(640, 480))
-        self.inspector.setObjectName(_fromUtf8("inspector"))
         self.logView = LogWidget(self.splitter)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.logView.setFont(font)
         self.logView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.logView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.logView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -79,7 +68,7 @@ class Ui_ApplicationWindow(object):
         self.horizontalLayout.addWidget(self.splitter_2)
         ApplicationWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ApplicationWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1024, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1024, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setTitle(QtGui.QApplication.translate("ApplicationWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))

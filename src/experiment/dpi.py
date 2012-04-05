@@ -1,4 +1,5 @@
-from PyQt4.QtCore import pyqtSignal,pyqtProperty
+from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtGui import QApplication
 
 from device import knownDevices
 from experiment import Experiment,Property
@@ -28,7 +29,7 @@ class SweepRange(object):
         self.logarithmic = Property(logarithmic,changedSignal=changedSignal)
     @property
     def values(self):
-        if self.logarithmic:
+        if self.logarithmic.value:
             return numpy.exp(numpy.linspace(numpy.log(self.start.value),numpy.log(self.stop.value),self.numberOfPoints.value))
         else:
             return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
@@ -40,17 +41,21 @@ class Dpi(Experiment):
     name = 'Direct Power Injection'
     def __init__(self):
         Experiment.__init__(self)
-        
         self.powerMinimum = Property(-30.,changedSignal=self.resultChanged) 
-        self.powerMaximum = Property(+0.,changedSignal=self.resultChanged)
-        self.frequencies = SweepRange(30e3,1e9,changedSignal=self.resultChanged) 
+        self.powerMaximum = Property(+15.,changedSignal=self.resultChanged)
+        self.frequencies = SweepRange(300e3,150e6,11,changedSignal=self.resultChanged) 
 
         
     def result(self):
+        paddedForwardPowers = [None]*self.frequencies.numberOfPoints.value
+        if hasattr(self,'measurements'):
+            for number,measurement in enumerate(self.measurements):
+                paddedForwardPowers[number] = measurement['generatorPower']
+        
         return {\
             'powerLimits':(self.powerMinimum.value,self.powerMaximum.value),
             'frequencies':self.frequencies,
-            'forwardPowers':[1.0]*self.frequencies.numberOfPoints.value }
+            'forwardPowers':paddedForwardPowers }
         
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
@@ -79,17 +84,18 @@ class Dpi(Experiment):
             # make it work
             for tryPower in inclusiveRange(startPower,self.powerMinimum.value,-stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-                logging.LogItem('Try to make it work with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
+                logging.LogItem('Try to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 if self.passCriterion.measure()['pass']:
                     break
             else:
-                #TODO: not being able to get it to work while descending down to the minimum forward power is a bad sign, this error should be handled or reported somewhere                        
+                logging.LogItem('Did not succeed to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.warning)
+
                 return tryPower
                 
             # make it fail
             for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.powerMaximum.value,stepSizes[stepIndex]):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
-                logging.LogItem('Try to make it fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
+                logging.LogItem('Try to make the test fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
                 self.rfGenerator.enableOutput()
                 if not self.passCriterion.measure()['pass']:
                     break
@@ -101,16 +107,18 @@ class Dpi(Experiment):
             else:
                 return tryPower
                 
-        measurements = []
-        for frequency in self.frequencies:
+        self.measurements = []
+        for frequency in self.frequencies.values:
             self.rfGenerator.setFrequency(frequency)
             logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.measure()
             measurement.update({'frequency':frequency,'pass':self.passCriterion.measure()['pass'],'generatorPower':Power(generatorPower,'dBm')})
-            measurements.append(measurement)
+            self.measurements.append(measurement)
+            self.resultChanged.emit()
+            QApplication.processEvents()
         self.rfGenerator.enableOutput(False)
-        return measurements
+
         
         
 if __name__ == '__main__':
@@ -120,27 +128,26 @@ if __name__ == '__main__':
 #    print experiment.measure()
 
 
-#    import numpy
+    import numpy
     experiment = Dpi()
-    experiment.powerMinimum.value = -50
-    print experiment.powerMinimum
-#    experiment.connect()
-#    experiment.prepare(numpy.arange(300e3,150e6,100e6),(-30,+15))
-#    results = experiment.measure()
-#    print results
-#    
-#    import csv
-#    import datetime
-#    fileName = 'Y:/emctestbench/results/dpi'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.xls'
-#    tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
-#    writer = csv.DictWriter(open(fileName,'wb'),tableHeaders,dialect='excel-tab')
-#    writer.writeheader()
-#    for result in results:
-#        writer.writerow({'frequency (Hz)':result['frequency'],
-#                         'generator (dBm)':result['generatorPower'].dBm(),
-#                         'forward (dBm)':result['forwardPower'].dBm(),
-#                         'reflected (dBm)':result['reflectedPower'].dBm(),
-#                         'transmitted (dBm)':result['transmittedPower'].dBm(),
-#                         'fail':(0 if result['pass'] else 1) })
-#    
+    experiment.connect()
+    experiment.prepare()
+    experiment.measure()
+    results = experiment.result()
+    print results
+    
+    import csv
+    import datetime
+    fileName = 'Y:/emctestbench/results/dpi'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.xls'
+    tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
+    writer = csv.DictWriter(open(fileName,'wb'),tableHeaders,dialect='excel-tab')
+    writer.writeheader()
+    for result in results:
+        writer.writerow({'frequency (Hz)':result['frequency'],
+                         'generator (dBm)':result['generatorPower'].dBm(),
+                         'forward (dBm)':result['forwardPower'].dBm(),
+                         'reflected (dBm)':result['reflectedPower'].dBm(),
+                         'transmitted (dBm)':result['transmittedPower'].dBm(),
+                         'fail':(0 if result['pass'] else 1) })
+    
                         

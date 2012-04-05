@@ -6,9 +6,11 @@ from experiment.dpi import Dpi
 
 import numpy
 
-class DpiController(Ui_Form):
-    def __init__(self,inspector):
-        self.setupUi(inspector)        
+class DpiController(QWidget,Ui_Form):
+    def __init__(self,parent):
+        QWidget.__init__(self,parent)
+        self.setupUi(self)  
+        
         self.model = Dpi()
         
         self.powerMinimum.setValue(self.model.powerMinimum.value)
@@ -28,9 +30,17 @@ class DpiController(Ui_Form):
         
         self.updateGraph()
         self.model.resultChanged.connect(self.updateGraph)
+        
+        self.startStop.clicked.connect(self.startMeasurement)
+        
+    def startMeasurement(self):
+        self.model.connect()
+        self.model.prepare()
+        self.model.measure()
+        
 #        x = numpy.linspace(-10, 10)
-##        self.dpiGraph.figure.gca().plot(x, x**2,label='Square')
-##        self.dpiGraph.figure.gca().plot(x, x**3,label='Cube')
+#        self.dpiGraph.axes.plot(x, x**2,label='Square')
+#        self.dpiGraph.axes.hold()
 #        self.dpiGraph.axes.plot(x, x**3,label='Cube')
 #        self.dpiGraph.axes.legend()
 
@@ -49,6 +59,8 @@ class DpiController(Ui_Form):
         self.dpiGraph.axes.set_xlim(result['frequencies'].start.value,result['frequencies'].stop.value)
         self.dpiGraph.axes.set_xscale('symlog' if result['frequencies'].logarithmic.value else 'linear')        
         self.dpiGraph.draw() #redraw_in_frame()
+#        self.dpiGraph.figure.set_frameon(False)
+        
 
 
 if __name__ == '__main__':
@@ -57,11 +69,9 @@ if __name__ == '__main__':
     
     application = QApplication(sys.argv)
     window = QMainWindow()
-    widget = QWidget()
     
-    dpiController = DpiController(widget)
-    window.setCentralWidget(widget)
+    dpiController = DpiController(window)
+    window.setCentralWidget(dpiController)
     window.show()
-        
         
     sys.exit(application.exec_())
