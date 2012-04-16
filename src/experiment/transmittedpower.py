@@ -6,7 +6,7 @@ import numpy
 class TransmittedPower(Experiment):
     name = 'Transmitted Power Calculation'
     calibrationFrequencies = numpy.arange(9e3,6e9,10e6)  
-    bridgeInsertionTransfer = numpy.array([ 0.77377226,  0.699627  ,  0.68171492,  0.66715284,  0.6528385 ,
+    bridgeInsertionTransfer = PowerRatio([ 0.77377226,  0.699627  ,  0.68171492,  0.66715284,  0.6528385 ,
         0.63686549,  0.62742583,  0.61976625,  0.61183938,  0.6065615 ,
         0.59856803,  0.59101899,  0.58320297,  0.57573591,  0.57454421,
         0.56930211,  0.56087989,  0.55734073,  0.5541857 ,  0.55022131,
@@ -126,7 +126,7 @@ class TransmittedPower(Experiment):
         0.05026711,  0.04954168,  0.0475726 ,  0.04824256,  0.04684664,
         0.04430298,  0.04737453,  0.05424693,  0.05735417,  0.05892572,
         0.05896095,  0.05567517,  0.05426582,  0.05269837,  0.04934907])
-    bridgeCouplingFactor = numpy.array([  1.72135711e-02,   2.16362094e-02,   2.19088868e-02,
+    bridgeCouplingFactor = PowerRatio([  1.72135711e-02,   2.16362094e-02,   2.19088868e-02,
          2.17756906e-02,   1.89422893e-02,   2.24209123e-02,
          1.93128106e-02,   1.83612658e-02,   2.18644447e-02,
          1.86638673e-02,   1.93839115e-02,   2.02049793e-02,
@@ -327,9 +327,9 @@ class TransmittedPower(Experiment):
          8.45328132e-03,   1.15713342e-02,   1.26756117e-02,
          1.27897955e-02,   1.12415003e-02,   8.32215609e-03])
     def bridgeInsertionTransferAt(self,frequency):
-        return numpy.interp(frequency,self.calibrationFrequencies,self.bridgeInsertionTransfer)
+        return PowerRatio(numpy.interp(frequency,self.calibrationFrequencies,self.bridgeInsertionTransfer))
     def bridgeCouplingFactorAt(self,frequency):
-        return numpy.interp(frequency,self.calibrationFrequencies,self.bridgeCouplingFactor)
+        return PowerRatio(numpy.interp(frequency,self.calibrationFrequencies,self.bridgeCouplingFactor))
         
     
     def connect(self):
@@ -343,6 +343,7 @@ class TransmittedPower(Experiment):
             generatorPower = self.rfGenerator.getPower()
             frequency = self.rfGenerator.getFrequency()
             forwardPower = generatorPower * self.bridgeInsertionTransferAt(frequency)
+            
             reflectedPower = self.wattMeter.getPower(2) / self.bridgeCouplingFactorAt(frequency)
             return {'transmittedPower':forwardPower-reflectedPower,'forwardPower':forwardPower,'reflectedPower':reflectedPower}
             

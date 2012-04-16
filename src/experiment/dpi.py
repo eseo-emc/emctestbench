@@ -8,6 +8,19 @@ from utility import Power
 import numpy
 from gui import logging
 
+from result import ResultSet
+
+class DpiResultSet(ResultSet):
+    def __init__(self,powerLimits):
+        self.powerLimits = powerLimits
+        ResultSet.__init__(self,{\
+            'frequency':float,
+            'generatorPower':Power,
+            'pass':bool,
+            'forwardPower':Power,
+            'reflectedPower':Power,
+            'transmittedPower':Power })
+
 class VoltageCriterion(Experiment):
     name = 'Voltage offset criterion'
     def connect(self):
@@ -25,7 +38,7 @@ class SweepRange(object):
     def __init__(self,startValue=0,stopValue=1,numberOfPoints=101,logarithmic=False,changedSignal=None):
         self.start = Property(startValue,changedSignal=changedSignal)
         self.stop = Property(stopValue,changedSignal=changedSignal)
-        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal)
+        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal,castTo=int)
         self.logarithmic = Property(logarithmic,changedSignal=changedSignal)
     @property
     def values(self):
@@ -35,30 +48,24 @@ class SweepRange(object):
             return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
 
 class Dpi(Experiment):
+    name = 'Direct Power Injection'    
+        
+    settingsChanged = pyqtSignal()
+    resultAdded = pyqtSignal(dict)
     resultChanged = pyqtSignal()
     progressed = pyqtSignal(int)
-#    resultAdded = pyqtSignal(object)
+    finished = pyqtSignal()        
     
-    name = 'Direct Power Injection'
     def __init__(self):
         Experiment.__init__(self)
-        self.powerMinimum = Property(-30.,changedSignal=self.resultChanged) 
-        self.powerMaximum = Property(+15.,changedSignal=self.resultChanged)
-        self.frequencies = SweepRange(300e3,150e6,11,changedSignal=self.resultChanged) 
+        self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
+        self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
+        self.frequencies = SweepRange(300e3,150e6,11,changedSignal=self.settingsChanged) 
         
-        self.stopRequested = False
-
-        
+        self._result = None
+    
     def result(self):
-        paddedForwardPowers = [None]*self.frequencies.numberOfPoints.value
-        if hasattr(self,'measurements'):
-            for number,measurement in enumerate(self.measurements):
-                paddedForwardPowers[number] = measurement['generatorPower']
-        
-        return {\
-            'powerLimits':(self.powerMinimum.value,self.powerMaximum.value),
-            'frequencies':self.frequencies,
-            'forwardPowers':paddedForwardPowers }
+        return self._result
         
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
@@ -75,9 +82,6 @@ class Dpi(Experiment):
         self.passCriterion.prepare()
         self.transmittedPower.connect()
 
-    def stop(self):
-        self.stopRequested = True
-    
     def run(self):
         guessPower = self.powerMinimum.value
         stepSizes = [5.0,1.0,0.5,.25]
@@ -113,7 +117,10 @@ class Dpi(Experiment):
             else:
                 return tryPower
                 
-        self.measurements = []
+        self._result = DpiResultSet((self.powerMinimum.value,self.powerMaximum.value))
+        self._result.changed.connect(self.resultChanged)
+        self._result.added.connect(self.resultAdded)
+        
         self.progressed.emit(0)
         for number,frequency in enumerate(self.frequencies.values):
             if self.stopRequested:
@@ -122,14 +129,21 @@ class Dpi(Experiment):
             logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.measure()
-            measurement.update({'frequency':frequency,'pass':self.passCriterion.measure()['pass'],'generatorPower':Power(generatorPower,'dBm')})
-            self.measurements.append(measurement)
-            self.resultChanged.emit()
+            self._result.append({'frequency':frequency,
+                                 'generatorPower':Power(generatorPower,'dBm'),
+                                 'pass':self.passCriterion.measure()['pass'],
+                                 'reflectedPower':measurement['reflectedPower'],
+                                 'forwardPower':measurement['forwardPower'],
+                                 'transmittedPower':measurement['transmittedPower'] })
+
+#            self.resultChanged.emit()
 
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
         self.rfGenerator.enableOutput(False)
         
+        self.finished.emit()
+        logging.LogItem('Finished DPI',logging.success)
         self.stopRequested = False
         
         
@@ -144,22 +158,9 @@ if __name__ == '__main__':
     experiment = Dpi()
     experiment.connect()
     experiment.prepare()
-    experiment.measure()
+    experiment.run()
     results = experiment.result()
     print results
     
-    import csv
-    import datetime
-    fileName = 'Y:/emctestbench/results/dpi'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.xls'
-    tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
-    writer = csv.DictWriter(open(fileName,'wb'),tableHeaders,dialect='excel-tab')
-    writer.writeheader()
-    for result in results:
-        writer.writerow({'frequency (Hz)':result['frequency'],
-                         'generator (dBm)':result['generatorPower'].dBm(),
-                         'forward (dBm)':result['forwardPower'].dBm(),
-                         'reflected (dBm)':result['reflectedPower'].dBm(),
-                         'transmitted (dBm)':result['transmittedPower'].dBm(),
-                         'fail':(0 if result['pass'] else 1) })
-    
+        
                         
