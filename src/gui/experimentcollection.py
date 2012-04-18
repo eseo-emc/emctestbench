@@ -30,5 +30,5 @@ class ExperimentCollection(QObject):
                             discoveredExperimentClasses.append(testClass)
         
         for discoveredExperimentClass in discoveredExperimentClasses:
-            self.experiments.append(discoveredExperimentClass())
+            self.experiments.append(discoveredExperimentClass)
         self.changed.emit()

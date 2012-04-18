@@ -1,5 +1,6 @@
-from PyQt4.QtGui import QTreeWidget,QTreeWidgetItem,QIcon,QMenu,QAction,QDesktopServices
-from PyQt4.QtCore import QUrl, pyqtSignal
+from PyQt4.QtGui import QApplication,QTreeWidget,QTreeWidgetItem,QIcon,QMenu,QAction,QDesktopServices,QDrag
+from PyQt4.QtCore import QUrl, pyqtSignal, QMimeData
+from PyQt4.QtCore import Qt
 
 from experimentcollection import ExperimentCollection
 from devicecollection import DeviceCollection
@@ -69,20 +70,54 @@ class SystemTreeWidget(QTreeWidget):
         self.experiments = SystemTreeItem(self,'Experiments')      
         self.results = SystemTreeItem(self,'Results') 
         
+        self.dragStartPosition = None
+        
         DeviceCollection.Instance().changed.connect(self.updateDevices)
         ExperimentCollection.Instance().changed.connect(self.updateExperiments)
         
         self.customContextMenuRequested.connect(self.treeContextMenuRequested)
-        self.itemClicked.connect(self.itemSelected)
     
     def treeContextMenuRequested(self,point):
         menu = QMenu()
         self.selectedItems()[0].addContextMenuActions(menu)
         menu.exec_(self.mapToGlobal(point))        
     
-    def itemSelected(self,item):
-        if item.parent() == self.experiments:
-            self.experimentSelected.emit(item.experiment)
+    def _selectedExperiment(self):
+        selectedItems = self.selectedItems()
+        if len(selectedItems) == 1 and selectedItems[0].parent() == self.experiments:
+            return selectedItems[0].experiment
+        else:
+            return None
+    
+    def mouseDoubleClickEvent(self,mouseEvent):
+        QTreeWidget.mouseDoubleClickEvent(self,mouseEvent)
+#        print 'mouseDoubleClickEvent'
+        if self._selectedExperiment():
+            self.experimentSelected.emit(self._selectedExperiment())
+    
+    def mousePressEvent(self,mouseEvent):
+        QTreeWidget.mousePressEvent(self,mouseEvent)
+#        http://doc.qt.nokia.com/4.7-snapshot/dnd.html
+        if mouseEvent.button() != Qt.LeftButton:
+            return
+        if self._selectedExperiment():
+            self.dragStartPosition = mouseEvent.pos()
+            
+    def mouseMoveEvent(self,mouseEvent):
+#        if mouseEvent.button() != Qt.LeftButton:
+#            return
+        if not self._selectedExperiment():
+            return
+        if not self.dragStartPosition:
+            return
+        if (mouseEvent.pos()-self.dragStartPosition).manhattanLength() < QApplication.startDragDistance():
+            return
+        
+        drag = QDrag(self)
+        mimeData = QMimeData()
+        mimeData.setText(self._selectedExperiment().__name__)
+        drag.setMimeData(mimeData)
+        drag.exec_()
     
     def updateDevices(self):
         for device in DeviceCollection.Instance().devices.values():
@@ -96,7 +131,16 @@ class SystemTreeWidget(QTreeWidget):
         self.experiments.setExpanded(True)   
         
 
-                        
+if __name__ == '__main__':
+    import sys
+    from PyQt4.QtGui import QApplication,QMainWindow
     
-#    
-        
+    application = QApplication(sys.argv)
+    window = QMainWindow()
+    
+    widget = SystemTreeWidget(window)
+    window.setCentralWidget(widget)
+    window.show()
+#    widget.updateDevices()
+#    widget.updateExperiments()        
+    sys.exit(application.exec_())

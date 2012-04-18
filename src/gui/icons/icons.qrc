@@ -17,5 +17,6 @@
     <file>logging/Error.png</file>
     <file>logging/Info.png</file>
     <file>logging/Success.png</file>
+    <file>logging/Unknown.png</file>
   </qresource>
 </RCC>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'applicationwindow_view.ui'
 #
-# Created: Thu Apr 05 09:53:01 2012
+# Created: Tue Apr 17 17:35:40 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,13 +30,7 @@ class Ui_ApplicationWindow(object):
         self.splitter_2 = QtGui.QSplitter(self.centralwidget)
         self.splitter_2.setOrientation(QtCore.Qt.Horizontal)
         self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
-        self.layoutWidget = QtGui.QWidget(self.splitter_2)
-        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
-        self.verticalLayout.setSpacing(0)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.systemTree = SystemTreeWidget(self.layoutWidget)
+        self.systemTree = SystemTreeWidget(self.splitter_2)
         self.systemTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.systemTree.setIconSize(QtCore.QSize(18, 18))
         self.systemTree.setColumnCount(1)
@@ -44,10 +38,20 @@ class Ui_ApplicationWindow(object):
         self.systemTree.headerItem().setText(0, _fromUtf8("1"))
         self.systemTree.header().setVisible(False)
         self.systemTree.header().setMinimumSectionSize(1)
-        self.verticalLayout.addWidget(self.systemTree)
         self.splitter = QtGui.QSplitter(self.splitter_2)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName(_fromUtf8("splitter"))
+        self.widget = QtGui.QWidget(self.splitter)
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.mainDropWidget = DropWidget(self.widget)
+        self.mainDropWidget.setObjectName(_fromUtf8("mainDropWidget"))
+        self.verticalLayout.addWidget(self.mainDropWidget)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
         self.logView = LogWidget(self.splitter)
         self.logView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.logView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -68,7 +72,7 @@ class Ui_ApplicationWindow(object):
         self.horizontalLayout.addWidget(self.splitter_2)
         ApplicationWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(ApplicationWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1024, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1024, 18))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setTitle(QtGui.QApplication.translate("ApplicationWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
@@ -117,5 +121,6 @@ class Ui_ApplicationWindow(object):
         pass
 
 from gui.logwidget import LogWidget
+from gui.dropwidget_controller import DropWidget
 from gui.systemtreewidget import SystemTreeWidget
 import icons_rc

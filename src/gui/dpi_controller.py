@@ -33,8 +33,7 @@ class DpiController(QWidget,Ui_Form):
         
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)
-        
-        
+              
         self.updateGraph()
         self.model.resultChanged.connect(self.updateGraph)
         self.model.settingsChanged.connect(self.updateGraph)
@@ -47,6 +46,9 @@ class DpiController(QWidget,Ui_Form):
         self.measurementStopped()
         self.model.started.connect(self.measurementStarted)
         self.model.finished.connect(self.measurementStopped)
+        
+        self.criterion.label = 'Criterion'
+        self.stimulus.label = 'Stimulus'
 
 
     def enableInputs(self,enable):
