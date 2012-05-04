@@ -1,27 +1,36 @@
 from xml.dom.minidom import Element
-
+import string
+from datetime import datetime
 #from utility.quantities import Power,UnitLess
 
 class Dommable:
     def asDom(self,parent):
-        element = parent.ownerDocument.createElement(self.__class__.__name__)
-        parent.appendChild(element)
-        return element
+        return self.appendChildTag(parent,self.__class__.__name__)
+        
     @classmethod
     def fromDom(cls,dom):
         raise NotImplementedError
     @classmethod
     def castToDommable(cls,anything):
-        if isinstance(anything,Dommable):
+        if hasattr(anything,'asDom'):
             return anything
+        elif type(anything) == list:
+            return List(anything)
+        elif type(anything) == datetime:
+            return DateTime(anything)
         elif type(anything) == float:
             from utility.quantities import UnitLess
             return UnitLess(anything)
         elif type(anything) == str:
             casted = String(anything)
             return casted
+        else:
+            raise ValueError,'Not castable to Dommable'
         
-        
+    def appendChildTag(self,parent,tagName):
+        element = parent.ownerDocument.createElement(tagName)
+        parent.appendChild(element)
+        return element
         
     @classmethod
     def appendTextNode(cls,element,text):
@@ -63,8 +72,29 @@ class Dommable:
 class String(Dommable,str):
     @classmethod
     def fromDom(cls,dom):
-        return str.__new__(cls,cls.getNodeText(dom))
+        return str.__new__(cls,string.strip(cls.getNodeText(dom)))
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
         self.appendTextNode(element,self)
+        return element
+        
+class DateTime(Dommable,datetime):
+    @classmethod
+    def fromDom(cls,dom):
+        return datetime.__new__(cls,datetime.strptime(string.strip(cls.getNodeText(dom)),'%Y-%m-%dT%H:%M:%S.%f'))
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        self.appendTextNode(element,self.strftime('%Y-%m-%dT%H:%M:%S.%f'))
+        return element
+        
+class List(Dommable,list):
+#    @classmethod
+#    def fromDom(cls,dom):
+#        newList = list.__new__(cls)
+#        
+#        return datetime.__new__(cls,datetime.strptime(string.strip(cls.getNodeText(dom)),'%Y-%m-%dT%H:%M:%S.%f'))
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        for item in self:
+            self.castToDommable(item).asDom(element)
         return element

@@ -3,18 +3,29 @@ from PyQt4.QtCore import QObject,pyqtSignal
 from device import knownDevices,Device
 
 from PyQt4.QtGui import QApplication
+from result.persistance import Dommable
+from xml.dom.minidom import getDOMImplementation,parseString
 
 import logging
 import inspect
+
 
 from copy import deepcopy
 
 from datetime import datetime
 
 
-class ExperimentResult(QObject):
+class ExperimentResult(QObject,Dommable):
     changed = pyqtSignal()    
     changedTo = pyqtSignal(object)    
+    
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        experimentElement = self.appendChildTag(element,'Experiment')        
+        resultElement = self.appendChildTag(element,'Result')
+        
+        self.castToDommable(self.result).asDom(resultElement)
+        return element
     
     def __init__(self,experiment,result,save=True):
         QObject.__init__(self)
@@ -26,6 +37,19 @@ class ExperimentResult(QObject):
         
         if save:
             ExperimentResultCollection.Instance().append(self)
+            self.saveToFileSystem()
+            
+        self.result.changed.connect(self.saveToFileSystem)
+            
+    def saveToFileSystem(self):
+        print 'Saving'
+        fileHandle = open('Y:/emctestbench/results/'+self.metadata['Name']+'.xml','wb')
+        document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
+        self.asDom(document.documentElement)
+        fileHandle.write(document.toxml(encoding='utf-8'))
+        fileHandle.close()
+        del(fileHandle)
+        
         
 
 @Singleton

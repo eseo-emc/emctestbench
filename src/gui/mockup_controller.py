@@ -10,7 +10,7 @@ class MockupController(QMainWindow,Ui_MainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setupUi(self)
-        self.showFullScreen()
+#        self.showFullScreen()
         
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         

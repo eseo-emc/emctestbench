@@ -10,6 +10,7 @@ from PyQt4.QtCore import Qt
 from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
 from gui import logging
+from experiment.experiment import ExperimentSlot
 
 import string
 
@@ -17,6 +18,9 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setupUi(self)     
+        
+        self.topLevelExperiment = ExperimentSlot()
+        self.mainDropWidget.model = self.topLevelExperiment
         self.mainDropWidget.topLevel = True
         
 #        self.showFullScreen()
@@ -79,7 +83,7 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         self.mainTabWidget.setCurrentIndex(0)
         
     def experimentSelected(self,experimentName):
-        self.mainDropWidget.selectExperiment(experimentName.__name__)   
+        self.topLevelExperiment.value = experimentName.__name__
     def experimentResultSelected(self,experimentResult):
         if hasattr(self,'activeResultController'):
             self.activeResultController.deleteLater()

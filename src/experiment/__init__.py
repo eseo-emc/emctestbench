@@ -1,1 +1,1 @@
-__all__ = ['transmittedpower','dpi','voltagecriterion']
+__all__ = ['transmittedpower','dpi','voltagecriterion','experiment']

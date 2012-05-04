@@ -37,7 +37,6 @@ class ScalarResult(Result,Dommable):
         return newScalarResult
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
-        print self.data
         self.castToDommable(self.data).asDom(element)
         return element
 
@@ -86,7 +85,7 @@ class DictResult(Result,Dommable):
 
 
         
-class ResultSet(Result):
+class ResultSet(Result,Dommable):
     extendedWidth = pyqtSignal(dict)    
     
     def __init__(self,fields):
@@ -97,6 +96,14 @@ class ResultSet(Result):
         self._fields.update({'timeStamp':datetime})
         for fieldName in self._fields.keys():
             self._data[fieldName] = []
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        for fieldName,data in self._data.items():
+            dataElement = self.castToDommable(data).asDom(element)
+            dataElement.setAttribute('name',fieldName)
+            break
+        return element
+            
     def append(self,values):
         values.update({'timeStamp':datetime.now()})
         for fieldName in self._fields.keys():

@@ -1,7 +1,7 @@
 from PyQt4.QtGui import QApplication
 
 from device import knownDevices
-from experiment import Experiment,Property,SweepRange
+from experiment import Experiment,ExperimentSlot,Property,SweepRange
 from utility.quantities import Power,PowerRatio
 import numpy
 from gui import logging
@@ -31,6 +31,8 @@ class Dpi(Experiment):
         
     def __init__(self):
         Experiment.__init__(self)
+        self.passCriterion = ExperimentSlot('VoltageCriterion')
+        self.transmittedPower = ExperimentSlot('TransmittedPower')
         self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
         self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
         self.frequencies = SweepRange(150e3,6000e6,11,changedSignal=self.settingsChanged) 
@@ -39,14 +41,14 @@ class Dpi(Experiment):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
         
-        self.transmittedPower.connect()
-        self.passCriterion.connect()
+        self.transmittedPower.value.connect()
+        self.passCriterion.value.connect()
     def prepare(self):
         self.switchPlatform.setPreset('bridge')
         self.rfGenerator.enableOutput(False)
         
-        self.passCriterion.prepare()
-        self.transmittedPower.prepare()
+        self.passCriterion.value.prepare()
+        self.transmittedPower.value.prepare()
 
     def run(self):
         result = DpiResult(Power([self.powerMinimum.value,self.powerMaximum.value],'dBm'),deepcopy(self.frequencies))
@@ -63,7 +65,7 @@ class Dpi(Experiment):
             def measureAndSavePass(tryPower):
                 self.rfGenerator.setPower(Power(tryPower,'dBm'))
                 self.rfGenerator.enableOutput()
-                passNotFail = self.passCriterion.measure()['Pass']
+                passNotFail = self.passCriterion.value.measure()['Pass']
                 result.append( {'frequency':frequency,
                              'generatorPower':Power(tryPower,'dBm'),
                              'pass':passNotFail,
@@ -92,9 +94,6 @@ class Dpi(Experiment):
                 return tryPower
                 
         
-#        self._result.changed.connect(self.resultChanged)
-#        self._result.added.connect(self.resultAdded)
-        
         self.progressed.emit(0)
         for number,frequency in enumerate(self.frequencies.values):
             if self.stopRequested:
@@ -102,16 +101,14 @@ class Dpi(Experiment):
             self.rfGenerator.setFrequency(frequency)
             logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
-            measurement = self.transmittedPower.measure()
+            measurement = self.transmittedPower.value.measure()
             result.append({'frequency':frequency,
                              'generatorPower':Power(generatorPower,'dBm'),
-                             'pass':self.passCriterion.measure()['Pass'],
+                             'pass':self.passCriterion.value.measure()['Pass'],
                              'reflectedPower':measurement['Reflected power'],
                              'forwardPower':measurement['Forward power'],
                              'transmittedPower':measurement['Transmitted power'],
                              'limit':True})
-
-#            self.resultChanged.emit()
 
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
@@ -136,8 +133,8 @@ if __name__ == '__main__':
 
     import numpy
     experiment = Dpi()
-    experiment.passCriterion = VoltageCriterion()
-    experiment.transmittedPower = TransmittedPower()
+    experiment.passCriterion.value = VoltageCriterion
+    experiment.transmittedPower.value = TransmittedPower
 
     experiment.connect()
     experiment.prepare()

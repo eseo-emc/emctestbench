@@ -15,8 +15,14 @@ class DpiController(QWidget,Ui_Form):
         self.setupUi(self)  
         self.topLevel = topLevel
         
-        self.model = Dpi()
-        self.fileView = DpiCsv()
+        self._model = None        
+#        self.fileView = DpiCsv()
+    @property
+    def model(self):
+        return self._model
+    @model.setter
+    def model(self,value):
+        self._model = value
         
         self.powerMinimum.setValue(self.model.powerMinimum.value)
         self.powerMinimum.valueChanged.connect(self.model.powerMinimum.setValue)
@@ -36,8 +42,6 @@ class DpiController(QWidget,Ui_Form):
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)
               
-
-     
         self.model.newResult.connect(self.newResult)
         self.model.progressed.connect(self.progress.setValue)
         
@@ -46,9 +50,9 @@ class DpiController(QWidget,Ui_Form):
         self.model.finished.connect(self.measurementStopped)
         
         self.criterion.label = 'Criterion'
-        self.criterion.selectExperiment('VoltageCriterion')
+        self.criterion.model = self.model.passCriterion
         self.stimulus.label = 'Stimulus'
-        self.stimulus.selectExperiment('TransmittedPower')
+        self.stimulus.model = self.model.transmittedPower
 
     def enableInputs(self,enable):
         self.frequencyMinimum.setEnabled(enable)             
@@ -76,8 +80,6 @@ class DpiController(QWidget,Ui_Form):
         self.enableInputs(True)
         
     def startMeasurement(self):
-        self.model.passCriterion = self.criterion.experiment
-        self.model.transmittedPower = self.stimulus.experiment
         self.model.connect()
         self.model.prepare()
         self.model.start()

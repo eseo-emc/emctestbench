@@ -38,12 +38,12 @@ class XmlTest(unittest.TestCase):
     def assertLoopThrough(self,resultClass):
         self.result.asDom(self.document.documentElement)
         xml = self.document.toprettyxml(encoding='utf-8')
-#        print xml
+        print xml
         
         parsedDom = parseString(xml)
         resultElement = parsedDom.documentElement.getElementsByTagName(resultClass.__name__)[0]
         parsedResult = resultClass.fromDom(resultElement)
-        print parsedResult.data
+#        print parsedResult.data
         self.assertEqual(self.result,parsedResult)
 
      
@@ -64,11 +64,10 @@ class DictResultXml_test(XmlTest):
         self.result = DictResult()
     def test_loopTroughSimple(self):
         self.result.data = {'gg':42.42}
-        print self.result.data
         self.assertLoopThrough(DictResult)
-#    def test_loopTroughPower(self):
-#        self.result.data = {'Name':'Mohamed','Power':Power(0.001,'W')}
-#        self.assertLoopThrough(DictResult)    
+    def test_loopTroughPower(self):
+        self.result.data = {'Name':'Mohamed','Power':Power(0.001,'W')}
+        self.assertLoopThrough(DictResult)    
         
         
 if __name__ == '__main__':
