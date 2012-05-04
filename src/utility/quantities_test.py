@@ -28,9 +28,13 @@ class Power_array_test(unittest.TestCase):
     def test_linear(self):
         self.assertTrue( all(abs((self.test.watt() / numpy.array([0.001,0.002,1,0.5]))-1) <0.01))
         
+class Power_equality_test(unittest.TestCase):
+    def test_equality(self):
+        self.assertEqual(Power(+3.,'dBm'),Power(+3.,'dBm'))
+        
 if __name__ == '__main__':
      import nose
-     nose.run(argv=['-w','../test','-v'])
+#     nose.run(argv=['-w','../test','-v'])
      nose.run(defaultTest=__name__)
 #    suite = unittest.defaultTestLoader.loadTestsFromTestCase(Power_test)
 #    unittest.TextTestRunner(verbosity=2).run(suite)

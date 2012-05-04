@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'voltagecriterion_view.ui'
 #
-# Created: Tue Apr 17 17:40:29 2012
+# Created: Thu Apr 26 18:15:56 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(640, 80)
+        Form.resize(640, 84)
         Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.horizontalLayout = QtGui.QHBoxLayout(Form)
         self.horizontalLayout.setSpacing(0)
@@ -36,6 +36,7 @@ class Ui_Form(object):
         self.nominalVoltage = QtGui.QDoubleSpinBox(Form)
         self.nominalVoltage.setDecimals(3)
         self.nominalVoltage.setMinimum(-99.99)
+        self.nominalVoltage.setSingleStep(0.1)
         self.nominalVoltage.setObjectName(_fromUtf8("nominalVoltage"))
         self.gridLayout.addWidget(self.nominalVoltage, 0, 2, 1, 1)
         self.label_3 = QtGui.QLabel(Form)
@@ -48,9 +49,9 @@ class Ui_Form(object):
         self.gridLayout.addWidget(self.measureNominal, 0, 4, 1, 1)
         spacerItem = QtGui.QSpacerItem(200, 58, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 0, 5, 3, 1)
-        self.widget = PassFailWidget(Form)
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.gridLayout.addWidget(self.widget, 0, 6, 3, 1)
+        self.passFailIndicator = PassFailWidget(Form)
+        self.passFailIndicator.setObjectName(_fromUtf8("passFailIndicator"))
+        self.gridLayout.addWidget(self.passFailIndicator, 0, 6, 3, 1)
         self.label = QtGui.QLabel(Form)
         self.label.setText(QtGui.QApplication.translate("Form", "Voltage Margin:", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -63,6 +64,7 @@ class Ui_Form(object):
         self.voltageMargin = QtGui.QDoubleSpinBox(Form)
         self.voltageMargin.setDecimals(3)
         self.voltageMargin.setMinimum(-99.99)
+        self.voltageMargin.setSingleStep(0.1)
         self.voltageMargin.setObjectName(_fromUtf8("voltageMargin"))
         self.gridLayout.addWidget(self.voltageMargin, 1, 2, 1, 1)
         self.label_2 = QtGui.QLabel(Form)
@@ -74,11 +76,6 @@ class Ui_Form(object):
         self.label_6.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 2, 0, 1, 1)
-        self.measuredVoltage = QtGui.QLineEdit(Form)
-        self.measuredVoltage.setText(_fromUtf8(""))
-        self.measuredVoltage.setReadOnly(True)
-        self.measuredVoltage.setObjectName(_fromUtf8("measuredVoltage"))
-        self.gridLayout.addWidget(self.measuredVoltage, 2, 2, 1, 1)
         self.label_5 = QtGui.QLabel(Form)
         self.label_5.setText(QtGui.QApplication.translate("Form", "V", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setObjectName(_fromUtf8("label_5"))
@@ -87,6 +84,13 @@ class Ui_Form(object):
         self.measure.setText(QtGui.QApplication.translate("Form", "Measure", None, QtGui.QApplication.UnicodeUTF8))
         self.measure.setObjectName(_fromUtf8("measure"))
         self.gridLayout.addWidget(self.measure, 2, 4, 1, 1)
+        self.measuredVoltage = QtGui.QDoubleSpinBox(Form)
+        self.measuredVoltage.setReadOnly(True)
+        self.measuredVoltage.setDecimals(3)
+        self.measuredVoltage.setMinimum(-99.99)
+        self.measuredVoltage.setSingleStep(0.1)
+        self.measuredVoltage.setObjectName(_fromUtf8("measuredVoltage"))
+        self.gridLayout.addWidget(self.measuredVoltage, 2, 2, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
 
         self.retranslateUi(Form)

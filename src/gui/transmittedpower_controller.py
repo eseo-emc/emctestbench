@@ -1,34 +1,23 @@
 from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QWidget
 
-from gui.voltagecriterion_view import Ui_Form
-from experiment.voltagecriterion import VoltageCriterion
-
+from gui.transmittedpower_view import Ui_Form
+from experiment.transmittedpower import TransmittedPower
 from experimentresultcollection import ExperimentResult
 
 import numpy
 
-class VoltageCriterionController(QWidget,Ui_Form):
+class TransmittedPowerController(QWidget,Ui_Form):
     def __init__(self,parent,topLevel=True):
         QWidget.__init__(self,parent)
-        self.setupUi(self) 
+        self.setupUi(self)  
+        
         self.topLevel = topLevel
         
-        self.model = VoltageCriterion()
+        self.model = TransmittedPower()
         self.model.connect()
         
-        def coupleValue(guiWidget,modelProperty):
-            guiWidget.setValue(modelProperty.value)
-            modelProperty.changedTo.connect(guiWidget.setValue)
-            guiWidget.valueChanged.connect(modelProperty.setValue)
-        
-        coupleValue(self.nominalVoltage,self.model.undisturbedOutputVoltage)
-        coupleValue(self.voltageMargin,self.model.voltageMargin)        
-#        coupleValue(self.measuredVoltage,self.model.result)        
         self.model.newResult.connect(self.newResult)        
-        
-        
-        self.measureNominal.clicked.connect(self.measureNominalVoltage) 
         self.measure.clicked.connect(self.measureOnce)
         
     def measureNominalVoltage(self):
@@ -36,27 +25,32 @@ class VoltageCriterionController(QWidget,Ui_Form):
     def measureOnce(self):
         self.model.start()
     def newResult(self,result):
-        self.measuredVoltage.setValue(result['Voltage'])
-        self.passFailIndicator.passNotFail = result['Pass']
+        self.generatorPower.setValue(result['Generator power'].dBm())
+        self.forwardPower.setValue(result['Forward power'].dBm())
+        self.reflectedPower.setValue(result['Reflected power'].dBm())
+        self.transmittedPower.setValue(result['Transmitted power'].dBm())
         
         if self.topLevel:
             ExperimentResult(self.model,result)
-        
 
 
 if __name__ == '__main__':
     import sys
     from PyQt4.QtGui import QApplication,QMainWindow
     from device import knownDevices    
+    from utility.quantities import Power
     
     application = QApplication(sys.argv)
     window = QMainWindow()
     
     switchPlatform = knownDevices['switchPlatform']
     switchPlatform.setPreset('bridge')
+    rfGenerator = knownDevices['rfGenerator']
+    rfGenerator.setPower(Power(10,'dBm'))
+    rfGenerator.enableOutput()
     
     
-    controller = VoltageCriterionController(window)
+    controller = TransmittedPowerController(window)
     window.setCentralWidget(controller)
     window.show()
         

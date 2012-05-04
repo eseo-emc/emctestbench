@@ -37,7 +37,7 @@ class DpiCsv(QObject):
         
 if __name__ == '__main__':
     import time
-    from utility import Power
+    from utility.quantities import Power
     test = DpiCsv()
     print test.fileName
     for frequency in range(10000,250000,10000):

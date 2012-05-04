@@ -1,0 +1,1765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>EMC Testbench</string>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="tabPosition">
+       <enum>QTabWidget::South</enum>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Results</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <item row="0" column="0" colspan="4">
+         <widget class="QTreeWidget" name="treeWidget_2">
+          <property name="font">
+           <font>
+            <family>MS Shell Dlg 2</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Experiment</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Date</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Operator</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>DUT</string>
+           </property>
+          </column>
+          <item>
+           <property name="text">
+            <string>All</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons/icons.qrc">
+             <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string>*</string>
+           </property>
+           <property name="text">
+            <string>*</string>
+           </property>
+           <property name="text">
+            <string>*</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Templates</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons/icons.qrc">
+             <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <item>
+            <property name="text">
+             <string>Simple DPI</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/ExperimentTemplate.png</normaloff>:/results/ExperimentTemplate.png</iconset>
+            </property>
+            <property name="text">
+             <string>DPI</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Sjoerd</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons/icons.qrc">
+             <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <item>
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+            <property name="text">
+             <string>Sjoerd</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Regulator</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+            <property name="text">
+             <string>Sjoerd</string>
+            </property>
+            <property name="text">
+             <string>{LM7805,L4949}</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>x-DPI</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>x-DPI</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/ExperimentTemplate.png</normaloff>:/results/ExperimentTemplate.png</iconset>
+             </property>
+             <property name="text">
+              <string>DPI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x-DPI</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/ExperimentResult.png</normaloff>:/results/ExperimentResult.png</iconset>
+             </property>
+             <property name="text">
+              <string>DPI</string>
+             </property>
+             <property name="text">
+              <string>Yesterday</string>
+             </property>
+             <property name="text">
+              <string>Sjoerd</string>
+             </property>
+             <property name="text">
+              <string>LM7805</string>
+             </property>
+            </item>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Mohamed</string>
+           </property>
+           <property name="icon">
+            <iconset resource="icons/icons.qrc">
+             <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <item>
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+            <property name="text">
+             <string>Mohamed</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Memory</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <item>
+             <property name="text">
+              <string>DPI</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/ExperimentResult.png</normaloff>:/results/ExperimentResult.png</iconset>
+             </property>
+             <property name="text">
+              <string>DPI</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Mohamed</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </item>
+           </item>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="icons/icons.qrc">
+            <normaloff>:/results/AddFolder.png</normaloff>:/results/AddFolder.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="icons/icons.qrc">
+            <normaloff>:/results/AddFilter.png</normaloff>:/results/AddFilter.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>56</width>
+            <height>17</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="icons/icons.qrc">
+            <normaloff>:/results/Delete.png</normaloff>:/results/Delete.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>16</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Experiments</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="margin">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QTreeWidget" name="treeWidget">
+          <property name="font">
+           <font>
+            <family>MS Shell Dlg 2</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <attribute name="headerVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </column>
+          <item>
+           <property name="text">
+            <string>Devices</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Agilent L4411A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Multimeter.png</normaloff>:/devices/Multimeter.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>Voltage</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Average voltage</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>RMS voltage</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Current</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Average current</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+              </property>
+             </item>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent DSO6014L</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>Voltage</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Average voltage</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Frequency</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent 86100A/54754A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent E4419B</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/WattMeter.png</normaloff>:/devices/WattMeter.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>Power</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent 53220A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent N9010A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/SpectrumAnalyzer.png</normaloff>:/devices/SpectrumAnalyzer.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>HP 8720C</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent N5247A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Agilent L4490A</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Switch.png</normaloff>:/devices/Switch.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>State</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Prana AP32DT120</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Amplifier.png</normaloff>:/devices/Amplifier.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>State</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Milmega AS0104-30/30</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Amplifier.png</normaloff>:/devices/Amplifier.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>State</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>NI PCI-6251</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>FTDI 2232H</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Stimulator.png</normaloff>:/devices/Stimulator.png</iconset>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Newport ESP300</string>
+            </property>
+            <property name="icon">
+             <iconset resource="icons/icons.qrc">
+              <normaloff>:/devices/Positioner.png</normaloff>:/devices/Positioner.png</iconset>
+            </property>
+            <item>
+             <property name="text">
+              <string>Position</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+          </item>
+          <item>
+           <property name="text">
+            <string>Experiments</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Emission</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>GTEM Emission</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Immunity</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>DPI</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>NFSI</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Generic stimuli</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>DC voltage</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>N6700B</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/PowerSupply.png</normaloff>:/devices/PowerSupply.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>DC current</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>N6700B</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/PowerSupply.png</normaloff>:/devices/PowerSupply.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Control signals</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Agilent N6700B</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/PowerSupply.png</normaloff>:/devices/PowerSupply.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Agilent L4490A</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Switch.png</normaloff>:/devices/Switch.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>FTDI 2232H</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Stimulator.png</normaloff>:/devices/Stimulator.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Scalar data signals</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Periodic signals</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent N5181A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/RfGenerator.png</normaloff>:/devices/RfGenerator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A top</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A bottom</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33250A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>One-shot signals</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A top</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A bottom</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33250A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>Noise</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A top</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33220A bottom</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent 33250A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Generator.png</normaloff>:/devices/Generator.png</iconset>
+               </property>
+              </item>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Test vectors</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Serial</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>FTDI 2232H</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Stimulator.png</normaloff>:/devices/Stimulator.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>Parallel</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>JTAG</string>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Position</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Newport ESP300</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Positioner.png</normaloff>:/devices/Positioner.png</iconset>
+              </property>
+             </item>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Generic measurements</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Voltage</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Average voltage</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent L4411A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Multimeter.png</normaloff>:/devices/Multimeter.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent DSO6014L</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>Time-domain voltage</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent DSO6014A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>NI PCI-6251</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+               </property>
+              </item>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Current</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Average current</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Shunt current measurement</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent L4411A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Multimeter.png</normaloff>:/devices/Multimeter.png</iconset>
+               </property>
+              </item>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Resistance</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Agilent L4411A</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Multimeter.png</normaloff>:/devices/Multimeter.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Power</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Transmitted power</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Agilent N9010A</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/SpectrumAnalyzer.png</normaloff>:/devices/SpectrumAnalyzer.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Agilent E4419B</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/WattMeter.png</normaloff>:/devices/WattMeter.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Frequency</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Agilent 53220A</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Agilent DSO6014L</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons/icons.qrc">
+                <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+              </property>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Transfer parameters</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>S-parameters</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>HP 8720C</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>Z-parameters</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>S to Z</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>HP 8720C</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>X-parameters</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>X11 from spectrum</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Agilent N5247A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Measurer.png</normaloff>:/devices/Measurer.png</iconset>
+               </property>
+              </item>
+             </item>
+             <item>
+              <property name="text">
+               <string>Time-domain</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Agilent 86100A/54754A</string>
+               </property>
+               <property name="icon">
+                <iconset resource="icons/icons.qrc">
+                 <normaloff>:/devices/Oscilloscope.png</normaloff>:/devices/Oscilloscope.png</iconset>
+               </property>
+              </item>
+             </item>
+            </item>
+            <item>
+             <property name="text">
+              <string>Data integrity</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Signal integrity</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>BER</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Jitter</string>
+              </property>
+             </item>
+            </item>
+           </item>
+           <item>
+            <property name="text">
+             <string>Control</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Sweep</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Piecewise</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Criterion</string>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Experiment.png</normaloff>:/results/Experiment.png</iconset>
+             </property>
+            </item>
+           </item>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>MS Shell Dlg 2</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave_as_template"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionSelect_All"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuLogging_level">
+     <property name="title">
+      <string>Logging level</string>
+     </property>
+     <addaction name="actionErrors_only"/>
+     <addaction name="actionInfo"/>
+     <addaction name="actionDebug"/>
+    </widget>
+    <addaction name="actionTree_Left"/>
+    <addaction name="actionTree_on_Top"/>
+    <addaction name="separator"/>
+    <addaction name="menuLogging_level"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QDockWidget" name="resultViewer">
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Result Viewer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="MatplotlibWidget" name="mplwidget"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="experimentViewer">
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Experiment Viewer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="0">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="subExperiment">
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Sub-experiment</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_7">
+    <layout class="QGridLayout" name="gridLayout_5">
+     <item row="0" column="0">
+      <widget class="QSlider" name="horizontalSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="logWindow">
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Log</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_8">
+    <layout class="QGridLayout" name="gridLayout_6">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QListView" name="listView"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="metadataViewer">
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Metadata</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>318</width>
+          <height>307</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Name*:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="lineEdit">
+             <property name="text">
+              <string>x-DPI 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>DUT*:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="lineEdit_2">
+             <property name="text">
+              <string>LM7805</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QLabel" name="label_3">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Operator*:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="lineEdit_3">
+             <property name="text">
+              <string>Sjoerd</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QLabel" name="label_4">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Start*:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="lineEdit_4">
+             <property name="text">
+              <string>16-04-2012 14:05:21</string>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Calibration kit:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLineEdit" name="lineEdit_5">
+             <property name="text">
+              <string>1-Sjoerd</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QPushButton" name="pushButton_4">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Delete.png</normaloff>:/results/Delete.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="2">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Instance number*:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QSpinBox" name="spinBox">
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="3">
+            <widget class="QPushButton" name="pushButton_5">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Delete.png</normaloff>:/results/Delete.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QComboBox" name="comboBox">
+             <item>
+              <property name="text">
+               <string>Text</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Number</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Float</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Boolean</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="6" column="3">
+            <widget class="QPushButton" name="pushButton_6">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="icons/icons.qrc">
+               <normaloff>:/results/Add.png</normaloff>:/results/Add.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0" colspan="4">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLineEdit" name="lineEdit_8">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="placeholderText">
+              <string>Field name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="checkBox">
+             <property name="toolTip">
+              <string extracomment="Mandatory field"/>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionSave_as_template">
+   <property name="text">
+    <string>Save as template</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionErrors_only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Errors only</string>
+   </property>
+  </action>
+  <action name="actionInfo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Info</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionTree_Left">
+   <property name="text">
+    <string>Tree Left</string>
+   </property>
+  </action>
+  <action name="actionTree_on_Top">
+   <property name="text">
+    <string>Tree on Top</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MatplotlibWidget</class>
+   <extends>QWidget</extends>
+   <header>matplotlibwidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="icons/icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

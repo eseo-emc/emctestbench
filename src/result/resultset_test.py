@@ -1,7 +1,9 @@
 import unittest
 import numpy
-from resultset import ResultSet
-from utility import Power
+from resultset import ResultSet,ScalarResult,DictResult
+from utility.quantities import Power
+
+from xml.dom.minidom import getDOMImplementation,parseString
 
 class ResultSet_test(unittest.TestCase):
     def setUp(self):
@@ -29,6 +31,45 @@ class ResultSet_test(unittest.TestCase):
         self.assertEqual( row['frequency'] , 40e3 )
         self.assertTrue( numpy.isnan(row['transmittedPower']) )
         self.assertEqual( row['generatedPower'] , Power(40.,'dBm') )
+
+class XmlTest(unittest.TestCase):
+    def setUp(self):
+        self.document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
+    def assertLoopThrough(self,resultClass):
+        self.result.asDom(self.document.documentElement)
+        xml = self.document.toprettyxml(encoding='utf-8')
+#        print xml
+        
+        parsedDom = parseString(xml)
+        resultElement = parsedDom.documentElement.getElementsByTagName(resultClass.__name__)[0]
+        parsedResult = resultClass.fromDom(resultElement)
+        print parsedResult.data
+        self.assertEqual(self.result,parsedResult)
+
+     
+class ScalarResultXml_test(XmlTest):
+    def setUp(self):
+        XmlTest.setUp(self)
+        self.result = ScalarResult()
+    def test_loopThroughFloat(self):
+        self.result.data = 3.14
+        self.assertLoopThrough(ScalarResult)
+    def test_loopThroughPower(self):
+        self.result.data = Power(2,'W')
+        self.assertLoopThrough(ScalarResult)
+        
+class DictResultXml_test(XmlTest):
+    def setUp(self):
+        XmlTest.setUp(self)
+        self.result = DictResult()
+    def test_loopTroughSimple(self):
+        self.result.data = {'gg':42.42}
+        print self.result.data
+        self.assertLoopThrough(DictResult)
+#    def test_loopTroughPower(self):
+#        self.result.data = {'Name':'Mohamed','Power':Power(0.001,'W')}
+#        self.assertLoopThrough(DictResult)    
+        
         
 if __name__ == '__main__':
      import nose

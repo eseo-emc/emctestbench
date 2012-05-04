@@ -3,27 +3,31 @@ from device.multimeter import Multimeter
 from device.rfgenerator import RfGenerator
 from device.wattmeter import WattMeter
 from device.switch import SwitchPlatform
-from utility import Power,PowerRatio
+from utility.quantities import Power,PowerRatio
+from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
 import time
+from random import gauss
 
 class DummyMultimeter(Multimeter,Device):
     defaultName = 'Dummy Multimeter'
+    standardDeviation = 0.01
     def __init__(self,rfGenerator,switchPlatform):
         self.rfGenerator = rfGenerator
         self.switchPlatform = switchPlatform
         Device.__init__(self)
     def measure(self):
+        time.sleep(0.1)
         if incidentPower() > Power(+7.1,'dBm'):
-            return 4.7
+            return gauss(4.7,self.standardDeviation)
         else:
-            return 4.9
+            return gauss(4.9,self.standardDeviation)
 
 class DummyRfGenerator(RfGenerator,Device):
     defaultName = 'Dummy RF Generator'
     def __init__(self):
         self._power = Power(-130.,'dBm')
         self._enableOutput = False
-        self.frequency = 300e3
+        self._frequency = 300e3
         Device.__init__(self)
     def setPower(self,newPower):
         self._power = newPower
@@ -61,7 +65,7 @@ class DummySwitchPlatform(SwitchPlatform,Device):
 class DummyWattMeter(WattMeter,Device):
     defaultName = 'Dummy Wattmeter'
     def putOnline(self):
-        time.sleep(1)
+        time.sleep(.5)
         self.online = True
     
     def __init__(self,rfGenerator,switchPlatform):
@@ -74,7 +78,7 @@ class DummyWattMeter(WattMeter,Device):
     def reset(self):
         self._wasReset = 1.0
     def getPower(self,channel=None):
-        time.sleep(1)
+        time.sleep(.5)
         channel1Power = Power(0,'W') *self._wasReset
         channel2Power = reflectedPower()*self._wasReset
         if channel == 1:
@@ -87,6 +91,7 @@ class DummyWattMeter(WattMeter,Device):
 
 rfGenerator = DummyRfGenerator()
 switchPlatform = DummySwitchPlatform()
+switchPlatform.setPreset('bridge')
 knownDevices = { \
     'multimeter' : DummyMultimeter(rfGenerator,switchPlatform),
     'rfGenerator' : rfGenerator,
@@ -95,6 +100,8 @@ knownDevices = { \
 }
 
 def incidentPower():
-    return rfGenerator.getPower() * PowerRatio(-1.5,'dB')
+    assert switchPlatform.preset == 'bridge'
+    return rfGenerator.getPower() * bridgeInsertionTransferAt(rfGenerator.getFrequency())
 def reflectedPower():
-    return incidentPower() * PowerRatio(-3,'dB') * PowerRatio(-18,'dB')
+    assert switchPlatform.preset == 'bridge'
+    return incidentPower() * PowerRatio(-6,'dB') * bridgeCouplingFactorAt(rfGenerator.getFrequency())

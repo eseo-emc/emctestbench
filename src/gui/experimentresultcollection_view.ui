@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ExperimentResultCollection</class>
+ <widget class="QWidget" name="ExperimentResultCollection">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>557</width>
+    <height>546</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ResultTree</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0" colspan="4">
+    <widget class="QTreeWidget" name="theTreeWidget">
+     <property name="font">
+      <font>
+       <family>MS Shell Dlg 2</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Experiment</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Date</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Operator</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>DUT</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>All</string>
+      </property>
+      <property name="icon">
+       <iconset resource="icons/icons.qrc">
+        <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string>*</string>
+      </property>
+      <property name="text">
+       <string>*</string>
+      </property>
+      <property name="text">
+       <string>*</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Templates</string>
+      </property>
+      <property name="icon">
+       <iconset resource="icons/icons.qrc">
+        <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <item>
+       <property name="text">
+        <string>Simple DPI</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/ExperimentTemplate.png</normaloff>:/results/ExperimentTemplate.png</iconset>
+       </property>
+       <property name="text">
+        <string>DPI</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sjoerd</string>
+      </property>
+      <property name="icon">
+       <iconset resource="icons/icons.qrc">
+        <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <item>
+       <property name="text">
+        <string>All</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string>*</string>
+       </property>
+       <property name="text">
+        <string>Sjoerd</string>
+       </property>
+       <property name="text">
+        <string>*</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Regulator</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string>*</string>
+       </property>
+       <property name="text">
+        <string>Sjoerd</string>
+       </property>
+       <property name="text">
+        <string>{LM7805,L4949}</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>x-DPI</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+       </property>
+       <item>
+        <property name="text">
+         <string>x-DPI</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons/icons.qrc">
+          <normaloff>:/results/ExperimentTemplate.png</normaloff>:/results/ExperimentTemplate.png</iconset>
+        </property>
+        <property name="text">
+         <string>DPI</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>x-DPI</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons/icons.qrc">
+          <normaloff>:/results/ExperimentResult.png</normaloff>:/results/ExperimentResult.png</iconset>
+        </property>
+        <property name="text">
+         <string>DPI</string>
+        </property>
+        <property name="text">
+         <string>Yesterday</string>
+        </property>
+        <property name="text">
+         <string>Sjoerd</string>
+        </property>
+        <property name="text">
+         <string>LM7805</string>
+        </property>
+       </item>
+      </item>
+     </item>
+     <item>
+      <property name="text">
+       <string>Mohamed</string>
+      </property>
+      <property name="icon">
+       <iconset resource="icons/icons.qrc">
+        <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <item>
+       <property name="text">
+        <string>All</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/Filter.png</normaloff>:/results/Filter.png</iconset>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string>*</string>
+       </property>
+       <property name="text">
+        <string>Mohamed</string>
+       </property>
+       <property name="text">
+        <string>*</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Memory</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons/icons.qrc">
+         <normaloff>:/results/Folder.png</normaloff>:/results/Folder.png</iconset>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <item>
+        <property name="text">
+         <string>DPI</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons/icons.qrc">
+          <normaloff>:/results/ExperimentResult.png</normaloff>:/results/ExperimentResult.png</iconset>
+        </property>
+        <property name="text">
+         <string>DPI</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="text">
+         <string>Mohamed</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </item>
+      </item>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="addFolder">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons/icons.qrc">
+       <normaloff>:/results/AddFolder.png</normaloff>:/results/AddFolder.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="addFilter">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons/icons.qrc">
+       <normaloff>:/results/AddFilter.png</normaloff>:/results/AddFilter.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>145</width>
+       <height>17</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="3">
+    <widget class="QPushButton" name="deleteItem">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="icons/icons.qrc">
+       <normaloff>:/results/Delete.png</normaloff>:/results/Delete.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="icons/icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

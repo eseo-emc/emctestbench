@@ -1,5 +1,14 @@
 <RCC>
   <qresource prefix="/">
+    <file>results/Add.png</file>
+    <file>results/AddFilter.png</file>
+    <file>results/AddFolder.png</file>
+    <file>results/Delete.png</file>
+    <file>results/Experiment.png</file>
+    <file>results/ExperimentResult.png</file>
+    <file>results/ExperimentTemplate.png</file>
+    <file>results/Filter.png</file>
+    <file>results/Folder.png</file>
     <file>devices/WattMeter.png</file>
     <file>devices/Amplifier.png</file>
     <file>devices/Generator.png</file>

@@ -1,6 +1,7 @@
 from math import log10,pow,sqrt
 #from numpy import inf,NaN,ndarray,asarray
 import numpy
+from result.persistance import Dommable
 
 class Amplitude():
     '''
@@ -125,7 +126,18 @@ class PowerRatio(numpy.ndarray):
 
 
 
-class Power(numpy.ndarray):
+
+class UnitLess(float,Dommable):
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        self.appendTextNode(element,str(self))
+        return element
+    @classmethod
+    def fromDom(cls,dom):
+        return cls(float(cls.getNodeText(dom)))
+
+class Power(numpy.ndarray,Dommable):
+    storageUnit = 'W'
     #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
     def __new__(cls, value, unit='W', info=None):
         value = numpy.asarray(value) * 1.0 #force values to be floats
@@ -142,6 +154,15 @@ class Power(numpy.ndarray):
         newObject = numpy.asarray(value).view(cls)
         newObject.info = info
         return newObject
+        
+    @classmethod
+    def fromDom(cls,dom):
+        return cls(float(cls.getNodeText(dom)),dom.getAttribute('unit'))
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        element.setAttribute('unit',self.storageUnit)
+        self.appendTextNode(element,str(self.asUnit(self.storageUnit)))
+        return element
         
     def __getitem__(self,itemNumber):
         singleItem = numpy.ndarray.__getitem__(self,itemNumber)
@@ -171,9 +192,16 @@ class Power(numpy.ndarray):
 #            else:
 #                return 10.0*log10(self)
 #        numpy.apply_along_axis()
-        
     def dBm(self):
         return self.dBW()+30.0
+    def asUnit(self,unit):
+        if unit == 'W':
+            return self.watt()
+        elif unit == 'dBm':
+            return self.dBm()
+        elif unit == 'dBW':
+            return self.dBW()
+            
     def min(self,maximumPower):
         return Power(min(self.watt(),maximumPower.watt()),'W')
     def max(self,minimumPower):
@@ -186,7 +214,7 @@ class Power(numpy.ndarray):
         if type(other) == numpy.array or type(other) == PowerRatio:
             return Power(self.watt()/numpy.array(other),'W')
         elif type(other) == Power:
-            return PowerRatio(self.watt()/numpy.array(other),None)
+            return PowerRatio(self.watt()/numpy.array(other))
     def __sub__(self,other):
         assert type(other) == Power
         return Power(self.watt()-other.watt(),'W')
@@ -195,6 +223,7 @@ class Power(numpy.ndarray):
         return Power(self.watt()+other.watt(),'W')        
     def __eq__(self,other):
         if type(other) == type(self):
+            print repr(self.watt()) , repr(other.watt())
             return self.watt() == other.watt()
         else:
             return numpy.ndarray.__eq__(self,other)

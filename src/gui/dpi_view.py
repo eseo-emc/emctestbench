@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'dpi_view.ui'
 #
-# Created: Tue Apr 17 17:40:21 2012
+# Created: Thu Apr 26 11:07:01 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -137,9 +137,6 @@ class Ui_Form(object):
         self.saveTransmittedPowers.setText(_fromUtf8(""))
         self.saveTransmittedPowers.setObjectName(_fromUtf8("saveTransmittedPowers"))
         self.gridLayout.addWidget(self.saveTransmittedPowers, 4, 4, 1, 1)
-        self.dpiGraph = MatplotlibWidget(Form)
-        self.dpiGraph.setObjectName(_fromUtf8("dpiGraph"))
-        self.gridLayout.addWidget(self.dpiGraph, 5, 0, 1, 6)
         self.verticalLayout.addLayout(self.gridLayout)
         self.stimulus = DropWidget(Form)
         self.stimulus.setObjectName(_fromUtf8("stimulus"))
@@ -154,5 +151,4 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         pass
 
-from matplotlibwidget import MatplotlibWidget
 from gui.dropwidget_controller import DropWidget

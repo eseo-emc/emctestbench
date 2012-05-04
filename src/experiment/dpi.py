@@ -1,88 +1,57 @@
-from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QApplication
 
 from device import knownDevices
-from experiment import Experiment,Property
-from transmittedpower import TransmittedPower
-from utility import Power
+from experiment import Experiment,Property,SweepRange
+from utility.quantities import Power,PowerRatio
 import numpy
 from gui import logging
+from copy import deepcopy
 
-from result import ResultSet
+from result.resultset import ResultSet
 
-class DpiResultSet(ResultSet):
-    def __init__(self,powerLimits):
+class DpiResult(ResultSet):
+    def __init__(self,powerLimits,frequencyRange):
         self.powerLimits = powerLimits
+        self.frequencyRange = frequencyRange
         ResultSet.__init__(self,{\
             'frequency':float,
             'generatorPower':Power,
             'pass':bool,
             'forwardPower':Power,
             'reflectedPower':Power,
-            'transmittedPower':Power })
+            'reflectionCoefficent':PowerRatio,
+            'transmittedPower':Power,
+            'limit':bool})
 
-class VoltageCriterion(Experiment):
-    name = 'Voltage offset criterion'
-    def connect(self):
-        self.voltMeter = knownDevices['multimeter']        
-        self.undisturbedOutputVoltage = None
-    def prepare(self,voltageMargin=0.05):
-        self.voltageMargin = voltageMargin
-        self.undisturbedOutputVoltage = self.voltMeter.measure()
-    def measure(self):
-        outputVoltage = self.voltMeter.measure()
-        return {'pass':abs(outputVoltage -self.undisturbedOutputVoltage) <= self.voltageMargin,
-                'outputVoltage (V)':outputVoltage}
 
-class SweepRange(object):
-    def __init__(self,startValue=0,stopValue=1,numberOfPoints=101,logarithmic=False,changedSignal=None):
-        self.start = Property(startValue,changedSignal=changedSignal)
-        self.stop = Property(stopValue,changedSignal=changedSignal)
-        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal,castTo=int)
-        self.logarithmic = Property(logarithmic,changedSignal=changedSignal)
-    @property
-    def values(self):
-        if self.logarithmic.value:
-            return numpy.exp(numpy.linspace(numpy.log(self.start.value),numpy.log(self.stop.value),self.numberOfPoints.value))
-        else:
-            return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
+
 
 class Dpi(Experiment):
     name = 'Direct Power Injection'    
         
-    settingsChanged = pyqtSignal()
-    resultAdded = pyqtSignal(dict)
-    resultChanged = pyqtSignal()
-    progressed = pyqtSignal(int)
-    finished = pyqtSignal()        
-    
     def __init__(self):
         Experiment.__init__(self)
         self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
         self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(300e3,150e6,11,changedSignal=self.settingsChanged) 
-        
-        self._result = None
-    
-    def result(self):
-        return self._result
+        self.frequencies = SweepRange(150e3,6000e6,11,changedSignal=self.settingsChanged) 
         
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
         
-        self.transmittedPower = TransmittedPower()
         self.transmittedPower.connect()
-        self.passCriterion = VoltageCriterion()        
         self.passCriterion.connect()
     def prepare(self):
         self.switchPlatform.setPreset('bridge')
         self.rfGenerator.enableOutput(False)
         
         self.passCriterion.prepare()
-        self.transmittedPower.connect()
+        self.transmittedPower.prepare()
 
     def run(self):
+        result = DpiResult(Power([self.powerMinimum.value,self.powerMaximum.value],'dBm'),deepcopy(self.frequencies))
+        self.newResult.emit(result)        
+        
         guessPower = self.powerMinimum.value
         stepSizes = [5.0,1.0,0.5,.25]
         def inclusiveRange(start,stop,step):
@@ -91,23 +60,28 @@ class Dpi(Experiment):
             else:
                 return numpy.array([stop])
         def findFailureFromBelow(startPower,stepIndex=0):
+            def measureAndSavePass(tryPower):
+                self.rfGenerator.setPower(Power(tryPower,'dBm'))
+                self.rfGenerator.enableOutput()
+                passNotFail = self.passCriterion.measure()['Pass']
+                result.append( {'frequency':frequency,
+                             'generatorPower':Power(tryPower,'dBm'),
+                             'pass':passNotFail,
+                             'limit':False} )
+                return passNotFail
             # make it work
             for tryPower in inclusiveRange(startPower,self.powerMinimum.value,-stepSizes[stepIndex]):
-                self.rfGenerator.setPower(Power(tryPower,'dBm'))
                 logging.LogItem('Try to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
-                if self.passCriterion.measure()['pass']:
+                if measureAndSavePass(tryPower):
                     break
             else:
                 logging.LogItem('Did not succeed to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.warning)
-
                 return tryPower
                 
             # make it fail
             for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.powerMaximum.value,stepSizes[stepIndex]):
-                self.rfGenerator.setPower(Power(tryPower,'dBm'))
                 logging.LogItem('Try to make the test fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
-                self.rfGenerator.enableOutput()
-                if not self.passCriterion.measure()['pass']:
+                if not measureAndSavePass(tryPower):
                     break
             else:
                 return tryPower
@@ -117,9 +91,9 @@ class Dpi(Experiment):
             else:
                 return tryPower
                 
-        self._result = DpiResultSet((self.powerMinimum.value,self.powerMaximum.value))
-        self._result.changed.connect(self.resultChanged)
-        self._result.added.connect(self.resultAdded)
+        
+#        self._result.changed.connect(self.resultChanged)
+#        self._result.added.connect(self.resultAdded)
         
         self.progressed.emit(0)
         for number,frequency in enumerate(self.frequencies.values):
@@ -129,12 +103,13 @@ class Dpi(Experiment):
             logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.measure()
-            self._result.append({'frequency':frequency,
-                                 'generatorPower':Power(generatorPower,'dBm'),
-                                 'pass':self.passCriterion.measure()['pass'],
-                                 'reflectedPower':measurement['reflectedPower'],
-                                 'forwardPower':measurement['forwardPower'],
-                                 'transmittedPower':measurement['transmittedPower'] })
+            result.append({'frequency':frequency,
+                             'generatorPower':Power(generatorPower,'dBm'),
+                             'pass':self.passCriterion.measure()['Pass'],
+                             'reflectedPower':measurement['Reflected power'],
+                             'forwardPower':measurement['Forward power'],
+                             'transmittedPower':measurement['Transmitted power'],
+                             'limit':True})
 
 #            self.resultChanged.emit()
 
@@ -146,21 +121,28 @@ class Dpi(Experiment):
         logging.LogItem('Finished DPI',logging.success)
         self.stopRequested = False
         
+        return result
+        
         
 if __name__ == '__main__':
+    from voltagecriterion import VoltageCriterion
+    from transmittedpower import TransmittedPower
+    
+    
     logging.LogModel.Instance().gui = False
-#    experiment = VoltageCriterion()
-#    experiment.prepare()
-#    print experiment.measure()
+
+
 
 
     import numpy
     experiment = Dpi()
+    experiment.passCriterion = VoltageCriterion()
+    experiment.transmittedPower = TransmittedPower()
+
     experiment.connect()
     experiment.prepare()
-    experiment.run()
-    results = experiment.result()
-    print results
+    results = experiment.run()
+    print results._data
     
         
                         

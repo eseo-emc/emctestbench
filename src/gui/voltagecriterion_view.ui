@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>80</height>
+    <height>84</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,6 +49,9 @@
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
       </widget>
      </item>
      <item row="0" column="3">
@@ -79,7 +82,7 @@
       </spacer>
      </item>
      <item row="0" column="6" rowspan="3">
-      <widget class="PassFailWidget" name="widget" native="true"/>
+      <widget class="PassFailWidget" name="passFailIndicator" native="true"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label">
@@ -106,6 +109,9 @@
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
       </widget>
      </item>
      <item row="1" column="3">
@@ -125,16 +131,6 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="measuredVoltage">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="3">
       <widget class="QLabel" name="label_5">
        <property name="text">
@@ -146,6 +142,22 @@
       <widget class="QPushButton" name="measure">
        <property name="text">
         <string>Measure</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="measuredVoltage">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>-99.989999999999995</double>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>

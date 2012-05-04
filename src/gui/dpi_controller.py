@@ -4,14 +4,16 @@ from PyQt4.QtGui import QWidget
 from gui.dpi_view import Ui_Form
 from experiment.dpi import Dpi
 from gui.dpicsv_view import DpiCsv
+from experimentresultcollection import ExperimentResult
 
 
 import numpy
 
 class DpiController(QWidget,Ui_Form):
-    def __init__(self,parent):
+    def __init__(self,parent,topLevel=True):
         QWidget.__init__(self,parent)
         self.setupUi(self)  
+        self.topLevel = topLevel
         
         self.model = Dpi()
         self.fileView = DpiCsv()
@@ -34,13 +36,9 @@ class DpiController(QWidget,Ui_Form):
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)
               
-        self.updateGraph()
-        self.model.resultChanged.connect(self.updateGraph)
-        self.model.settingsChanged.connect(self.updateGraph)
-        
-        self.model.resultAdded.connect(self.fileView.writeResultRow)
-        self.model.finished.connect(self.fileView.close)       
-        
+
+     
+        self.model.newResult.connect(self.newResult)
         self.model.progressed.connect(self.progress.setValue)
         
         self.measurementStopped()
@@ -48,8 +46,9 @@ class DpiController(QWidget,Ui_Form):
         self.model.finished.connect(self.measurementStopped)
         
         self.criterion.label = 'Criterion'
+        self.criterion.selectExperiment('VoltageCriterion')
         self.stimulus.label = 'Stimulus'
-
+        self.stimulus.selectExperiment('TransmittedPower')
 
     def enableInputs(self,enable):
         self.frequencyMinimum.setEnabled(enable)             
@@ -77,32 +76,17 @@ class DpiController(QWidget,Ui_Form):
         self.enableInputs(True)
         
     def startMeasurement(self):
+        self.model.passCriterion = self.criterion.experiment
+        self.model.transmittedPower = self.stimulus.experiment
         self.model.connect()
         self.model.prepare()
         self.model.start()
         
-#        x = numpy.linspace(-10, 10)
-#        self.dpiGraph.axes.plot(x, x**2,label='Square')
-#        self.dpiGraph.axes.hold()
-#        self.dpiGraph.axes.plot(x, x**3,label='Cube')
-#        self.dpiGraph.axes.legend()
+    def newResult(self,result):
+        if self.topLevel:
+            ExperimentResult(self.model,result)
 
-
-
-    def updateGraph(self):
-        result = self.model.result()
-        if result is not None:
-            self.dpiGraph.axes.plot(result['frequency'], result['forwardPower'].dBm(),label='Generator power')
-        self.dpiGraph.axes.set_xlabel('Frequency (Hz)')
-        self.dpiGraph.axes.set_ylabel('Power (dBm)')
-        
-        self.dpiGraph.axes.legend()
-        
-        self.dpiGraph.axes.set_ylim(self.model.powerMinimum.value,self.model.powerMaximum.value)
-        self.dpiGraph.axes.set_xlim(self.model.frequencies.start.value,self.model.frequencies.stop.value)
-        self.dpiGraph.axes.set_xscale('symlog' if self.model.frequencies.logarithmic.value else 'linear')        
-        self.dpiGraph.draw() #redraw_in_frame()
-#        self.dpiGraph.figure.set_frameon(False)
+    
         
 
 

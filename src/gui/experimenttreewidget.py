@@ -6,7 +6,7 @@ from experimentcollection import ExperimentCollection
 from devicecollection import DeviceCollection
 #import logging
 
-class SystemTreeItem(QTreeWidgetItem):   
+class ExperimentTreeItem(QTreeWidgetItem):   
     def __init__(self,parent=None,name=None):
         QTreeWidgetItem.__init__(self,parent)
         if name:
@@ -19,21 +19,21 @@ class SystemTreeItem(QTreeWidgetItem):
         menu.addAction(refreshAction)
     
         
-class ExperimentItem(SystemTreeItem):
+class ExperimentItem(ExperimentTreeItem):
     def __init__(self,experiment):
-        SystemTreeItem.__init__(self)
+        ExperimentTreeItem.__init__(self)
         self.experiment = experiment
         self.setText(0,experiment.name)
     def addContextMenuActions(self,menu):
-        SystemTreeItem.addContextMenuActions(self,menu)
+        ExperimentTreeItem.addContextMenuActions(self,menu)
         menu.addSeparator()
         noneAction = QAction('None',menu)
         noneAction.setEnabled(False)
         menu.addAction(noneAction)
 
-class DeviceItem(SystemTreeItem):
+class DeviceItem(ExperimentTreeItem):
     def __init__(self,device):
-        SystemTreeItem.__init__(self)
+        ExperimentTreeItem.__init__(self)
         self.device = device
         self.update()
         self.device.changed.connect(self.update)
@@ -42,7 +42,7 @@ class DeviceItem(SystemTreeItem):
         self.setToolTip(0,self.device.detailedInformation)
         self.setText(0,str(self.device))
     def addContextMenuActions(self,menu):
-        SystemTreeItem.addContextMenuActions(self,menu)
+        ExperimentTreeItem.addContextMenuActions(self,menu)
         menu.addSeparator()
         onlineAction = QAction('Put Online',menu)
         onlineAction.triggered.connect(self.device.putOnline)
@@ -60,15 +60,14 @@ class DeviceItem(SystemTreeItem):
                 documentationMenu.addAction(urlAction)
             menu.addAction(documentationMenu.menuAction())
 
-class SystemTreeWidget(QTreeWidget):
+class ExperimentTreeWidget(QTreeWidget):
     experimentSelected = pyqtSignal(object)    
     
     def __init__(self,parent):
         QTreeWidget.__init__(self,parent)
         
-        self.devices = SystemTreeItem(self,'Devices')      
-        self.experiments = SystemTreeItem(self,'Experiments')      
-        self.results = SystemTreeItem(self,'Results') 
+        self.devices = ExperimentTreeItem(self,'Devices')      
+        self.experiments = ExperimentTreeItem(self,'Experiments')      
         
         self.dragStartPosition = None
         
@@ -138,7 +137,7 @@ if __name__ == '__main__':
     application = QApplication(sys.argv)
     window = QMainWindow()
     
-    widget = SystemTreeWidget(window)
+    widget = ExperimentTreeWidget(window)
     window.setCentralWidget(widget)
     window.show()
 #    widget.updateDevices()
