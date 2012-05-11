@@ -2,7 +2,7 @@ from PyQt4.QtGui import QApplication
 
 from device import knownDevices
 from experiment import Experiment,ExperimentSlot,Property,SweepRange
-from utility.quantities import Power,PowerRatio
+from utility.quantities import Power,PowerRatio,Frequency
 import numpy
 from gui import logging
 from copy import deepcopy
@@ -14,7 +14,7 @@ class DpiResult(ResultSet):
         self.powerLimits = powerLimits
         self.frequencyRange = frequencyRange
         ResultSet.__init__(self,{\
-            'frequency':float,
+            'frequency':Frequency,
             'generatorPower':Power,
             'pass':bool,
             'forwardPower':Power,
@@ -22,20 +22,28 @@ class DpiResult(ResultSet):
             'reflectionCoefficent':PowerRatio,
             'transmittedPower':Power,
             'limit':bool})
-
-
-
+    def asDom(self,parent):
+        element = ResultSet.asDom(self,parent)
+        self.appendChildObject(element,self.powerLimits,'Power limits')   
+        self.appendChildObject(element,self.frequencyRange,'Frequency range')
+        return element
+    @classmethod
+    def fromDom(cls,dom):
+        newResult = super(DpiResult,cls).fromDom(dom)
+        newResult.powerLimits = cls.childObjectById(dom,'Power limits')
+        newResult.frequencyRange = cls.childObjectById(dom,'Frequency range')
+        return newResult
 
 class Dpi(Experiment):
     name = 'Direct Power Injection'    
         
     def __init__(self):
         Experiment.__init__(self)
-        self.passCriterion = ExperimentSlot('VoltageCriterion')
-        self.transmittedPower = ExperimentSlot('TransmittedPower')
+        self.passCriterion = ExperimentSlot() #'VoltageCriterion')
+        self.transmittedPower = ExperimentSlot() #'TransmittedPower')
         self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
         self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(150e3,6000e6,11,changedSignal=self.settingsChanged) 
+        self.frequencies = SweepRange(150e3,1500e6,11,changedSignal=self.settingsChanged) 
         
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   

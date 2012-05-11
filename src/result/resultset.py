@@ -3,7 +3,8 @@ from PyQt4.QtCore import pyqtSignal,QObject
 import numpy
 
 
-from persistance import Dommable
+from persistance import Dommable,Dict
+from timestamp import TimeStamp
 from utility.quantities import UnitLess
 
 
@@ -48,29 +49,10 @@ class ScalarResult(Result,Dommable):
         self._data = value
         self._emitChanged()
         
-class DictResult(Result,Dommable):
+class DictResult(Dict,Result):
     def __init__(self):
         Result.__init__(self)
-        self._data = {}
-    @classmethod
-    def fromDom(cls,dom):
-        newDictResult = cls()
-        newData = {}
-        for name,childObject in cls.childObjectsByName(dom):
-            newData.update({name:childObject})
-        newDictResult.data = newData
-        return newDictResult
-    def asDom(self,parent):
-        element = Dommable.asDom(self,parent)
-        for name,value in self.data.items():
-            print name,type(value)
-            item = self.castToDommable(value).asDom(element) 
-            item.setAttribute('name',name)  
-        return element
-        
-        
-    def __getitem__(self,key):
-        return self._data[key]
+        Dict.__init__(self)
     @property
     def data(self):
         return self._data
@@ -93,19 +75,45 @@ class ResultSet(Result,Dommable):
         self.creationMoment = datetime.now()     
         self._data = {}
         self._fields = fields
-        self._fields.update({'timeStamp':datetime})
+        self._fields.update({'timeStamp':TimeStamp})
         for fieldName in self._fields.keys():
             self._data[fieldName] = []
+    def __eq__(self,other):
+        print 'Self ',self._data
+        print 'Other', other._data
+        return self._data == other._data
+    @classmethod
+    def fromDom(cls,dom):
+        fields = {}
+        data = {}
+        numberOfRows = None
+        for elementId,indexableObject in cls.childObjectById(dom,'Data').items():
+            items = []
+            for item in indexableObject:
+                items.append(item)
+            if numberOfRows:
+                assert len(items) == numberOfRows,'Not all elements of ResultSet have the same number of items'
+            else:
+                numberOfRows = len(items)
+            fields.update({elementId:type(items[0])})
+            data.update({elementId:items})
+        assert 'timeStamp' in fields.keys()
+        
+        newResultSet = super(ResultSet,cls).__new__(cls)
+        ResultSet.__init__(newResultSet,fields)
+        newResultSet._data = data
+        return newResultSet
+              
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
-        for fieldName,data in self._data.items():
-            dataElement = self.castToDommable(data).asDom(element)
-            dataElement.setAttribute('name',fieldName)
-            break
+        consolidatedDict = Dict()
+        for key in self._fields.keys():
+            consolidatedDict.update({key:self[key]})
+        self.appendChildObject(element,consolidatedDict,'Data')
         return element
             
     def append(self,values):
-        values.update({'timeStamp':datetime.now()})
+        values.update({'timeStamp':TimeStamp()})
         for fieldName in self._fields.keys():
             fieldValue = None
             if values.has_key(fieldName):
@@ -125,7 +133,7 @@ class ResultSet(Result,Dommable):
             if item == None:           
                 self._data[key][number] = missingValue
         
-        if fieldType == datetime:
+        if fieldType == TimeStamp:
             return self._data[key]
         elif isinstance(fieldType(0),numpy.ndarray):
             return fieldType(self._data[key])

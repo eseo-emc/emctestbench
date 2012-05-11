@@ -1,7 +1,8 @@
 from math import log10,pow,sqrt
-#from numpy import inf,NaN,ndarray,asarray
+from numpy import inf,nan
 import numpy
 from result.persistance import Dommable
+import string
 
 class Amplitude():
     '''
@@ -126,19 +127,88 @@ class PowerRatio(numpy.ndarray):
 
 
 
+#class UnitLess(float,Dommable):
+#    def asDom(self,parent):
+#        element = Dommable.asDom(self,parent)
+#        self.appendTextNode(element,str(self))
+#        return element
+#    @classmethod
+#    def fromDom(cls,dom):
+#        return cls(float(cls.getNodeText(dom)))
 
-class UnitLess(float,Dommable):
-    def asDom(self,parent):
-        element = Dommable.asDom(self,parent)
-        self.appendTextNode(element,str(self))
-        return element
+class DommableArray(numpy.ndarray,Dommable):
+    def __new__(cls, value):
+        #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
+        newObject = numpy.asarray(value).view(cls)
+        return newObject
+    def __getitem__(self,itemNumber):
+        singleItem = numpy.ndarray.__getitem__(self,itemNumber)
+        return self.__class__(singleItem)
+#    def __array_finalize__(self, obj):
+#        if obj is None: return
+#        self.info = getattr(obj, 'info', None)  
+#    def __eq__(self,other):
+#        equality = numpy.ndarray.__eq__(self,other)
+#        if isinstance(equality,numpy.ndarray):
+#            return equality.all()
+#        else:
+#            return equality      
+    def append(self,value):
+        assert type(value) == type(self)
+        return self.__class__(numpy.append(self,value))
+        
     @classmethod
     def fromDom(cls,dom):
-        return cls(float(cls.getNodeText(dom)))
+        return eval('cls('+cls.getNodeText(dom)+')')
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        self.appendTextNode(element,self.toArrayString(separator=',\n'))
+        return element
+        
+    def __repr__(self):
+        return self.__class__.__name__+'('+self.toArrayString()+")"
+    def __str__(self):
+        return self.toArrayString()
+    def toArrayString(self,formatFunction=None,separator=', '):
+        if not formatFunction:
+            formatFunction = lambda value : str(numpy.asarray(value))
+        def toString(theArray):
+            if theArray.shape == ():
+                return formatFunction(theArray)
+            else:
+                returnList = []
+                for item in theArray:
+                    returnList.append(toString(item))
+                return '[' + separator.join(returnList) + ']'
+        return toString(self)
 
-class Power(numpy.ndarray,Dommable):
+
+class UnitLess(DommableArray):
+    pass
+
+class Boolean(DommableArray):
+    pass
+
+class Frequency(DommableArray):
+    storageUnit = 'Hz'
+    
+    def __new__(cls,value,unit='Hz'):
+        value = numpy.asarray(value) * 1.0 #force values to be floats
+        assert unit == 'Hz', 'Other Frequency units than Hz are not yet supported'
+        return DommableArray.__new__(cls,value)
+
+    #TODO: refactor to units with an ISO prefix, perhaps a list of enumerator/denominator unit, analytical math to simplify unit?
+    @classmethod
+    def fromDom(cls,dom):
+        return eval('cls('+cls.getNodeText(dom)+',"'+dom.getAttribute('unit')+'")')
+    def asDom(self,parent):
+        element = DommableArray.asDom(self,parent)
+        element.setAttribute('unit',self.storageUnit)
+        return element
+
+class Power(DommableArray):
     storageUnit = 'W'
-    #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
+    
     def __new__(cls, value, unit='W', info=None):
         value = numpy.asarray(value) * 1.0 #force values to be floats
 
@@ -151,34 +221,21 @@ class Power(numpy.ndarray,Dommable):
         else:
             raise ValueError, '''Power unit '%s' not recognised.''' % unit
         
-        newObject = numpy.asarray(value).view(cls)
-        newObject.info = info
-        return newObject
+        return DommableArray.__new__(cls,value)
+#        newObject = numpy.asarray(value).view(cls)
+#        newObject.info = info
+#        return newObject
         
     @classmethod
     def fromDom(cls,dom):
-        return cls(float(cls.getNodeText(dom)),dom.getAttribute('unit'))
+        return eval('cls('+cls.getNodeText(dom)+',"'+dom.getAttribute('unit')+'")')
     def asDom(self,parent):
-        element = Dommable.asDom(self,parent)
+        element = DommableArray.asDom(self,parent)
         element.setAttribute('unit',self.storageUnit)
-        self.appendTextNode(element,str(self.asUnit(self.storageUnit)))
         return element
-        
-    def __getitem__(self,itemNumber):
-        singleItem = numpy.ndarray.__getitem__(self,itemNumber)
-        return Power(singleItem)
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.info = getattr(obj, 'info', None)
-        
-    def append(self,value):
-        assert type(value) == type(self)
-        return self.__class__(numpy.append(self,value))
-            
+          
     def watt(self):
-        return numpy.asarray(self)
-        
+        return numpy.asarray(self) 
     def dBW(self):
         invalid = (lambda linearValue: numpy.NaN)
         infinite = (lambda linearValue: -numpy.inf)
@@ -194,7 +251,9 @@ class Power(numpy.ndarray,Dommable):
 #        numpy.apply_along_axis()
     def dBm(self):
         return self.dBW()+30.0
-    def asUnit(self,unit):
+    def asUnit(self,unit=None):
+        if not unit:
+            unit = self.storageUnit
         if unit == 'W':
             return self.watt()
         elif unit == 'dBm':
@@ -221,39 +280,36 @@ class Power(numpy.ndarray,Dommable):
     def __add__(self,other):
         assert type(other) == Power
         return Power(self.watt()+other.watt(),'W')        
-    def __eq__(self,other):
-        if type(other) == type(self):
-            print repr(self.watt()) , repr(other.watt())
-            return self.watt() == other.watt()
-        else:
-            return numpy.ndarray.__eq__(self,other)
+#    def __eq__(self,other): 
+#        if type(other) == type(self):
+#            return DommableArray.__eq__(self,other.watt())
+#        else:
+#            return DommableArray.__eq__(self,other)
 
     def __repr__(self):
-        return str(self)
+        return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"
+
     def __str__(self):
-        def toString(theArray):
-            if theArray.shape == ():
-                #return '{watt:e} W'.format(watt=self.watt())
-                if numpy.isnan(theArray):
-                    return 'NaN'
-                if theArray >= 0:
-                    dBmValue = theArray.dBm()
-                    prefix = ''
-                else:
-                    dBmValue = (-1*theArray)
-                    prefix = '<- '
-                if dBmValue == -numpy.inf:
-                    return prefix+'-inf dBm'
-                else:
-                    return prefix+'{dBm:+.1f} dBm'.format(dBm=dBmValue)
+        def safeDbmFormat(value):
+            if numpy.isnan(value):
+                return 'NaN'
+            if value >= 0:
+                dBmValue = value.dBm()
+                prefix = ''
             else:
-                returnList = []
-                for item in theArray:
-                    returnList.append(toString(item))
-                return '[' + ', '.join(returnList) + ']'
-                
-        return toString(self)
-#    return numpy.ndarray.__str__(self)
+                dBmValue = (-1*value)
+                prefix = '<- '
+            if dBmValue == -numpy.inf:
+                return prefix+'-inf dBm'
+            else:
+                return prefix+'{dBm:+.1f} dBm'.format(dBm=dBmValue)
+        
+        return self.toArrayString(safeDbmFormat)
+    def toArrayString(self,formatFunction=None,separator=', '):
+        if not formatFunction:
+            formatFunction = lambda value : str(value.asUnit())
+        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=separator)
+
 
 
     
@@ -261,15 +317,17 @@ class Power(numpy.ndarray,Dommable):
 if __name__ == '__main__':
     import numpy
     
-#    print repr(Power([[0.001,0.002],[2.,1.]]))
-#    print repr(Power([2.,1.]))
-#    print repr(Power(2.))
+    print repr(Power([[0.001,0.002],[2.,1.]]))
+    print repr(Power([2.,1.]))
+    print repr(Power(2.))
 #
 #    print 'Testing Power...'
     a = Power([],'dBm')
     b = Power(numpy.append(a,Power(3,'dBm')))
     c = a.append(Power(3,'dBm'))
-    print repr(c)
+    print c
+    
+    print Power([[1,2],[.001,.002]]).toArrayString()
 #    assert abs((test-test*PowerRatio(-3,'dB')).dBm() - -3.0) < 0.1
 #    assert str(test) == '+0.0 dBm'
 #    assert str(test*2.0) == '+3.0 dBm'

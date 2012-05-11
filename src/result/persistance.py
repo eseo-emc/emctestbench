@@ -1,9 +1,10 @@
 from xml.dom.minidom import Element
 import string
-from datetime import datetime
 #from utility.quantities import Power,UnitLess
+from datetime import datetime
+import numpy
 
-class Dommable:
+class Dommable(object):
     def asDom(self,parent):
         return self.appendChildTag(parent,self.__class__.__name__)
         
@@ -16,15 +17,20 @@ class Dommable:
             return anything
         elif type(anything) == list:
             return List(anything)
+        elif isinstance(anything,bool) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'b' ):
+            from utility.quantities import Boolean
+            return Boolean(anything)
         elif type(anything) == datetime:
-            return DateTime(anything)
-        elif type(anything) == float:
+            from timestamp import TimeStamp
+            return TimeStamp(anything)
+        elif isinstance(anything,float) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'f' ):
             from utility.quantities import UnitLess
             return UnitLess(anything)
         elif type(anything) == str:
             casted = String(anything)
             return casted
         else:
+            print type(anything),anything,isinstance(anything,numpy.ndarray),anything.dtype.kind
             raise ValueError,'Not castable to Dommable'
         
     def appendChildTag(self,parent,tagName):
@@ -37,33 +43,77 @@ class Dommable:
         node = element.ownerDocument.createTextNode(text)
         element.appendChild(node)
     @classmethod
-    def getNodeText(cls,element):
-        return element.childNodes[0].data
+    def appendChildObject(cls,parent,childObject,childId):
+        element = cls.castToDommable(childObject).asDom(parent)
+        element.setAttribute('id',childId)
+        return element
+    @classmethod
+    def getNodeText(cls,element,strip=True):
+        childNodes = element.childNodes
+        if len(childNodes) >= 1:
+            if strip:
+                return string.strip(childNodes[0].data)
+            else:
+                return childNodes[0].data
+        else:
+            return ''
     @classmethod
     def childElements(cls,parent):
         for node in parent.childNodes:
             if isinstance(node,Element):
                 yield node
     @classmethod
-    def childObjects(cls,parent,byName=False):
+    def childObjects(cls,parent,byId=False):
         for element in cls.childElements(parent):
-            if byName:
-                yield (str(element.getAttribute('name')),cls.objectFromElement(element))
+            if byId:
+                yield (str(element.getAttribute('id')),cls.objectFromElement(element))
             else:
                 yield cls.objectFromElement(element)
     @classmethod
-    def childObjectsByName(cls,parent):
-        return cls.childObjects(parent,byName=True)
+    def childElementById(cls,parent,theId):
+        foundElement = None
+        for element in cls.childElements(parent):
+            if element.getAttribute('id') == theId:
+                assert not foundElement,'Multiple elements with the same id found'
+                foundElement = element  
+        assert foundElement is not None,'Id not found'
+        return foundElement
+    @classmethod
+    def childObjectById(cls,parent,theId):
+        return cls.objectFromElement(cls.childElementById(parent,theId))
+                
+#    @classmethod
+#    def childObjectsByName(cls,parent):
+#        return cls.childObjects(parent,byId=True)
     @classmethod
     def objectFromElement(cls,element):
         if element.tagName == 'Power':
             from utility.quantities import Power
             factory = Power
+        elif element.tagName == 'DpiResult':
+            from experiment.dpi import DpiResult
+            factory = DpiResult
         elif element.tagName == 'UnitLess':
             from utility.quantities import UnitLess
             factory = UnitLess
+        elif element.tagName == 'Dict':
+            factory = Dict
         elif element.tagName == 'String':
             factory = String
+        elif element.tagName == 'List':
+            factory = List
+        elif element.tagName == 'TimeStamp':
+            from result.timestamp import TimeStamp
+            factory = TimeStamp
+        elif element.tagName == 'Frequency':
+            from utility.quantities import Frequency
+            factory = Frequency
+        elif element.tagName == 'Boolean':
+            from utility.quantities import Boolean
+            factory = Boolean
+        elif element.tagName == 'SweepRange':
+            from experiment.experiment import SweepRange
+            factory = SweepRange
         else:
             raise ValueError("Tag name {tagName} unknown.".format(tagName=element.tagName))
             
@@ -72,29 +122,66 @@ class Dommable:
 class String(Dommable,str):
     @classmethod
     def fromDom(cls,dom):
-        return str.__new__(cls,string.strip(cls.getNodeText(dom)))
+        return str.__new__(cls,cls.getNodeText(dom))
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
         self.appendTextNode(element,self)
         return element
         
-class DateTime(Dommable,datetime):
-    @classmethod
-    def fromDom(cls,dom):
-        return datetime.__new__(cls,datetime.strptime(string.strip(cls.getNodeText(dom)),'%Y-%m-%dT%H:%M:%S.%f'))
-    def asDom(self,parent):
-        element = Dommable.asDom(self,parent)
-        self.appendTextNode(element,self.strftime('%Y-%m-%dT%H:%M:%S.%f'))
-        return element
         
 class List(Dommable,list):
-#    @classmethod
-#    def fromDom(cls,dom):
-#        newList = list.__new__(cls)
-#        
-#        return datetime.__new__(cls,datetime.strptime(string.strip(cls.getNodeText(dom)),'%Y-%m-%dT%H:%M:%S.%f'))
+    @classmethod
+    def fromDom(cls,dom):
+        newList = list.__new__(cls)
+        for item in cls.childObjects(dom):
+            newList.append(item)
+        return newList
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
         for item in self:
             self.castToDommable(item).asDom(element)
         return element
+
+#TODO: make this subclass dict, to be coherent and efficient
+# currently gives baseclass layout conflict...        
+class Dict(Dommable):
+    def __init__(self,data ={}):
+        Dommable.__init__(self)
+        self._data = data
+    @classmethod
+    def fromDom(cls,dom):
+        newDictResult = cls()
+        newData = {}
+        for name,childObject in cls.childObjects(dom,byId=True):
+            newData.update({name:childObject})
+        newDictResult.data = newData
+        return newDictResult
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        for name,value in self.data.items():
+            self.appendChildObject(element,value,name)
+            
+        return element
+        
+        
+    def __getitem__(self,key):
+        return self._data[key]
+    def __setitem__(self,key,value):
+        self._data[key] = value
+        
+    @property
+    def data(self):
+        return self._data
+    @data.setter
+    def data(self,value):
+        self._data = value
+    def update(self,values):
+        self._data.update(values)
+    def values(self):
+        return self._data.values()
+    def items(self):
+        return self._data.items()
+        
+        
+    def append(self,values):
+        self.update()

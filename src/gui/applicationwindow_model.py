@@ -4,11 +4,13 @@ from device import knownDevices
 import logging
 from experimentcollection import ExperimentCollection
 from devicecollection import DeviceCollection
+from experimentresultcollection import ExperimentResultCollection
 
 class ApplicationWindowModel(object):
     def __init__(self):     
         ExperimentCollection.Instance().discover()
         DeviceCollection.Instance().discover()
+        ExperimentResultCollection.Instance().loadFromFileSystem()
                 
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):

@@ -14,9 +14,16 @@ class TransmittedPowerController(QWidget,Ui_Form):
         
         self.topLevel = topLevel
         
-        self.model = TransmittedPower()
-        self.model.connect()
+        self._model = None
         
+    @property
+    def model(self):    
+        return self._model
+    @model.setter
+    def model(self,value):
+        self._model = value
+    
+        self.model.connect()
         self.model.newResult.connect(self.newResult)        
         self.measure.clicked.connect(self.measureOnce)
         

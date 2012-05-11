@@ -15,6 +15,7 @@ class TransmittedPower(Experiment):
         self.switchPlatform = knownDevices['switchPlatform']
         self.wattMeter = knownDevices['wattMeter']
         self.rfGenerator = knownDevices['rfGenerator']
+
     def prepare(self):
         self.wattMeter.reset()
     def measure(self):

@@ -26,6 +26,7 @@ class Power_array_test(unittest.TestCase):
     def setUp(self):
         self.test = Power(numpy.array([0.0,3.0,30.0,27.0]),'dBm')
     def test_linear(self):
+        #TODO deport almost checking down the class hierarchy
         self.assertTrue( all(abs((self.test.watt() / numpy.array([0.001,0.002,1,0.5]))-1) <0.01))
         
 class Power_equality_test(unittest.TestCase):

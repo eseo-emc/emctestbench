@@ -14,7 +14,14 @@ class VoltageCriterionController(QWidget,Ui_Form):
         self.setupUi(self) 
         self.topLevel = topLevel
         
-        self.model = VoltageCriterion()
+        self._model = None
+    @property
+    def model(self):
+        return self._model
+    @model.setter
+    def model(self,value):
+        self._model = value
+        
         self.model.connect()
         
         def coupleValue(guiWidget,modelProperty):

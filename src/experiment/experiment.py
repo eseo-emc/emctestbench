@@ -3,6 +3,8 @@ from PyQt4.QtCore import pyqtSignal
 import numpy
 import string
 
+from result.persistance import Dommable
+
 class Property(QObject):
     changed = pyqtSignal()
     changedTo = pyqtSignal(object)    
@@ -51,7 +53,7 @@ experiment = {experimentName}'''.format(moduleName=string.lower(experiment),expe
             self._value = experiment
             self._emitChanged()
 
-class SweepRange(object):
+class SweepRange(Dommable):
     def __init__(self,startValue=0,stopValue=1,numberOfPoints=101,logarithmic=False,changedSignal=None):
         self.start = Property(startValue,changedSignal=changedSignal)
         self.stop = Property(stopValue,changedSignal=changedSignal)
@@ -63,8 +65,21 @@ class SweepRange(object):
             return numpy.exp(numpy.linspace(numpy.log(self.start.value),numpy.log(self.stop.value),self.numberOfPoints.value))
         else:
             return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
-
-
+    @classmethod
+    def fromDom(cls,dom):
+        startValue = float(dom.getAttribute('startValue'))
+        stopValue = float(dom.getAttribute('stopValue'))
+        numberOfPoints = int(dom.getAttribute('numberOfPoints'))
+        logarithmic = dom.getAttribute('logarithmic') == 'True'
+        return SweepRange(startValue,stopValue,numberOfPoints,logarithmic)
+        
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        element.setAttribute('startValue',str(self.start.value))
+        element.setAttribute('stopValue',str(self.stop.value))
+        element.setAttribute('numberOfPoints',str(self.numberOfPoints.value))
+        element.setAttribute('logarithmic',str(self.logarithmic.value))
+        return element
 
 class Experiment(QThread):
     name = 'Experiment'

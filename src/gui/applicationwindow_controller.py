@@ -23,13 +23,15 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         self.mainDropWidget.model = self.topLevelExperiment
         self.mainDropWidget.topLevel = True
         
-#        self.showFullScreen()
+        self.showFullScreen()
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         
         self.action_About.triggered.connect(self.about)
         
         self.experimentResultTree.update()
         self.experimentResultTree.experimentResultSelected.connect(self.experimentResultSelected)
+        self.experimentResultTree.changed.connect(self.showExperimentResultTree)
+        
         
         self.model = ApplicationWindowModel()
         self.experimentTree.experimentSelected.connect(self.experimentSelected)
@@ -98,9 +100,13 @@ self.activeResultController = {controllerName}(self.resultViewerWidget)
 self.resultVerticalLayout.addWidget(self.activeResultController)
 '''.format(moduleName=string.lower(resultType)+'_controller',controllerName=resultType+'Controller'))
         self.activeResultController.model = experimentResult.result
+        self.resultViewer.raise_()
 #        except:
 #            logging.LogItem(sys.exc_info()[1],logging.error)         
-        
+    
+    def showExperimentResultTree(self):
+        self.mainTabWidget.setCurrentIndex(0)
+    
     def aboutToQuit(self):
         logging.LogItem('Bye!')
     def about(self):

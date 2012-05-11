@@ -15,11 +15,12 @@ class ExperimentResultTreeItem(QTreeWidgetItem):
         self.experimentResult = experimentResult
         
         self.setText(0,self.experimentResult.metadata['Name'])  
-        self.setText(2,self.experimentResult.metadata['Creation'].strftime('%H:%m:%S'))
+        self.setText(2,self.experimentResult.metadata['Creation'].strftime('%H:%M:%S'))
         
     
 class ExperimentResultCollectionController(QWidget,Ui_ExperimentResultCollection):
     experimentResultSelected = pyqtSignal(object)
+    changed = pyqtSignal()
     
     def __init__(self,parent=None):
         QWidget.__init__(self,parent)
@@ -38,6 +39,9 @@ class ExperimentResultCollectionController(QWidget,Ui_ExperimentResultCollection
         self.theTreeWidget.clear()
         for experimentResult in self.model.experimentResults:
             ExperimentResultTreeItem(experimentResult,parent=self.theTreeWidget)
+        
+        self.changed.emit()
+        
             
     def itemDoubleClicked(self,index):
         selectedExperimentResult = self.theTreeWidget.selectedItems()[0].experimentResult
