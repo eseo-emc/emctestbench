@@ -3,9 +3,9 @@
 #    pyuic4 applicationwindow_view.ui > applicationwindow_view.py
 # To compile the resources:
 #    pyrcc4 icons\icons.qrc > icons_rc.py
-import sys
 
-from PyQt4.QtGui import QMainWindow, QMessageBox,QDockWidget
+
+from PyQt4.QtGui import QMainWindow, QMessageBox,QDockWidget,QApplication
 from PyQt4.QtCore import Qt
 from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
@@ -23,7 +23,10 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         self.mainDropWidget.model = self.topLevelExperiment
         self.mainDropWidget.topLevel = True
         
-        self.showFullScreen()
+        desktopRect = QApplication.desktop().screenGeometry()
+        if desktopRect.height() <= self.height() or desktopRect.width() <= self.width():
+            self.showFullScreen()
+            
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         
         self.action_About.triggered.connect(self.about)
@@ -120,7 +123,7 @@ Groupe ESEO, Angers"""
 
 if __name__ == '__main__':
     import sys
-    from PyQt4.QtGui import QApplication
+    
     
     
 #    from gui.applicationwindow_controller import ApplicationWindowController

@@ -2,7 +2,7 @@ from utility import Singleton
 from PyQt4.QtCore import QObject,pyqtSignal
 from device import knownDevices,Device
 
-from PyQt4.QtGui import QApplication
+from PyQt4.QtGui import QApplication,QDesktopServices
 from result.persistance import Dommable
 from xml.dom.minidom import getDOMImplementation,parse
 from result.persistance import Dict
@@ -11,6 +11,7 @@ import logging
 import inspect
 
 import glob
+import os
 
 from copy import deepcopy
 
@@ -75,10 +76,9 @@ class ExperimentResult(QObject,Dommable):
         
 
 @Singleton
-class ExperimentResultCollection(QObject):
-    resultPath = 'Y:/emctestbench/results/'    
-    resultExtension = '.xml'      
-    
+class ExperimentResultCollection(QObject):  
+    resultExtension = '.xml' 
+        
     changed = pyqtSignal()   
     extendedWith = pyqtSignal(object)
     
@@ -86,6 +86,11 @@ class ExperimentResultCollection(QObject):
     def __init__(self):
         QObject.__init__(self)
         self.experimentResults = []   
+        
+        self.resultPath = os.path.join(str(QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)),'EmcTestbench/')
+        if not os.path.exists(self.resultPath):
+            os.mkdir(self.resultPath)
+            
         
     def __getitem__(self,key):
         return self.experimentResults[key]
