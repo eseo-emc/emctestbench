@@ -37,15 +37,22 @@ class ExperimentResult(QObject,Dommable):
     def fromDom(cls,dom):
         metadata = cls.childObjectById(dom,'Metadata')
         result = cls.childObjectById(dom,'Result')
-        return cls(None,result,save=False,metadata=metadata)
+        return cls(None,result,save=False,metadata=metadata,name='From anonymous DOM')
     
-    def __init__(self,experiment,result,save=True,metadata=None):
+    def __init__(self,experiment,result,save=True,metadata=None,name=None):
         QObject.__init__(self)
         self.saveCount = 0
+        self._name = None
+        
         if metadata == None:
             creationDate = datetime.now()
-            metadata = Dict({'Name':experiment.name + creationDate.strftime(' %Y%m%d-%H%M%S'),'DUT':'','Operator':'','Creation':creationDate})
+            metadata = Dict({'DUT':'','Operator':'','Creation':creationDate})
         self.metadata = metadata
+
+        if name == None:
+            name = experiment.name + creationDate.strftime(' %Y%m%d-%H%M%S')
+        self.name = name
+
         self.experiment = deepcopy(experiment)
         self.result = result
         
@@ -55,22 +62,32 @@ class ExperimentResult(QObject,Dommable):
             
         self.result.changed.connect(self.saveToFileSystem)
         
+    @property
+    def name(self):
+        return self._name
+    @name.setter
+    def name(self,value):
+        self._name = value.replace('\\','').replace('/','').replace(':','')
+        self.changed.emit()
+        
     @classmethod
     def loadFromFileSystem(cls,fileName):
         fileHandle = open(fileName,'rb')
         document = parse(fileHandle)
         experimentResultElement = document.getElementsByTagName('ExperimentResult')[0]
-        cls.fromDom(experimentResultElement)
+        newExperimentResult = cls.fromDom(experimentResultElement)
+        newExperimentResult.name = os.path.splitext(os.path.split(fileName)[-1])[0]
+        return newExperimentResult
         
     def saveToFileSystem(self):
         QApplication.removePostedEvents(self)
-        fileHandle = open(ExperimentResultCollection.Instance().resultPath+self.metadata['Name']+ExperimentResultCollection.Instance().resultExtension,'wb')
+        fileHandle = open(ExperimentResultCollection.Instance().resultPath+self.name+ExperimentResultCollection.Instance().resultExtension,'wb')
         document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
         self.asDom(document.documentElement)
         fileHandle.write(document.toxml(encoding='utf-8'))
         fileHandle.close()
-        self.saveCount += 1
-        print self.saveCount
+#        self.saveCount += 1
+#        print self.saveCount
         del(fileHandle)
         
         
@@ -94,7 +111,8 @@ class ExperimentResultCollection(QObject):
         
     def __getitem__(self,key):
         return self.experimentResults[key]
-    def loadFromFileSystem(self):
+    def refresh(self):
+        self.experimentResults = []
         for fileName in glob.glob(self.resultPath+'*'+self.resultExtension):
             ExperimentResult.loadFromFileSystem(fileName)
     def append(self,newExperimentResult):

@@ -7,10 +7,37 @@ from persistance import Dommable,Dict
 from timestamp import TimeStamp
 from utility.quantities import UnitLess
 
+import os
+
+class ExportType(object):
+    def __init__(self,name,extensions):
+        self.name = name
+        self.extensions = extensions
+    def globFilters(self):
+        filters = []
+        for extension in self.extensions:
+            filters.append('*.'+extension)
+        return filters
+    def appendExtensionToFileName(self,fileName):
+        splittedFileName = fileName.split(os.path.extsep)
+        if splittedFileName[-1] in self.extensions:
+            return fileName
+        else:
+            return fileName + os.path.extsep + self.extensions[0]
+            
+class exportFunction(object):
+    def __init__(self,name,extensions):
+        self.name = name
+        self.extensions = extensions
+    def __call__(self,function):
+        function.exportType = ExportType(self.name,self.extensions)
+        return function
+    
 
 class Result(QObject):
     changed = pyqtSignal()    
     changedTo = pyqtSignal(object)
+    exportTypes = []
     
     def __init__(self):
         QObject.__init__(self)
@@ -24,7 +51,16 @@ class Result(QObject):
 
     def __eq__(self,other):
         return self._data == other._data
-
+        
+    def exportFunctions(self):
+        types = []
+        for attributeName in dir(self):
+            attribute = getattr(self,attributeName)
+            if hasattr(attribute,'exportType'):
+#            if attributeName.startswith('exportAs'):
+#                exportMethod = getattr(self,attributeName)
+                types.append(attribute)
+        return types
 
        
 class ScalarResult(Result,Dommable):

@@ -10,7 +10,7 @@ class ApplicationWindowModel(object):
     def __init__(self):     
         ExperimentCollection.Instance().discover()
         DeviceCollection.Instance().discover()
-        ExperimentResultCollection.Instance().loadFromFileSystem()
+        ExperimentResultCollection.Instance().refresh()
                 
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):

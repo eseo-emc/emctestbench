@@ -7,9 +7,15 @@ import numpy
 from gui import logging
 from copy import deepcopy
 
-from result.resultset import ResultSet
+from result.resultset import ResultSet,exportFunction
+
+import csv
+
+
 
 class DpiResult(ResultSet):
+    name = 'DPI result'
+    
     def __init__(self,powerLimits,frequencyRange):
         self.powerLimits = powerLimits
         self.frequencyRange = frequencyRange
@@ -27,6 +33,33 @@ class DpiResult(ResultSet):
         self.appendChildObject(element,self.powerLimits,'Power limits')   
         self.appendChildObject(element,self.frequencyRange,'Frequency range')
         return element
+    
+    @exportFunction('CSV one point per frequency',['xls','csv'])
+    def exportAsCsvAShort(self,fileName):
+        self._writeToCsv(fileName,onlyLimits=True)  
+
+    @exportFunction('CSV all measurement points',['xls','csv'])    
+    def exportAsCsvBLong(self,fileName):    
+        self._writeToCsv(fileName,onlyLimits=False)        
+
+    def _writeToCsv(self,fileName,onlyLimits):
+        fileHandle = open(fileName,'wb')
+        tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
+        writer = csv.DictWriter(fileHandle,tableHeaders,dialect='excel-tab')
+        writer.writeheader()
+        
+        for result in self.byRow():
+            if not(onlyLimits) or result['limit']:
+                writer.writerow({'frequency (Hz)':result['frequency'],
+                                 'generator (dBm)':result['generatorPower'].dBm(),
+                                 'forward (dBm)':result['forwardPower'].dBm(),
+                                 'reflected (dBm)':result['reflectedPower'].dBm(),
+                                 'transmitted (dBm)':result['transmittedPower'].dBm(),
+                                 'fail':(0 if result['pass'] else 1) })
+        fileHandle.close()
+        fileHandle = None
+
+        
     @classmethod
     def fromDom(cls,dom):
         newResult = super(DpiResult,cls).fromDom(dom)
@@ -39,8 +72,8 @@ class Dpi(Experiment):
         
     def __init__(self):
         Experiment.__init__(self)
-        self.passCriterion = ExperimentSlot() #'VoltageCriterion')
-        self.transmittedPower = ExperimentSlot() #'TransmittedPower')
+        self.passCriterion = ExperimentSlot('VoltageCriterion')
+        self.transmittedPower = ExperimentSlot('TransmittedPower')
         self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
         self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
         self.frequencies = SweepRange(150e3,1500e6,11,changedSignal=self.settingsChanged) 
@@ -130,24 +163,25 @@ class Dpi(Experiment):
         
         
 if __name__ == '__main__':
-    from voltagecriterion import VoltageCriterion
-    from transmittedpower import TransmittedPower
-    
-    
-    logging.LogModel.Instance().gui = False
-
-
-
-
-    import numpy
-    experiment = Dpi()
-    experiment.passCriterion.value = VoltageCriterion
-    experiment.transmittedPower.value = TransmittedPower
-
-    experiment.connect()
-    experiment.prepare()
-    results = experiment.run()
-    print results._data
+    print DpiResult.exportTypes
+#    from voltagecriterion import VoltageCriterion
+#    from transmittedpower import TransmittedPower
+#    
+#    
+#    logging.LogModel.Instance().gui = False
+#
+#
+#
+#
+#    import numpy
+#    experiment = Dpi()
+#    experiment.passCriterion.value = VoltageCriterion
+#    experiment.transmittedPower.value = TransmittedPower
+#
+#    experiment.connect()
+#    experiment.prepare()
+#    results = experiment.run()
+#    print results._data
     
         
                         

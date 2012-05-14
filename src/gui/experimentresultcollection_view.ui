@@ -25,6 +25,9 @@
        <pointsize>10</pointsize>
       </font>
      </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
      <column>
       <property name="text">
        <string>Name</string>

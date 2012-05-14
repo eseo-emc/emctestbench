@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'experimentresultcollection_view.ui'
 #
-# Created: Fri Apr 20 17:34:59 2012
+# Created: Fri May 11 17:00:05 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,7 @@ class Ui_ExperimentResultCollection(object):
         font.setFamily(_fromUtf8("MS Shell Dlg 2"))
         font.setPointSize(10)
         self.theTreeWidget.setFont(font)
+        self.theTreeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.theTreeWidget.setObjectName(_fromUtf8("theTreeWidget"))
         self.theTreeWidget.headerItem().setText(0, QtGui.QApplication.translate("ExperimentResultCollection", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.theTreeWidget.headerItem().setText(1, QtGui.QApplication.translate("ExperimentResultCollection", "Experiment", None, QtGui.QApplication.UnicodeUTF8))
