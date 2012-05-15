@@ -189,12 +189,12 @@ class UnitLess(DommableArray):
 class Boolean(DommableArray):
     pass
 
-class Frequency(DommableArray):
-    storageUnit = 'Hz'
-    
-    def __new__(cls,value,unit='Hz'):
+class DommableDimensionalArray(DommableArray):
+    def __new__(cls,value,unit=None):
+        if unit == None:
+            unit = cls.storageUnit
         value = numpy.asarray(value) * 1.0 #force values to be floats
-        assert unit == 'Hz', 'Other Frequency units than Hz are not yet supported'
+        assert unit == cls.storageUnit
         return DommableArray.__new__(cls,value)
 
     #TODO: refactor to units with an ISO prefix, perhaps a list of enumerator/denominator unit, analytical math to simplify unit?
@@ -205,6 +205,13 @@ class Frequency(DommableArray):
         element = DommableArray.asDom(self,parent)
         element.setAttribute('unit',self.storageUnit)
         return element
+
+class Voltage(DommableDimensionalArray):
+    storageUnit = 'V'    
+
+class Frequency(DommableDimensionalArray):
+    storageUnit = 'Hz'
+
 
 class Power(DommableArray):
     storageUnit = 'W'

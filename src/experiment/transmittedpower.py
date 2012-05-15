@@ -1,6 +1,7 @@
 from device import knownDevices
 from utility.quantities import Power
 from experiment import Experiment
+from result import persistance
 import numpy
 from copy import copy
 
@@ -8,7 +9,7 @@ from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
 
 from result.resultset import DictResult
 
-class TransmittedPower(Experiment):
+class TransmittedPower(Experiment,persistance.Dommable):
     name = 'Transmitted Power Calculation'
     
     def connect(self):
@@ -30,7 +31,7 @@ class TransmittedPower(Experiment):
                            'Transmitted power':forwardPower-reflectedPower,
                            'Forward power':forwardPower,
                            'Reflected power':reflectedPower}
-            self.newResult.emit(result)
+            self.emitResult(result)
             return result
             
         else:

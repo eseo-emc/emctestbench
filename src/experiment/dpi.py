@@ -1,8 +1,7 @@
-from PyQt4.QtGui import QApplication
-
 from device import knownDevices
 from experiment import Experiment,ExperimentSlot,Property,SweepRange
 from utility.quantities import Power,PowerRatio,Frequency
+from result import persistance
 import numpy
 from gui import logging
 from copy import deepcopy
@@ -67,17 +66,22 @@ class DpiResult(ResultSet):
         newResult.frequencyRange = cls.childObjectById(dom,'Frequency range')
         return newResult
 
-class Dpi(Experiment):
+class Dpi(Experiment,persistance.Dommable):
     name = 'Direct Power Injection'    
         
     def __init__(self):
         Experiment.__init__(self)
-        self.passCriterion = ExperimentSlot('VoltageCriterion')
-        self.transmittedPower = ExperimentSlot('TransmittedPower')
+        self.passCriterion = ExperimentSlot(parent=self,defaultValue='VoltageCriterion')
+        self.transmittedPower = ExperimentSlot(parent=self,defaultValue='TransmittedPower')
         self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
         self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
         self.frequencies = SweepRange(150e3,1500e6,11,changedSignal=self.settingsChanged) 
-        
+    def asDom(self,parent):
+        element = persistance.Dommable.asDom(self,parent)
+        self.appendChildObject(element,self.passCriterion.value,'Pass Criterion')
+        self.appendChildObject(element,self.transmittedPower.value,'Transmitted Power')
+        return element
+    
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
@@ -93,7 +97,7 @@ class Dpi(Experiment):
 
     def run(self):
         result = DpiResult(Power([self.powerMinimum.value,self.powerMaximum.value],'dBm'),deepcopy(self.frequencies))
-        self.newResult.emit(result)        
+        self.emitResult(result)        
         
         guessPower = self.powerMinimum.value
         stepSizes = [5.0,1.0,0.5,.25]
@@ -159,7 +163,7 @@ class Dpi(Experiment):
         logging.LogItem('Finished DPI',logging.success)
         self.stopRequested = False
         
-        return result
+
         
         
 if __name__ == '__main__':

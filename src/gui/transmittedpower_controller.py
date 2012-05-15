@@ -3,7 +3,7 @@ from PyQt4.QtGui import QWidget
 
 from gui.transmittedpower_view import Ui_Form
 from experiment.transmittedpower import TransmittedPower
-from experimentresultcollection import ExperimentResult
+from experimentresult import ExperimentResult
 
 import numpy
 
@@ -36,9 +36,6 @@ class TransmittedPowerController(QWidget,Ui_Form):
         self.forwardPower.setValue(result['Forward power'].dBm())
         self.reflectedPower.setValue(result['Reflected power'].dBm())
         self.transmittedPower.setValue(result['Transmitted power'].dBm())
-        
-        if self.topLevel:
-            ExperimentResult(self.model,result)
 
 
 if __name__ == '__main__':

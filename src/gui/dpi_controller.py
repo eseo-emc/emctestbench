@@ -3,9 +3,6 @@ from PyQt4.QtGui import QWidget
 
 from gui.dpi_view import Ui_Form
 from experiment.dpi import Dpi
-from gui.dpicsv_view import DpiCsv
-from experimentresultcollection import ExperimentResult
-
 
 import numpy
 
@@ -42,7 +39,6 @@ class DpiController(QWidget,Ui_Form):
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)
               
-        self.model.newResult.connect(self.newResult)
         self.model.progressed.connect(self.progress.setValue)
         
         self.measurementStopped()
@@ -84,9 +80,7 @@ class DpiController(QWidget,Ui_Form):
         self.model.prepare()
         self.model.start()
         
-    def newResult(self,result):
-        if self.topLevel:
-            ExperimentResult(self.model,result)
+
 
     
         

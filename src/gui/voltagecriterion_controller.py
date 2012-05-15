@@ -4,7 +4,7 @@ from PyQt4.QtGui import QWidget
 from gui.voltagecriterion_view import Ui_Form
 from experiment.voltagecriterion import VoltageCriterion
 
-from experimentresultcollection import ExperimentResult
+from experimentresult import ExperimentResult
 
 import numpy
 
@@ -45,9 +45,7 @@ class VoltageCriterionController(QWidget,Ui_Form):
     def newResult(self,result):
         self.measuredVoltage.setValue(result['Voltage'])
         self.passFailIndicator.passNotFail = result['Pass']
-        
-        if self.topLevel:
-            ExperimentResult(self.model,result)
+
         
 
 

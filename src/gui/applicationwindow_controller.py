@@ -19,9 +19,8 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         QMainWindow.__init__(self)
         self.setupUi(self)     
         
-        self.topLevelExperiment = ExperimentSlot()
+        self.topLevelExperiment = ExperimentSlot(parent=None)
         self.mainDropWidget.model = self.topLevelExperiment
-        self.mainDropWidget.topLevel = True
         
         desktopRect = QApplication.desktop().screenGeometry()
         if desktopRect.height() <= self.height() or desktopRect.width() <= self.width():
@@ -31,13 +30,13 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         
         self.action_About.triggered.connect(self.about)
         
-        self.experimentResultTree.update()
+        self.model = ApplicationWindowModel()
+        self.experimentTree.experimentSelected.connect(self.experimentSelected)        
         self.experimentResultTree.experimentResultSelected.connect(self.experimentResultSelected)
         self.experimentResultTree.changed.connect(self.showExperimentResultTree)
         
         
-        self.model = ApplicationWindowModel()
-        self.experimentTree.experimentSelected.connect(self.experimentSelected)
+        
 
         logging.LogItem("EMC Testbench started",logging.info)
         self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(logging.warning))

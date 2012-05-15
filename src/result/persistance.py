@@ -98,6 +98,9 @@ class Dommable(object):
             factory = UnitLess
         elif element.tagName == 'Dict':
             factory = Dict
+        elif element.tagName == 'DictResult':
+            from result.resultset import DictResult
+            factory = DictResult
         elif element.tagName == 'String':
             factory = String
         elif element.tagName == 'List':

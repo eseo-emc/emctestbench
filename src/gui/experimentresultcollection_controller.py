@@ -79,21 +79,26 @@ class ExperimentResultCollectionController(QWidget,Ui_ExperimentResultCollection
         self.changed.emit()
    
     def treeContextMenuRequested(self,point):
-        menu = QMenu()
-        self.theTreeWidget.selectedItems()[0].addContextMenuActions(menu)
-        menu.exec_(self.theTreeWidget.mapToGlobal(point))      
+        selectedItems = self.theTreeWidget.selectedItems()
+        if len(selectedItems) == 1:
+            menu = QMenu()
+            selectedItems[0].addContextMenuActions(menu)
+            menu.exec_(self.theTreeWidget.mapToGlobal(point))      
             
     def itemDoubleClicked(self,index):
+        
+        
         selectedExperimentResult = self.theTreeWidget.selectedItems()[0].experimentResult
         self.experimentResultSelected.emit(selectedExperimentResult)
         
+        self.model.changed.emit()
     
         
 if __name__ == '__main__':
     import sys
     from PyQt4.QtGui import QApplication,QMainWindow
     
-    from gui.experimentresultcollection import ExperimentResult
+    from gui.experimentresult import ExperimentResult
     
     application = QApplication(sys.argv)
     window = QMainWindow()

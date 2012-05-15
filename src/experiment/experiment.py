@@ -4,6 +4,7 @@ import numpy
 import string
 
 from result.persistance import Dommable
+from gui.experimentresult import ExperimentResult
 
 class Property(QObject):
     changed = pyqtSignal()
@@ -32,8 +33,9 @@ class Property(QObject):
         self.changedTo.emit(self.value)
         
 class ExperimentSlot(Property):
-    def __init__(self,defaultValue=None):
+    def __init__(self,parent=None,defaultValue=None):
         self._value = None
+        self.parent = parent
         Property.__init__(self,defaultValue=defaultValue)
     @property
     def value(self):
@@ -51,6 +53,7 @@ experiment = {experimentName}'''.format(moduleName=string.lower(experiment),expe
             experiment = experiment()
         if type(experiment) is not type(self._value):
             self._value = experiment
+            self._value.parent = self.parent
             self._emitChanged()
 
 class SweepRange(Dommable):
@@ -84,26 +87,30 @@ class SweepRange(Dommable):
 class Experiment(QThread):
     name = 'Experiment'
     settingsChanged = pyqtSignal()
-    newResult = pyqtSignal(object)
     
     progressed = pyqtSignal(int)
     finished = pyqtSignal()    
+    newResult = pyqtSignal(object)
     
     def __init__(self):
         QThread.__init__(self)
         self.stopRequested = False
         self._result = None
+        self.parent = None
     
-#    def result(self):
-#        return self._result
-#        
+    def prepare(self):
+        raise NotImplementedError
+  
     def measure(self):
         return self.run()  
         
     def stop(self):
         self.stopRequested = True
+        
+    def emitResult(self,result):
+        if self.parent == None:
+            ExperimentResult(self,result)
+        self.newResult.emit(result)
     
-    name = None
-    def prepare(self):
-        raise NotImplementedError
+
     

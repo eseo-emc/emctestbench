@@ -2,7 +2,8 @@
 Copied from http://stackoverflow.com/questions/42558/python-and-the-singleton-pattern
 '''
 from PyQt4.QtCore import QObject
-
+from PyQt4.QtGui import QApplication
+#TODO: Merge with QApplication-less Singleton decorator
 class Singleton(QObject):
     """
     A non-thread-safe helper class to ease implementing singletons.
@@ -32,14 +33,13 @@ class Singleton(QObject):
 
         """
         try:
-            return self._instance
+            return getattr(QApplication.instance(),self._decorated.__name__)
         except AttributeError:
-            print 'instantiating',self._decorated
-#            if repr(self._decorated) == "<class 'experimentresultcollection.ExperimentResultCollection'>":
-#                qsdf
-            self._instance = self._decorated()
-            return self._instance
-
+#            print 'instantiating',self._decorated,'as',self._decorated.__name__
+            
+            setattr(QApplication.instance(),self._decorated.__name__, self._decorated())
+            return getattr(QApplication.instance(),self._decorated.__name__)
+            
     def __call__(self):
         """
         Call method that raises an exception in order to prevent creation
