@@ -40,20 +40,20 @@ class DpiResultController(QWidget,Ui_DpiResult):
 
         if result is not None:
             limitPoints = result['limit']
-            frequency = result['frequency'][limitPoints]      
+            frequency = result['injection frequency'][limitPoints]      
             
             self.dpiGraph.axes.hold(False)
-            self.dpiGraph.axes.plot(frequency, result['transmittedPower'][limitPoints].asUnit(unitName),label='Transmitted power')
+            self.dpiGraph.axes.plot(frequency, result['transmitted power'][limitPoints].asUnit(unitName),label='Transmitted power')
             self.dpiGraph.axes.hold(True)
             if self.generated.isChecked():
-                self.dpiGraph.axes.plot(frequency, result['generatorPower'][limitPoints].asUnit(unitName),label='Generator power')
+                self.dpiGraph.axes.plot(frequency, result['generator power'][limitPoints].asUnit(unitName),label='Generator power')
             if self.forwardReflected.isChecked():
-                self.dpiGraph.axes.plot(frequency, result['forwardPower'][limitPoints].asUnit(unitName),label='Forward power')
-                self.dpiGraph.axes.plot(frequency, result['reflectedPower'][limitPoints].asUnit(unitName),label='Reflected power')
+                self.dpiGraph.axes.plot(frequency, result['forward power'][limitPoints].asUnit(unitName),label='Forward power')
+                self.dpiGraph.axes.plot(frequency, result['reflected power'][limitPoints].asUnit(unitName),label='Reflected power')
             if self.passFail.isChecked():
                 passNotFail = result['pass']
-                self.dpiGraph.axes.plot(result['frequency'][passNotFail], result['generatorPower'][passNotFail].asUnit(unitName),'+g',label='Pass')
-                self.dpiGraph.axes.plot(result['frequency'][passNotFail==False], result['generatorPower'][passNotFail==False].asUnit(unitName),'xr',label='Fail')
+                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail], result['generator power'][passNotFail].asUnit(unitName),'+g',label='Pass')
+                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail==False], result['generator power'][passNotFail==False].asUnit(unitName),'xr',label='Fail')
         
         
         self.dpiGraph.axes.set_ylim(result.powerLimits.asUnit(unitName))

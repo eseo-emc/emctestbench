@@ -27,10 +27,10 @@ class TransmittedPower(Experiment,persistance.Dommable):
             forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
          
             reflectedPower = self.wattMeter.getPower(2) / bridgeCouplingFactorAt(frequency)
-            result.data = {'Generator power':generatorPower,
-                           'Transmitted power':forwardPower-reflectedPower,
-                           'Forward power':forwardPower,
-                           'Reflected power':reflectedPower}
+            result.data = {'generator power':generatorPower,
+                           'transmitted power':forwardPower-reflectedPower,
+                           'forward power':forwardPower,
+                           'reflected power':reflectedPower}
             self.emitResult(result)
             return result
             
@@ -46,7 +46,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
 #            print tryForwardPower
             self.rfGenerator.setPower(tryForwardPower)
             self.rfGenerator.enableOutput()
-            realTransmittedPower = self.measure()['transmittedPower']
+            realTransmittedPower = self.measure()['transmitted power']
             realTransmittedPower = realTransmittedPower.max(Power(-40,'dBm'))
 
             gain = nominalPower/realTransmittedPower
@@ -54,7 +54,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
             tryForwardPower *= gain
             tryForwardPower = tryForwardPower.min(generatorMaximum)
 
-        return self.measure()['transmittedPower']
+        return self.measure()['transmitted power']
 
         
     

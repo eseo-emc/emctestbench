@@ -1,14 +1,21 @@
 import unittest
 
 from persistance_test import XmlTest
-from timestamp import TimeStamp
+from timestamp import Timestamp
+from datetime import datetime
 
-class TimeStampXml_test(XmlTest):
+class TimestampXml_test(XmlTest):
     def setUp(self):
         XmlTest.setUp(self)
     def test_now(self):
-        self.result = TimeStamp()
-        self.assertLoopThrough(TimeStamp)
+        self.result = Timestamp()
+        self.assertLoopThrough(Timestamp)
+    def test_array(self):
+        self.result = Timestamp()
+        self.result = self.result.append(Timestamp())
+        self.assertLoopThrough(Timestamp)
+    def assertEqual(self,one,other):
+        unittest.TestCase.assertTrue(self,(one == other).all())
         
 
         

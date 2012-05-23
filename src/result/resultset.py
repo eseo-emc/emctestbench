@@ -4,7 +4,7 @@ import numpy
 
 
 from persistance import Dommable,Dict
-from timestamp import TimeStamp
+from timestamp import Timestamp
 from utility.quantities import UnitLess
 
 import os
@@ -111,7 +111,7 @@ class ResultSet(Result,Dommable):
         self.creationMoment = datetime.now()     
         self._data = {}
         self._fields = fields
-        self._fields.update({'timeStamp':TimeStamp})
+        self._fields.update({'timestamp':Timestamp})
         for fieldName in self._fields.keys():
             self._data[fieldName] = []
     def __eq__(self,other):
@@ -123,7 +123,7 @@ class ResultSet(Result,Dommable):
         fields = {}
         data = {}
         numberOfRows = None
-        for elementId,indexableObject in cls.childObjectById(dom,'Data').items():
+        for elementId,indexableObject in cls.childObjectById(dom,'data').items():
             items = []
             for item in indexableObject:
                 items.append(item)
@@ -133,7 +133,7 @@ class ResultSet(Result,Dommable):
                 numberOfRows = len(items)
             fields.update({elementId:type(items[0])})
             data.update({elementId:items})
-        assert 'timeStamp' in fields.keys()
+        assert 'timestamp' in fields.keys()
         
         newResultSet = super(ResultSet,cls).__new__(cls)
         ResultSet.__init__(newResultSet,fields)
@@ -145,11 +145,11 @@ class ResultSet(Result,Dommable):
         consolidatedDict = Dict()
         for key in self._fields.keys():
             consolidatedDict.update({key:self[key]})
-        self.appendChildObject(element,consolidatedDict,'Data')
+        self.appendChildObject(element,consolidatedDict,'data')
         return element
             
     def append(self,values):
-        values.update({'timeStamp':TimeStamp()})
+        values.update({'timestamp':Timestamp()})
         for fieldName in self._fields.keys():
             fieldValue = None
             if values.has_key(fieldName):
@@ -169,9 +169,9 @@ class ResultSet(Result,Dommable):
             if item == None:           
                 self._data[key][number] = missingValue
         
-        if fieldType == TimeStamp:
-            return self._data[key]
-        elif isinstance(fieldType(0),numpy.ndarray):
+#        if fieldType == Timestamp:
+#            return self._data[key]
+        if isinstance(fieldType(0),numpy.ndarray):
             return fieldType(self._data[key])
         else:
             return numpy.array(self._data[key],dtype=fieldType)

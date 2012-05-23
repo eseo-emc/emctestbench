@@ -1,7 +1,7 @@
 import numpy
 
 from device import ScpiDevice
-from utility.quantities import *
+from utility import quantities
 from multimeter import Multimeter
 
 class AgilentL4411a(Multimeter,ScpiDevice):
@@ -15,7 +15,7 @@ class AgilentL4411a(Multimeter,ScpiDevice):
         self.write('CONF:VOLT:DC AUTO')
         voltageString = self.ask('MEASure?')
 #         voltageString = self.ask('MEASure:VOLTage:DC?')
-        return float(voltageString)
+        return quantities.Voltage(float(voltageString),'V')
     
 if __name__ == '__main__':
     device = AgilentL4411a()

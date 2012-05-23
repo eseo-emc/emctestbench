@@ -5,6 +5,8 @@ from gui.voltagecriterion_view import Ui_Form
 from experiment.voltagecriterion import VoltageCriterion
 
 from experimentresult import ExperimentResult
+from experiment import experiment
+from utility import quantities
 
 import numpy
 
@@ -15,6 +17,7 @@ class VoltageCriterionController(QWidget,Ui_Form):
         self.topLevel = topLevel
         
         self._model = None
+        self.result = experiment.Property(quantities.Voltage(0.0))
     @property
     def model(self):
         return self._model
@@ -24,16 +27,12 @@ class VoltageCriterionController(QWidget,Ui_Form):
         
         self.model.connect()
         
-        def coupleValue(guiWidget,modelProperty):
-            guiWidget.setValue(modelProperty.value)
-            modelProperty.changedTo.connect(guiWidget.setValue)
-            guiWidget.valueChanged.connect(modelProperty.setValue)
-        
-        coupleValue(self.nominalVoltage,self.model.undisturbedOutputVoltage)
-        coupleValue(self.voltageMargin,self.model.voltageMargin)        
-#        coupleValue(self.measuredVoltage,self.model.result)        
+        self.nominalVoltage.model = self.model.undisturbedOutputVoltage
+        self.voltageMargin.model = self.model.voltageMargin
+
+
         self.model.newResult.connect(self.newResult)        
-        
+        self.measuredVoltage.model = self.result
         
         self.measureNominal.clicked.connect(self.measureNominalVoltage) 
         self.measure.clicked.connect(self.measureOnce)
@@ -43,8 +42,8 @@ class VoltageCriterionController(QWidget,Ui_Form):
     def measureOnce(self):
         self.model.start()
     def newResult(self,result):
-        self.measuredVoltage.setValue(result['Voltage'])
-        self.passFailIndicator.passNotFail = result['Pass']
+        self.result.setValue(result['voltage'])
+        self.passFailIndicator.passNotFail = result['pass']
 
         
 
@@ -52,7 +51,8 @@ class VoltageCriterionController(QWidget,Ui_Form):
 if __name__ == '__main__':
     import sys
     from PyQt4.QtGui import QApplication,QMainWindow
-    from device import knownDevices    
+    from device import knownDevices  
+    from experiment import voltagecriterion
     
     application = QApplication(sys.argv)
     window = QMainWindow()
@@ -62,6 +62,7 @@ if __name__ == '__main__':
     
     
     controller = VoltageCriterionController(window)
+    controller.model = voltagecriterion.VoltageCriterion()
     window.setCentralWidget(controller)
     window.show()
         

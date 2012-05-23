@@ -21,17 +21,11 @@ class DpiController(QWidget,Ui_Form):
     def model(self,value):
         self._model = value
         
-        self.powerMinimum.setValue(self.model.powerMinimum.value)
-        self.powerMinimum.valueChanged.connect(self.model.powerMinimum.setValue)
-
-        self.powerMaximum.setValue(self.model.powerMaximum.value)
-        self.powerMaximum.valueChanged.connect(self.model.powerMaximum.setValue)
+        self.powerMinimum.model = self.model.powerMinimum        
+        self.powerMaximum.model = self.model.powerMaximum
         
-        self.frequencyMinimum.setValue(self.model.frequencies.start.value)
-        self.frequencyMinimum.valueChanged.connect(self.model.frequencies.start.setValue)
-        
-        self.frequencyMaximum.setValue(self.model.frequencies.stop.value)
-        self.frequencyMaximum.valueChanged.connect(self.model.frequencies.stop.setValue)  
+        self.frequencyMinimum.model = self.model.frequencies.start
+        self.frequencyMaximum.model = self.model.frequencies.stop
         
         self.frequencySteps.setValue(self.model.frequencies.numberOfPoints.value)
         self.frequencySteps.valueChanged.connect(self.model.frequencies.numberOfPoints.setValue)
@@ -89,11 +83,13 @@ class DpiController(QWidget,Ui_Form):
 if __name__ == '__main__':
     import sys
     from PyQt4.QtGui import QApplication,QMainWindow
+    from experiment import dpi    
     
     application = QApplication(sys.argv)
     window = QMainWindow()
     
     dpiController = DpiController(window)
+    dpiController.model = dpi.Dpi()
     window.setCentralWidget(dpiController)
     window.show()
         

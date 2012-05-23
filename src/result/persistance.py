@@ -21,11 +21,14 @@ class Dommable(object):
             from utility.quantities import Boolean
             return Boolean(anything)
         elif type(anything) == datetime:
-            from timestamp import TimeStamp
-            return TimeStamp(anything)
+            from timestamp import Timestamp
+            return Timestamp(anything)
         elif isinstance(anything,float) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'f' ):
             from utility.quantities import UnitLess
             return UnitLess(anything)
+        elif isinstance(anything,int) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'i' ):
+            from utility.quantities import Integer
+            return Integer(anything)
         elif type(anything) == str:
             casted = String(anything)
             return casted
@@ -90,12 +93,18 @@ class Dommable(object):
         if element.tagName == 'Power':
             from utility.quantities import Power
             factory = Power
+        elif element.tagName == 'Voltage':
+            from utility.quantities import Voltage
+            factory = Voltage
         elif element.tagName == 'DpiResult':
             from experiment.dpi import DpiResult
             factory = DpiResult
         elif element.tagName == 'UnitLess':
             from utility.quantities import UnitLess
             factory = UnitLess
+        elif element.tagName == 'Integer':
+            from utility.quantities import Integer
+            factory = Integer
         elif element.tagName == 'Dict':
             factory = Dict
         elif element.tagName == 'DictResult':
@@ -105,9 +114,9 @@ class Dommable(object):
             factory = String
         elif element.tagName == 'List':
             factory = List
-        elif element.tagName == 'TimeStamp':
-            from result.timestamp import TimeStamp
-            factory = TimeStamp
+        elif element.tagName == 'Timestamp':
+            from result.timestamp import Timestamp
+            factory = Timestamp
         elif element.tagName == 'Frequency':
             from utility.quantities import Frequency
             factory = Frequency

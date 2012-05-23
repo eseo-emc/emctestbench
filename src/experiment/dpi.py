@@ -9,7 +9,7 @@ from copy import deepcopy
 from result.resultset import ResultSet,exportFunction
 
 import csv
-
+import sys
 
 
 class DpiResult(ResultSet):
@@ -19,18 +19,18 @@ class DpiResult(ResultSet):
         self.powerLimits = powerLimits
         self.frequencyRange = frequencyRange
         ResultSet.__init__(self,{\
-            'frequency':Frequency,
-            'generatorPower':Power,
+            'injection frequency':Frequency,
+            'generator power':Power,
             'pass':bool,
-            'forwardPower':Power,
-            'reflectedPower':Power,
-            'reflectionCoefficent':PowerRatio,
-            'transmittedPower':Power,
+            'forward power':Power,
+            'reflected power':Power,
+            'reflection coefficent':PowerRatio,
+            'transmitted power':Power,
             'limit':bool})
     def asDom(self,parent):
         element = ResultSet.asDom(self,parent)
-        self.appendChildObject(element,self.powerLimits,'Power limits')   
-        self.appendChildObject(element,self.frequencyRange,'Frequency range')
+        self.appendChildObject(element,self.powerLimits,'power limits')   
+        self.appendChildObject(element,self.frequencyRange,'frequency range')
         return element
     
     @exportFunction('CSV one point per frequency',['xls','csv'])
@@ -42,18 +42,21 @@ class DpiResult(ResultSet):
         self._writeToCsv(fileName,onlyLimits=False)        
 
     def _writeToCsv(self,fileName,onlyLimits):
-        fileHandle = open(fileName,'wb')
+        try:
+            fileHandle = open(fileName,'wb')
+        except:
+            logging.LogItem(sys.exc_info()[1],logging.error)
         tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
         writer = csv.DictWriter(fileHandle,tableHeaders,dialect='excel-tab')
         writer.writeheader()
         
         for result in self.byRow():
             if not(onlyLimits) or result['limit']:
-                writer.writerow({'frequency (Hz)':result['frequency'],
-                                 'generator (dBm)':result['generatorPower'].dBm(),
-                                 'forward (dBm)':result['forwardPower'].dBm(),
-                                 'reflected (dBm)':result['reflectedPower'].dBm(),
-                                 'transmitted (dBm)':result['transmittedPower'].dBm(),
+                writer.writerow({'frequency (Hz)':result['injection frequency'].Hz(),
+                                 'generator (dBm)':result['generator power'].dBm(),
+                                 'forward (dBm)':result['forward power'].dBm(),
+                                 'reflected (dBm)':result['reflected power'].dBm(),
+                                 'transmitted (dBm)':result['transmitted power'].dBm(),
                                  'fail':(0 if result['pass'] else 1) })
         fileHandle.close()
         fileHandle = None
@@ -62,8 +65,8 @@ class DpiResult(ResultSet):
     @classmethod
     def fromDom(cls,dom):
         newResult = super(DpiResult,cls).fromDom(dom)
-        newResult.powerLimits = cls.childObjectById(dom,'Power limits')
-        newResult.frequencyRange = cls.childObjectById(dom,'Frequency range')
+        newResult.powerLimits = cls.childObjectById(dom,'power limits')
+        newResult.frequencyRange = cls.childObjectById(dom,'frequency range')
         return newResult
 
 class Dpi(Experiment,persistance.Dommable):
@@ -73,13 +76,20 @@ class Dpi(Experiment,persistance.Dommable):
         Experiment.__init__(self)
         self.passCriterion = ExperimentSlot(parent=self,defaultValue='VoltageCriterion')
         self.transmittedPower = ExperimentSlot(parent=self,defaultValue='TransmittedPower')
-        self.powerMinimum = Property(-30.,changedSignal=self.settingsChanged)
-        self.powerMaximum = Property(+15.,changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(150e3,1500e6,11,changedSignal=self.settingsChanged) 
+        self.powerMinimum = Property(Power(-30.,'dBm'),changedSignal=self.settingsChanged)
+
+        self.powerMaximum = Property(Power(+15.,'dBm'),changedSignal=self.settingsChanged)
+        self.frequencies = SweepRange(Frequency(150e3),Frequency(1500e6),11,changedSignal=self.settingsChanged) 
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
-        self.appendChildObject(element,self.passCriterion.value,'Pass Criterion')
-        self.appendChildObject(element,self.transmittedPower.value,'Transmitted Power')
+        self.appendChildObject(element,self.passCriterion.value,'pass criterion')
+        self.appendChildObject(element,self.transmittedPower.value,'transmitted power')
+        
+
+        self.appendChildObject(element,self.powerMinimum.value,'power minimum')
+        
+
+        self.appendChildObject(element,self.powerMaximum.value,'power maximum')
         return element
     
     def connect(self):
@@ -96,11 +106,12 @@ class Dpi(Experiment,persistance.Dommable):
         self.transmittedPower.value.prepare()
 
     def run(self):
-        result = DpiResult(Power([self.powerMinimum.value,self.powerMaximum.value],'dBm'),deepcopy(self.frequencies))
+
+        result = DpiResult(Power([self.powerMinimum.value,self.powerMaximum.value]),deepcopy(self.frequencies))
         self.emitResult(result)        
         
         guessPower = self.powerMinimum.value
-        stepSizes = [5.0,1.0,0.5,.25]
+        stepSizes = [5.0,1.0,0.5,.25] # dB
         def inclusiveRange(start,stop,step):
             if start != stop:
                 return numpy.concatenate((numpy.arange(start,stop,step),[stop]))
@@ -108,33 +119,33 @@ class Dpi(Experiment,persistance.Dommable):
                 return numpy.array([stop])
         def findFailureFromBelow(startPower,stepIndex=0):
             def measureAndSavePass(tryPower):
-                self.rfGenerator.setPower(Power(tryPower,'dBm'))
+                self.rfGenerator.setPower(tryPower)
                 self.rfGenerator.enableOutput()
-                passNotFail = self.passCriterion.value.measure()['Pass']
-                result.append( {'frequency':frequency,
-                             'generatorPower':Power(tryPower,'dBm'),
+                passNotFail = self.passCriterion.value.measure()['pass']
+                result.append( {'injection frequency':frequency,
+                             'generator power':tryPower,
                              'pass':passNotFail,
                              'limit':False} )
                 return passNotFail
             # make it work
-            for tryPower in inclusiveRange(startPower,self.powerMinimum.value,-stepSizes[stepIndex]):
-                logging.LogItem('Try to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
+            for tryPower in Power(inclusiveRange(startPower.dBm(),self.powerMinimum.value.dBm(),-stepSizes[stepIndex]),'dBm'):
+                logging.LogItem('Try to make the test pass with {tryPower}...'.format(tryPower=tryPower),logging.debug)
                 if measureAndSavePass(tryPower):
                     break
             else:
-                logging.LogItem('Did not succeed to make the test pass with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.warning)
+                logging.LogItem('Did not succeed to make the test pass with {tryPower}...'.format(tryPower=tryPower),logging.warning)
                 return tryPower
                 
             # make it fail
-            for tryPower in inclusiveRange(tryPower+stepSizes[stepIndex],self.powerMaximum.value,stepSizes[stepIndex]):
-                logging.LogItem('Try to make the test fail with {tryPower:.1f} dBm...'.format(tryPower=tryPower),logging.debug)
+            for tryPower in Power(inclusiveRange(tryPower.dBm()+stepSizes[stepIndex],self.powerMaximum.value.dBm(),stepSizes[stepIndex]),'dBm'):
+                logging.LogItem('Try to make the test fail with {tryPower}...'.format(tryPower=tryPower),logging.debug)
                 if not measureAndSavePass(tryPower):
                     break
             else:
                 return tryPower
 
             if stepIndex < len(stepSizes)-1:                
-                return findFailureFromBelow(tryPower-stepSizes[stepIndex],stepIndex+1)
+                return findFailureFromBelow(Power(tryPower.dBm()-stepSizes[stepIndex],'dBm'),stepIndex+1)
             else:
                 return tryPower
                 
@@ -144,15 +155,15 @@ class Dpi(Experiment,persistance.Dommable):
             if self.stopRequested:
                 break
             self.rfGenerator.setFrequency(frequency)
-            logging.LogItem('Passing to {frequency:.2e} Hz'.format(frequency=frequency),logging.debug)
+            logging.LogItem('Passing to {frequency}'.format(frequency=frequency),logging.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.value.measure()
-            result.append({'frequency':frequency,
-                             'generatorPower':Power(generatorPower,'dBm'),
-                             'pass':self.passCriterion.value.measure()['Pass'],
-                             'reflectedPower':measurement['Reflected power'],
-                             'forwardPower':measurement['Forward power'],
-                             'transmittedPower':measurement['Transmitted power'],
+            result.append({'injection frequency':frequency,
+                             'generator power':generatorPower,
+                             'pass':self.passCriterion.value.measure()['pass'],
+                             'reflected power':measurement['reflected power'],
+                             'forward power':measurement['forward power'],
+                             'transmitted power':measurement['transmitted power'],
                              'limit':True})
 
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
@@ -161,13 +172,18 @@ class Dpi(Experiment,persistance.Dommable):
         
         self.finished.emit()
         logging.LogItem('Finished DPI',logging.success)
+        
         self.stopRequested = False
         
 
         
         
 if __name__ == '__main__':
-    print DpiResult.exportTypes
+    import copy
+    a = Dpi()
+    print a.powerMaximum.value
+    b = copy.deepcopy(a)
+    print b.powerMaximum.value
 #    from voltagecriterion import VoltageCriterion
 #    from transmittedpower import TransmittedPower
 #    

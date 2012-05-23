@@ -1,6 +1,7 @@
 import unittest
 from quantities import *
 import numpy
+import copy
 
 class Power_test(unittest.TestCase):
     def setUp(self):
@@ -32,6 +33,17 @@ class Power_array_test(unittest.TestCase):
 class Power_equality_test(unittest.TestCase):
     def test_equality(self):
         self.assertEqual(Power(+3.,'dBm'),Power(+3.,'dBm'))
+        
+class Power_copy_test(unittest.TestCase):
+    def test_scalar(self):
+        original = Power(+6,'dBW')
+        duplicate = copy.deepcopy(original)
+        self.assertEqual(type(original),type(duplicate))
+    def test_array(self):
+        original = Power([+6],'dBW')
+        duplicate = copy.deepcopy(original)
+        self.assertEqual(type(original),type(duplicate))
+        
         
 if __name__ == '__main__':
      import nose

@@ -70,18 +70,18 @@ class SweepRange(Dommable):
             return numpy.linspace(self.start.value,self.stop.value,self.numberOfPoints.value)
     @classmethod
     def fromDom(cls,dom):
-        startValue = float(dom.getAttribute('startValue'))
-        stopValue = float(dom.getAttribute('stopValue'))
-        numberOfPoints = int(dom.getAttribute('numberOfPoints'))
-        logarithmic = dom.getAttribute('logarithmic') == 'True'
+        startValue = cls.childObjectById(dom,'start value')
+        stopValue = cls.childObjectById(dom,'stop value')
+        numberOfPoints = cls.childObjectById(dom,'number of points')
+        logarithmic = cls.childObjectById(dom,'logarithmic')
         return SweepRange(startValue,stopValue,numberOfPoints,logarithmic)
         
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
-        element.setAttribute('startValue',str(self.start.value))
-        element.setAttribute('stopValue',str(self.stop.value))
-        element.setAttribute('numberOfPoints',str(self.numberOfPoints.value))
-        element.setAttribute('logarithmic',str(self.logarithmic.value))
+        self.appendChildObject(element,self.start.value,'start value')
+        self.appendChildObject(element,self.stop.value,'stop value')
+        self.appendChildObject(element,self.numberOfPoints.value,'number of points')
+        self.appendChildObject(element,self.logarithmic.value,'logarithmic')
         return element
 
 class Experiment(QThread):
@@ -113,4 +113,11 @@ class Experiment(QThread):
         self.newResult.emit(result)
     
 
+if __name__ == '__main__':
+    from utility import quantities
+    import copy
+    a = Property(quantities.Power(3,'dBm'))
+    print a.value
+    b= copy.deepcopy(a)
+    print b.value
     

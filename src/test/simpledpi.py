@@ -3,7 +3,7 @@ from device.multimeter import Multimeter
 from device.rfgenerator import RfGenerator
 from device.wattmeter import WattMeter
 from device.switch import SwitchPlatform
-from utility.quantities import Power,PowerRatio
+from utility.quantities import Power,PowerRatio,Voltage
 from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
 import time
 from random import gauss
@@ -18,9 +18,9 @@ class DummyMultimeter(Multimeter,Device):
     def measure(self):
         time.sleep(0.1)
         if incidentPower() > Power(+7.1,'dBm'):
-            return gauss(4.7,self.standardDeviation)
+            return Voltage(gauss(4.7,self.standardDeviation),'V')
         else:
-            return gauss(4.9,self.standardDeviation)
+            return Voltage(gauss(4.9,self.standardDeviation),'V')
 
 class DummyRfGenerator(RfGenerator,Device):
     defaultName = 'Dummy RF Generator'

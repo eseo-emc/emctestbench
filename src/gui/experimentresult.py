@@ -23,16 +23,16 @@ class ExperimentResult(QObject,Dommable):
     
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
-        self.appendChildObject(element,self.metadata,'Metadata')
-        self.appendChildObject(element,self.experiment,'Experiment')
-        self.appendChildObject(element,self.result,'Result')
+        self.appendChildObject(element,self.metadata,'metadata')
+        self.appendChildObject(element,self.experiment,'experiment')
+        self.appendChildObject(element,self.result,'result')
         return element
 
     @classmethod
     def fromDom(cls,dom):
-        metadata = cls.childObjectById(dom,'Metadata')
-        result = cls.childObjectById(dom,'Result')
-        assert isinstance(result,Result),'Tag with id="Result" yields no Result instance'
+        metadata = cls.childObjectById(dom,'metadata')
+        result = cls.childObjectById(dom,'result')
+        assert isinstance(result,Result),'Tag with id="result" yields no Result instance'
         return cls(None,result,save=False,metadata=metadata,name='From anonymous DOM')
     
     def __init__(self,experiment,result,save=True,metadata=None,name=None):
@@ -42,7 +42,7 @@ class ExperimentResult(QObject,Dommable):
         
         if metadata == None:
             creationDate = datetime.now()
-            metadata = Dict({'DUT':'','Operator':'','Creation':creationDate})
+            metadata = Dict({'DUT':'','operator':'','creation':creationDate})
         self.metadata = metadata
 
         if name == None:

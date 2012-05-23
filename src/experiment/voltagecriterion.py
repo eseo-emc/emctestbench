@@ -2,31 +2,32 @@ from device import knownDevices
 from experiment import Experiment,Property
 from result.resultset import DictResult
 from result import persistance
+from utility import quantities
 
 class VoltageCriterion(Experiment,persistance.Dommable):
     name = 'Voltage offset criterion'
     def __init__(self):
         Experiment.__init__(self)
-        self.undisturbedOutputVoltage = Property(0.,changedSignal=self.settingsChanged)
-        self.voltageMargin = Property(0.1,changedSignal=self.settingsChanged)
+        self.undisturbedOutputVoltage = Property(quantities.Voltage(0.,'V'),changedSignal=self.settingsChanged)
+        self.voltageMargin = Property(quantities.Voltage(100.,'mV'),changedSignal=self.settingsChanged)
 #        self.laresult = Result(self,0.)
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
-        self.appendChildObject(element,self.undisturbedOutputVoltage.value,'Undisturbed Output Voltage')
-        self.appendChildObject(element,self.voltageMargin.value,'Voltage Margin')        
+        self.appendChildObject(element,self.undisturbedOutputVoltage.value,'undisturbed output voltage')
+        self.appendChildObject(element,self.voltageMargin.value,'voltage margin')        
         return element
         
     def connect(self):
         self.voltMeter = knownDevices['multimeter']
     def prepare(self):
-        self.undisturbedOutputVoltage.value = self.measure()['Voltage']
+        self.undisturbedOutputVoltage.value = self.measure()['voltage']
     def measure(self):
         #        result = ScalarResult()
         outputVoltage = self.voltMeter.measure()
 #        result.data = outputVoltage
         result = DictResult()
-        result.data = {'Pass':abs(outputVoltage -self.undisturbedOutputVoltage.value) <= self.voltageMargin.value,
-                'Voltage':outputVoltage}
+        result.data = {'pass':abs(outputVoltage -self.undisturbedOutputVoltage.value) <= self.voltageMargin.value,
+                'voltage':outputVoltage}
 #        self.result.value = {'pass':abs(outputVoltage -self.undisturbedOutputVoltage.value) <= self.voltageMargin.value,
 #                'outputVoltage (V)':outputVoltage}
         self.emitResult(result)

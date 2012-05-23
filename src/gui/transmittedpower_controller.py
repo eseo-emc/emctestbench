@@ -32,10 +32,10 @@ class TransmittedPowerController(QWidget,Ui_Form):
     def measureOnce(self):
         self.model.start()
     def newResult(self,result):
-        self.generatorPower.setValue(result['Generator power'].dBm())
-        self.forwardPower.setValue(result['Forward power'].dBm())
-        self.reflectedPower.setValue(result['Reflected power'].dBm())
-        self.transmittedPower.setValue(result['Transmitted power'].dBm())
+        self.generatorPower.setValue(result['generator power'].dBm())
+        self.forwardPower.setValue(result['forward power'].dBm())
+        self.reflectedPower.setValue(result['reflected power'].dBm())
+        self.transmittedPower.setValue(result['transmitted power'].dBm())
 
 
 if __name__ == '__main__':

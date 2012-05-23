@@ -3,9 +3,10 @@ from PyQt4.QtCore import QObject,pyqtSignal
 from PyQt4.QtGui import QDesktopServices,QApplication
 import experimentresult
 
-#from utility import singletonmixin
 import glob
 import os
+import sys
+import logging
         
 
 @Singleton
@@ -29,7 +30,10 @@ class ExperimentResultCollection(QObject):
     def refresh(self):
         self.experimentResults = []
         for fileName in glob.glob(self.resultPath+'*'+self.resultExtension):
-            experimentresult.ExperimentResult.loadFromFileSystem(fileName)
+            try:
+                experimentresult.ExperimentResult.loadFromFileSystem(fileName)
+            except:
+                logging.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),logging.error)
     def append(self,newExperimentResult):
         self.experimentResults.append(newExperimentResult)
         self.extendedWith.emit(newExperimentResult)

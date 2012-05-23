@@ -42,33 +42,16 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QDoubleSpinBox" name="nominalVoltage">
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>-99.989999999999995</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-      </widget>
+      <widget class="QuantityWidgetController" name="nominalVoltage"/>
      </item>
      <item row="0" column="3">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>V</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
       <widget class="QPushButton" name="measureNominal">
        <property name="text">
         <string>Measure</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="5" rowspan="3">
+     <item row="0" column="4" rowspan="3">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -81,7 +64,7 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="6" rowspan="3">
+     <item row="0" column="5" rowspan="3">
       <widget class="PassFailWidget" name="passFailIndicator" native="true"/>
      </item>
      <item row="1" column="0">
@@ -102,24 +85,7 @@
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="voltageMargin">
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>-99.989999999999995</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>V</string>
-       </property>
-      </widget>
+      <widget class="QuantityWidgetController" name="voltageMargin"/>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_6">
@@ -132,13 +98,6 @@
       </widget>
      </item>
      <item row="2" column="3">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>V</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4">
       <widget class="QPushButton" name="measure">
        <property name="text">
         <string>Measure</string>
@@ -146,18 +105,9 @@
       </widget>
      </item>
      <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="measuredVoltage">
+      <widget class="QuantityWidgetController" name="measuredVoltage">
        <property name="readOnly">
         <bool>true</bool>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>-99.989999999999995</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
@@ -171,6 +121,11 @@
    <extends>QWidget</extends>
    <header>gui.passfailwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QuantityWidgetController</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>gui.quantitywidget_controller.h</header>
   </customwidget>
  </customwidgets>
  <resources>

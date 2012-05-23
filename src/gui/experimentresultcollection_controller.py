@@ -28,7 +28,7 @@ class ExperimentResultItem(ExperimentResultTreeItem):
         self.experimentResult.changed.connect(self.update)
     def update(self):
         self.setText(0,self.experimentResult.name)  
-        self.setText(2,self.experimentResult.metadata['Creation'].strftime('%H:%M:%S'))
+        self.setText(2,self.experimentResult.metadata['creation'].strftime('%H:%M:%S'))
     def addContextMenuActions(self,menu):
         ExperimentResultTreeItem.addContextMenuActions(self,menu)
         if len(self.experimentResult.result.exportFunctions()) > 0:
@@ -48,7 +48,7 @@ class ExperimentResultItem(ExperimentResultTreeItem):
         dialog.setNameFilter(';;'.join(exportStrings))
         if dialog.exec_() == dialog.Accepted:
             selectedExportFunction = exportFunctions[exportStrings.index(dialog.selectedFilter())]
-            fileName = selectedExportFunction.exportType.appendExtensionToFileName( dialog.selectedFiles()[0] )
+            fileName = selectedExportFunction.exportType.appendExtensionToFileName( str(dialog.selectedFiles()[0]) )
             selectedExportFunction(fileName)
 
         

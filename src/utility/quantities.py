@@ -4,6 +4,11 @@ import numpy
 from result.persistance import Dommable
 import string
 
+#siPrefices = ['y','z','a','f','p','n','u','m','','k','M','G','T','P','E','Z','Y']
+#siUnitIndex = 8
+siPrefices = ['n','u','m','','k','M','G']
+siUnitIndex = 3
+
 class Amplitude():
     '''
     Represents a voltage amplitude. When set using power quantities, a characteristic impedance of 50 Ohm is assumed.
@@ -141,6 +146,8 @@ class DommableArray(numpy.ndarray,Dommable):
         #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
         newObject = numpy.asarray(value).view(cls)
         return newObject
+    def __deepcopy__(self,memo):
+        return type(self)(self)
     def __getitem__(self,itemNumber):
         singleItem = numpy.ndarray.__getitem__(self,itemNumber)
         return self.__class__(singleItem)
@@ -168,7 +175,7 @@ class DommableArray(numpy.ndarray,Dommable):
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+")"
     def __str__(self):
-        return self.toArrayString()
+        return self.toArrayString(separator=' ')
     def toArrayString(self,formatFunction=None,separator=', '):
         if not formatFunction:
             formatFunction = lambda value : str(numpy.asarray(value))
@@ -185,18 +192,47 @@ class DommableArray(numpy.ndarray,Dommable):
 
 class UnitLess(DommableArray):
     pass
+class Integer(DommableArray):
+    pass
 
 class Boolean(DommableArray):
     pass
 
+def reasonableExponent(number):
+    if number == 0.:
+        return 0
+    else:
+        return numpy.int(numpy.floor(numpy.log10(abs(number))/3.)*3)
+def exponentToPrefix(exponent):
+    return siPrefices[exponent/3+siUnitIndex]
+def prefixToExponent(prefix):
+    return (siPrefices.index(prefix)-siUnitIndex)*3
+
+#def siMultiplierAndUnit(jointUnit,unit=''):
+#    prefix = jointUnit[0]
+#    unit = jointUnit[1:]
+#    multiplier = 10**(index)
+#    (siPrefices.index('m')-8)*3
+
 class DommableDimensionalArray(DommableArray):
+    storageUnit = None
+    
     def __new__(cls,value,unit=None):
         if unit == None:
             unit = cls.storageUnit
-        value = numpy.asarray(value) * 1.0 #force values to be floats
-        assert unit == cls.storageUnit
+        
+        value = numpy.asarray(value) * 10**cls._getExponent(unit)
+        
         return DommableArray.__new__(cls,value)
-
+    @classmethod
+    def _getExponent(cls,jointUnit):
+        assert jointUnit.endswith(cls.storageUnit),'Requested {jointUnit} does not end with {storageUnit}'.format(jointUnit=jointUnit,storageUnit=cls.storageUnit)
+        return prefixToExponent(jointUnit[:-1*len(cls.storageUnit)])
+    def asUnit(self,jointUnit):
+        return numpy.asarray(self)/(10**self._getExponent(jointUnit))
+    def preferredUnit(self):
+        return exponentToPrefix(reasonableExponent(self.min())) + self.storageUnit
+        
     #TODO: refactor to units with an ISO prefix, perhaps a list of enumerator/denominator unit, analytical math to simplify unit?
     @classmethod
     def fromDom(cls,dom):
@@ -205,20 +241,31 @@ class DommableDimensionalArray(DommableArray):
         element = DommableArray.asDom(self,parent)
         element.setAttribute('unit',self.storageUnit)
         return element
+    
+    def __repr__(self):
+        return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"    
+    def __str__(self):        
+        formatFunction = lambda value : str(value.asUnit(value.preferredUnit())) + ' ' + value.preferredUnit()
+        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=' ')
 
 class Voltage(DommableDimensionalArray):
     storageUnit = 'V'    
 
 class Frequency(DommableDimensionalArray):
     storageUnit = 'Hz'
+    
+    def Hz(self):
+        return self.asUnit('Hz')
 
 
 class Power(DommableArray):
     storageUnit = 'W'
-    
-    def __new__(cls, value, unit='W', info=None):
+        
+    def __new__(cls, value, unit=None, info=None):
         value = numpy.asarray(value) * 1.0 #force values to be floats
-
+        
+        if unit == None:
+            unit = cls.storageUnit
         if unit == 'W':
             pass
         elif unit == 'dBm':
@@ -295,7 +342,6 @@ class Power(DommableArray):
 
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"
-
     def __str__(self):
         def safeDbmFormat(value):
             if numpy.isnan(value):
@@ -324,17 +370,22 @@ class Power(DommableArray):
 if __name__ == '__main__':
     import numpy
     
-    print repr(Power([[0.001,0.002],[2.,1.]]))
-    print repr(Power([2.,1.]))
-    print repr(Power(2.))
+#    print repr(Power([[0.001,0.002],[2.,1.]]))
+#    print repr(Power([2.,1.]))
+#    print repr(Power(2.))
 #
 #    print 'Testing Power...'
     a = Power([],'dBm')
     b = Power(numpy.append(a,Power(3,'dBm')))
     c = a.append(Power(3,'dBm'))
+    c = Power(6,'dBW')
     print c
     
-    print Power([[1,2],[.001,.002]]).toArrayString()
+    import copy
+    d = copy.deepcopy(c)
+    print d
+    
+#    print Power([[1,2],[.001,.002]]).toArrayString()
 #    assert abs((test-test*PowerRatio(-3,'dB')).dBm() - -3.0) < 0.1
 #    assert str(test) == '+0.0 dBm'
 #    assert str(test*2.0) == '+3.0 dBm'

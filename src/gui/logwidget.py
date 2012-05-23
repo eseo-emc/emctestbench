@@ -16,7 +16,7 @@ class LogWidget(QTableWidget):
         QTableWidget.__init__(self,parent)
         self.logModel = logging.LogModel.Instance()
         self.logModel.itemAdded.connect(self.update)      
-        self.maximumLevel = 3
+        self.maximumLevel = logging.warning
     def setLevel(self,level):
         self.maximumLevel = level
         self.update()
