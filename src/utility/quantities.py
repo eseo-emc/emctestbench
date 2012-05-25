@@ -154,7 +154,11 @@ class DommableArray(numpy.ndarray,Dommable):
 #    def __array_finalize__(self, obj):
 #        if obj is None: return
 #        self.info = getattr(obj, 'info', None)  
-#    def __eq__(self,other):
+    def __eq__(self,other):
+        if type(other) == type(None):
+            return False
+        else:
+            return numpy.asarray(self) == numpy.asarray(other)
 #        equality = numpy.ndarray.__eq__(self,other)
 #        if isinstance(equality,numpy.ndarray):
 #            return equality.all()
@@ -256,6 +260,9 @@ class Frequency(DommableDimensionalArray):
     
     def Hz(self):
         return self.asUnit('Hz')
+        
+class Position(DommableDimensionalArray):
+    storageUnit = 'm'
 
 
 class Power(DommableArray):
@@ -350,8 +357,8 @@ class Power(DommableArray):
                 dBmValue = value.dBm()
                 prefix = ''
             else:
-                dBmValue = (-1*value)
-                prefix = '<- '
+                dBmValue = (-1*value).dBm()
+                prefix = '<-- '
             if dBmValue == -numpy.inf:
                 return prefix+'-inf dBm'
             else:
@@ -369,21 +376,23 @@ class Power(DommableArray):
                         
 if __name__ == '__main__':
     import numpy
-    
+    a = Frequency([1,2 ],'GHz')
+    b= Frequency([1,0],'GHz')
+    print a == b
 #    print repr(Power([[0.001,0.002],[2.,1.]]))
 #    print repr(Power([2.,1.]))
 #    print repr(Power(2.))
 #
 #    print 'Testing Power...'
-    a = Power([],'dBm')
-    b = Power(numpy.append(a,Power(3,'dBm')))
-    c = a.append(Power(3,'dBm'))
-    c = Power(6,'dBW')
-    print c
-    
-    import copy
-    d = copy.deepcopy(c)
-    print d
+#    a = Power([],'dBm')
+#    b = Power(numpy.append(a,Power(3,'dBm')))
+#    c = a.append(Power(3,'dBm'))
+#    c = Power(6,'dBW')
+#    print c
+#    
+#    import copy
+#    d = copy.deepcopy(c)
+#    print d
     
 #    print Power([[1,2],[.001,.002]]).toArrayString()
 #    assert abs((test-test*PowerRatio(-3,'dB')).dBm() - -3.0) < 0.1

@@ -32,6 +32,17 @@ class Property(QObject):
         self.changed.emit()
         self.changedTo.emit(self.value)
         
+class ScalarProperty(Property):
+    def __init__(self,defaultValue,castTo=None,changedSignal=None,minimum=None,maximum=None):
+        Property.__init__(self,defaultValue,castTo,changedSignal)
+        if minimum == None:
+            minimum = type(defaultValue)(-numpy.inf)
+        if maximum == None:
+            maximum = type(defaultValue)(numpy.inf)
+            
+        self.minimum = minimum
+        self.maximum = maximum
+        
 class ExperimentSlot(Property):
     def __init__(self,parent=None,defaultValue=None):
         self._value = None

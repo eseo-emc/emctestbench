@@ -150,6 +150,10 @@ class ResultSet(Result,Dommable):
             
     def append(self,values):
         values.update({'timestamp':Timestamp()})
+        for fieldName in values.keys():
+            if fieldName not in self._fields.keys():
+                self._fields.update({fieldName:type(values[fieldName])})
+                self._data.update({fieldName:[None]*self.numberOfRows()})
         for fieldName in self._fields.keys():
             fieldValue = None
             if values.has_key(fieldName):
@@ -175,8 +179,10 @@ class ResultSet(Result,Dommable):
             return fieldType(self._data[key])
         else:
             return numpy.array(self._data[key],dtype=fieldType)
+    def numberOfRows(self):
+        return len(self._data.values()[0])
     def byRow(self):
-        for rowNumber in range(len(self._data.values()[0])):
+        for rowNumber in range(self.numberOfRows()):
             yield self.row(rowNumber)
     def row(self,rowNumber):
         newRow = {}            

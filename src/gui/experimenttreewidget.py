@@ -24,6 +24,7 @@ class ExperimentItem(ExperimentTreeItem):
         ExperimentTreeItem.__init__(self)
         self.experiment = experiment
         self.setText(0,experiment.name)
+        self.setIcon(0,QIcon(':/results/Experiment.png'))
     def addContextMenuActions(self,menu):
         ExperimentTreeItem.addContextMenuActions(self,menu)
         menu.addSeparator()

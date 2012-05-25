@@ -6,221 +6,246 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>341</height>
+    <width>651</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QuantityWidgetController" name="xStart">
-   <property name="geometry">
-    <rect>
-     <x>128</x>
-     <y>29</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>3</number>
    </property>
-  </widget>
-  <widget class="QuantityWidgetController" name="yStart">
-   <property name="geometry">
-    <rect>
-     <x>247</x>
-     <y>29</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
+   <property name="spacing">
+    <number>3</number>
    </property>
-  </widget>
-  <widget class="QuantityWidgetController" name="zStart">
-   <property name="geometry">
-    <rect>
-     <x>366</x>
-     <y>29</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>28</y>
-     <width>68</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Start position:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="readStartPosition">
-   <property name="geometry">
-    <rect>
-     <x>485</x>
-     <y>28</y>
-     <width>113</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Read current position</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>57</y>
-     <width>66</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Stop position:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QuantityWidgetController" name="xStart_2">
-   <property name="geometry">
-    <rect>
-     <x>128</x>
-     <y>58</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="readStopPosition">
-   <property name="geometry">
-    <rect>
-     <x>485</x>
-     <y>57</y>
-     <width>113</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Read current position</string>
-   </property>
-  </widget>
-  <widget class="QuantityWidgetController" name="zStart_2">
-   <property name="geometry">
-    <rect>
-     <x>366</x>
-     <y>58</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QuantityWidgetController" name="yStart_2">
-   <property name="geometry">
-    <rect>
-     <x>247</x>
-     <y>58</y>
-     <width>53</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>128</x>
-     <y>9</y>
-     <width>16</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>x</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>247</x>
-     <y>9</y>
-     <width>16</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>y</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>366</x>
-     <y>9</y>
-     <width>16</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>z</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>86</y>
-     <width>83</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Number of steps:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="numberOfSteps">
-   <property name="geometry">
-    <rect>
-     <x>128</x>
-     <y>86</y>
-     <width>37</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>120</y>
-     <width>591</width>
-     <height>71</height>
-    </rect>
-   </property>
-  </widget>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label_3">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>x</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLabel" name="label_4">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>y</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QLabel" name="label_5">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>z</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Start position:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QuantityWidgetController" name="yStart"/>
+   </item>
+   <item row="4" column="4">
+    <widget class="QPushButton" name="readStartPosition">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Read current position</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Stop position:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QuantityWidgetController" name="yStop"/>
+   </item>
+   <item row="5" column="4">
+    <widget class="QPushButton" name="readStopPosition">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Read current position</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Number of steps:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QSpinBox" name="numberOfSteps"/>
+   </item>
+   <item row="6" column="4">
+    <widget class="QPushButton" name="rehearsePath">
+     <property name="text">
+      <string>Rehearse path</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Generator power:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="PowerWidgetController" name="generatorPower"/>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="text">
+      <string>Generator frequency:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QuantityWidgetController" name="generatorFrequency"/>
+   </item>
+   <item row="10" column="0" colspan="5">
+    <widget class="DropWidget" name="transmittedPower" native="true"/>
+   </item>
+   <item row="11" column="0" colspan="5">
+    <widget class="DropWidget" name="measurement" native="true"/>
+   </item>
+   <item row="7" column="0" colspan="5">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QuantityWidgetController" name="xStart">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QDoubleSpinBox" name="xStop">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QuantityWidgetController" name="zStart">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QDoubleSpinBox" name="zStop">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="5">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4">
+    <widget class="QPushButton" name="startStop">
+     <property name="text">
+      <string>Start</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QProgressBar" name="progress">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>
    <class>QuantityWidgetController</class>
    <extends>QDoubleSpinBox</extends>
    <header>gui.quantitywidget_controller.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DropWidget</class>
+   <extends>QWidget</extends>
+   <header>gui.dropwidget_controller.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PowerWidgetController</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>gui.powerwidget_controller.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

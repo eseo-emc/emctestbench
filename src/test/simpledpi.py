@@ -3,10 +3,13 @@ from device.multimeter import Multimeter
 from device.rfgenerator import RfGenerator
 from device.wattmeter import WattMeter
 from device.switch import SwitchPlatform
-from utility.quantities import Power,PowerRatio,Voltage
+from device.positioner import Positioner
+from device.spectrumanalyzer import SpectrumAnalyzer
+from utility.quantities import Power,PowerRatio,Voltage,Position
 from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
 import time
 from random import gauss
+import numpy
 
 class DummyMultimeter(Multimeter,Device):
     defaultName = 'Dummy Multimeter'
@@ -88,15 +91,55 @@ class DummyWattMeter(WattMeter,Device):
         else:
             return (channel1Power,channel2Power)
         
+class DummyPositioner(Positioner,Device):
+    defaultName = 'Dummy Positioner'    
+    
+    def __init__(self):
+        Device.__init__(self)
+        Positioner.__init__(self)
+        self._position = None
+    def prepare(self):
+        self._position = Position([42,42,42],'mm')
+    def setPosition(self,position):
+        
+        time.sleep(numpy.linalg.norm(position-self._position)/0.1)
+        self._position = position
+        return self.getPosition()
+    def getPosition(self):
+        return self._position
+    
+class DummySpectrumAnalyzer(SpectrumAnalyzer,Device):
+    defaultName = 'Dummy Spectrum Analyzer'
+    
+    def __init__(self,rfGenerator,positioner):
+        SpectrumAnalyzer.__init__(self)
+        Device.__init__(self)
+        
+        self.rfGenerator = rfGenerator
+        self.positioner = positioner
+    
+    def powerAt(self,frequency):
+        noiseFloor = Power(-35,'dBm')
+        if frequency == self.rfGenerator.getFrequency():
+            halfTraceWidth = Position(2.0,'mm')
+            sincPhase = numpy.pi * self.positioner.getPosition()[1] / halfTraceWidth
+            if sincPhase == 0:
+                sincPhase = 0.001
+            return noiseFloor + incidentPower()*(numpy.sin(sincPhase)/sincPhase)**2
+        else:
+            return noiseFloor
 
 rfGenerator = DummyRfGenerator()
 switchPlatform = DummySwitchPlatform()
 switchPlatform.setPreset('bridge')
+positioner = DummyPositioner()
 knownDevices = { \
     'multimeter' : DummyMultimeter(rfGenerator,switchPlatform),
     'rfGenerator' : rfGenerator,
     'wattMeter' : DummyWattMeter(rfGenerator,switchPlatform),
-    'switchPlatform' : switchPlatform \
+    'switchPlatform' : switchPlatform, \
+    'positioner' : positioner, \
+    'spectrumAnalyzer0' : DummySpectrumAnalyzer(rfGenerator,positioner) \
 }
 
 def incidentPower():

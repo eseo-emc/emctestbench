@@ -34,6 +34,7 @@ class ExperimentResultCollection(QObject):
                 experimentresult.ExperimentResult.loadFromFileSystem(fileName)
             except:
                 logging.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),logging.error)
+                raise 
     def append(self,newExperimentResult):
         self.experimentResults.append(newExperimentResult)
         self.extendedWith.emit(newExperimentResult)

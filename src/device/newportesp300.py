@@ -3,6 +3,7 @@ import numpy
 
 from device import ScpiDevice
 from positioner import Positioner
+from utility import quantities
 
 class NewportEsp300Error(object):
     def __init__(self,errorCode,errorDescription,timeStamp):
@@ -32,7 +33,7 @@ class NewportEsp300(Positioner,ScpiDevice):
         self.writeSafe('1 HO') # activate
     def deleteGroup(self):
         self.writeSafe('1 HX')
-    def initialize(self):
+    def prepare(self):
         self.turnOnAndHome()
             
     def popError(self):
@@ -89,20 +90,20 @@ class NewportEsp300(Positioner,ScpiDevice):
         self.createGroup()
         coordinateStrings = self.ask('1 HP?').split(', ')
         self.deleteGroup()
-        return numpy.array([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])])
+        return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
 
     def setLocation(self,newLocation):
         self.createGroup()
-        test.writeSafe('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation))
+        test.writeSafe('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation.asUnit('mm')))
         self.deleteGroup()
         self.waitUntilMotionDone()
         return self.getLocation()
         
 if __name__ == '__main__':
     test = NewportEsp300()
-#     test.initialize()
+#     test.prepare()
 #     while True:
-#         test.initialize()
+#         test.prepare()
 #         for x in numpy.linspace(0,140,15):
 #             test.setLocation([65.+x,-23.,35.])
 #         test.setLocation([0.,0.,0.])

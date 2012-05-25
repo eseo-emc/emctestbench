@@ -99,6 +99,9 @@ class Dommable(object):
         elif element.tagName == 'DpiResult':
             from experiment.dpi import DpiResult
             factory = DpiResult
+        elif element.tagName == 'NearFieldScanResult':
+            from experiment.nearfieldscan import NearFieldScanResult
+            factory = NearFieldScanResult
         elif element.tagName == 'UnitLess':
             from utility.quantities import UnitLess
             factory = UnitLess
@@ -120,6 +123,9 @@ class Dommable(object):
         elif element.tagName == 'Frequency':
             from utility.quantities import Frequency
             factory = Frequency
+        elif element.tagName == 'Position':
+            from utility.quantities import Position
+            factory = Position
         elif element.tagName == 'Boolean':
             from utility.quantities import Boolean
             factory = Boolean
@@ -174,7 +180,6 @@ class Dict(Dommable):
             self.appendChildObject(element,value,name)
             
         return element
-        
         
     def __getitem__(self,key):
         return self._data[key]

@@ -3,6 +3,7 @@ from gui.powerwidget_view import Ui_Form
 from utility import quantities
 
 import sys
+import numpy
 
 
 class QuantityWidgetController(QWidget,Ui_Form):
@@ -10,8 +11,8 @@ class QuantityWidgetController(QWidget,Ui_Form):
         QWidget.__init__(self,parent)
         self.setupUi(self)
         
-        self.value.setMinimum(0)
-        self.value.setMaximum(1e99)
+#        self.value.setMinimum(0)
+#        self.value.setMaximum(1e99)
         self.value.setDecimals(3)
         self.value.setSingleStep(1.)
         
@@ -30,10 +31,18 @@ class QuantityWidgetController(QWidget,Ui_Form):
         self._model = value
         self._fillUnitMenu(self.model.value.storageUnit)
         
+        if not(hasattr(self.model,'minimum')):
+            print 'Warning: QuantityWidget wants a defined minimum'
+            self.model.minimum = type(self.model.value)(0)
+        if not(hasattr(self.model,'maximum')):
+            print 'Warning: QuantityWidget wants a defined maximum'
+            self.model.maximum = type(self.model.value)(+numpy.inf)
+        
         self.update() 
         self.model.changed.connect(self.update)
         self.value.valueChanged.connect(self.valueEntered)
         self.unit.currentIndexChanged.connect(self.update)
+            
     def setReadOnly(self,value):
         self.value.setReadOnly(value)
         
@@ -49,7 +58,10 @@ class QuantityWidgetController(QWidget,Ui_Form):
         
     def update(self):
         self._processChangeSignals -= 1
+        self.value.setMinimum(self.model.minimum.asUnit(str(self.unit.currentText())))
+        self.value.setMaximum(self.model.maximum.asUnit(str(self.unit.currentText())))
         self.value.setValue(self.model.value.asUnit(str(self.unit.currentText())))
+
         self._processChangeSignals += 1
     def valueEntered(self):
         if self._processChangeSignals == 0:
