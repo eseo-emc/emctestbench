@@ -32,14 +32,25 @@ class Singleton(QObject):
         On all subsequent calls, the already created instance is returned.
 
         """
-        try:
-            return getattr(QApplication.instance(),self._decorated.__name__)
-        except AttributeError:
-#            print 'instantiating',self._decorated,'as',self._decorated.__name__
-            
-            setattr(QApplication.instance(),self._decorated.__name__, self._decorated())
-            return getattr(QApplication.instance(),self._decorated.__name__)
-            
+        if QApplication.instance():
+#            print "qapp"
+            try:
+                return getattr(QApplication.instance(),self._decorated.__name__)
+            except AttributeError:
+    #            print 'instantiating',self._decorated,'as',self._decorated.__name__
+                
+                setattr(QApplication.instance(),self._decorated.__name__, self._decorated())
+                return getattr(QApplication.instance(),self._decorated.__name__)
+        else:
+#            print "non-threaded"
+            try:
+                return self._instance
+            except:
+#                print 'instantiating',self._decorated
+    #            if repr(self._decorated) == "<class 'experimentresultcollection.ExperimentResultCollection'>":
+    #                qsdf
+                self._instance = self._decorated()
+                return self._instance
     def __call__(self):
         """
         Call method that raises an exception in order to prevent creation
@@ -56,7 +67,7 @@ if __name__ == '__main__':
         def __init__(self):
             print 'Foo created'
     
-    f = Foo() # Error, this isn't how you get the instance of a singleton
+#    f = Foo() # Error, this isn't how you get the instance of a singleton
     f = Foo.Instance() # Good. Being explicit is in line with the Python Zen
     g = Foo.Instance() # Returns already created instance
     print f is g # True

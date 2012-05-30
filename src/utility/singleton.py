@@ -34,7 +34,7 @@ class Singleton(QObject):
         try:
             return self._instance
         except AttributeError:
-            print 'instantiating',self._decorated
+#            print 'instantiating',self._decorated
 #            if repr(self._decorated) == "<class 'experimentresultcollection.ExperimentResultCollection'>":
 #                qsdf
             self._instance = self._decorated()

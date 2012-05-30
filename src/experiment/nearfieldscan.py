@@ -85,8 +85,8 @@ class NearFieldScan(Experiment,persistance.Dommable):
                 break
             
             logging.LogItem('Passing to {position}'.format(position=position),logging.debug)
-            self.positioner.setPosition(position)
-            measurement = {'position':position}
+            location = self.positioner.setLocation(position)
+            measurement = {'position':location}
             measurement.update( self.transmittedPower.value.measure().data )
             measurement.update( {'received power':self.spectrumAnalyzer.powerAt(self.generatorFrequency.value)})
 #            measurement.update( self.measurement.value.measure() )

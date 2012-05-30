@@ -100,12 +100,12 @@ class DummyPositioner(Positioner,Device):
         self._position = None
     def prepare(self):
         self._position = Position([42,42,42],'mm')
-    def setPosition(self,position):
+    def setLocation(self,position):
         
         time.sleep(numpy.linalg.norm(position-self._position)/0.1)
         self._position = position
-        return self.getPosition()
-    def getPosition(self):
+        return self.getLocation()
+    def getLocation(self):
         return self._position
     
 class DummySpectrumAnalyzer(SpectrumAnalyzer,Device):
@@ -122,7 +122,7 @@ class DummySpectrumAnalyzer(SpectrumAnalyzer,Device):
         noiseFloor = Power(-35,'dBm')
         if frequency == self.rfGenerator.getFrequency():
             halfTraceWidth = Position(2.0,'mm')
-            sincPhase = numpy.pi * self.positioner.getPosition()[1] / halfTraceWidth
+            sincPhase = numpy.pi * self.positioner.getLocation()[1] / halfTraceWidth
             if sincPhase == 0:
                 sincPhase = 0.001
             return noiseFloor + incidentPower()*(numpy.sin(sincPhase)/sincPhase)**2

@@ -3,6 +3,8 @@
 '''
 
 import visa
+from pyvisa import vpp43
+
 import time
 from gui import logging
 from PyQt4.QtCore import QObject,pyqtSignal
@@ -55,32 +57,25 @@ class ScpiDevice(Device):
         self._deviceHandle = None
     @property
     def detailedInformation(self):
-#        return super(ScpiDevice,self).detailedInformation + ' ' + self.visaAddress
         return self.defaultName  + ' ' + self.visaAddress
     
     def write(self,message):
         if not self._deviceHandle:
             self.putOnline()
-        if self.online:
-            self._deviceHandle.write(message)
-        else:
-            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
-            raise
-    def ask(self,message):
-        if not self._deviceHandle:
-            self.putOnline()
-            assert self.online
-#        else:
-#            print 'Would ask from {address}: "{message}"'.format(message=message,address=self.visaAddress)
         try:
-            answer = self._deviceHandle.ask(message)
+            self._deviceHandle.write(message)
         except:
             logging.LogItem(str(sys.exc_info()[1]),logging.error)
-            raise
-        return answer
+#            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
+            raise             
+            
+    def ask(self,message):
+        self.write(message)
+        return self._deviceHandle.read()
             
     def ask_for_values(self,message):
-        return self._deviceHandle.ask_for_values(message)
+        self.write(message)
+        return self._deviceHandle.read_values(message)
     
     def _putOffline(self):
         if self._deviceHandle:
@@ -110,6 +105,8 @@ class ScpiDevice(Device):
         self._putOffline()
     def reset(self):
         self.write('*RST')
+    def clear(self):
+        self.write('CLR')
     def askIdentity(self):
         return self.ask('*IDN?')
     def identify(self):
