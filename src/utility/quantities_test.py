@@ -14,6 +14,8 @@ class Power_test(unittest.TestCase):
 class PowerRatio_test(unittest.TestCase):
     def setUp(self):
         self.testPower = PowerRatio(-3.0,'dB')
+    def test_dB(self):
+        self.assertAlmostEqual(self.testPower.asUnit('dB'),-3.0)
     def test_linear(self):
         self.assertAlmostEqual(self.testPower.linear(),0.5,1)
         

@@ -67,69 +67,69 @@ class Amplitude():
 #        else:
 #            return '{dB:+.1f} dB'.format(dB=dBValue)
 
-class PowerRatio(numpy.ndarray):
-    #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
-    def __new__(cls, value, unit='', info=None):
-        value = numpy.asarray(value) * 1.0 #force values to be floats
-
-        if unit == '':
-            pass         
-        elif unit == 'dB':
-            value = numpy.power(10.,value*0.1) * 1
-        else:
-            raise ValueError, '''Power unit '%s' not recognised.''' % unit
-        
-        newObject = numpy.asarray(value).view(cls)
-        newObject.info = info
-        return newObject
-        
-    def __getitem__(self,itemNumber):
-        singleItem = numpy.ndarray.__getitem__(self,itemNumber)
-        return Power(singleItem)
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.info = getattr(obj, 'info', None)
-            
-    def linear(self):
-        return numpy.asarray(self)
-        
-    def dB(self):
-        if self < 0.:
-            return numpy.NaN
-        elif self == 0.:
-            return -numpy.inf
-        else:
-            return 10.0*log10(self)
-        
-
-        
-    def __repr__(self):
-        return str(self)
-        
-        
-    def __str__(self):
-        def toString(theArray):
-            if theArray.shape == ():
-                #return '{watt:e} W'.format(watt=self.watt())
-                if theArray >= 0:
-                    dBValue = theArray.dB()
-                    prefix = ''
-                else:
-                    dBValue = (-1*theArray)
-                    prefix = '<- '
-                if dBValue == -numpy.inf:
-                    return prefix+'-inf dB'
-                else:
-                    return prefix+'{dB:+.1f} dB'.format(dB=dBValue)
-            else:
-                returnList = []
-                for item in theArray:
-                    returnList.append(toString(item))
-                return '[' + ', '.join(returnList) + ']'
-                
-        return toString(self)
-
+#class PowerRatio(numpy.ndarray):
+#    #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
+#    def __new__(cls, value, unit='', info=None):
+#        value = numpy.asarray(value) * 1.0 #force values to be floats
+#
+#        if unit == '':
+#            pass         
+#        elif unit == 'dB':
+#            value = numpy.power(10.,value*0.1) * 1
+#        else:
+#            raise ValueError, '''Power unit '%s' not recognised.''' % unit
+#        
+#        newObject = numpy.asarray(value).view(cls)
+#        newObject.info = info
+#        return newObject
+#        
+#    def __getitem__(self,itemNumber):
+#        singleItem = numpy.ndarray.__getitem__(self,itemNumber)
+#        return Power(singleItem)
+#
+#    def __array_finalize__(self, obj):
+#        if obj is None: return
+#        self.info = getattr(obj, 'info', None)
+#            
+#    def linear(self):
+#        return numpy.asarray(self)
+#        
+#    def dB(self):
+#        if self < 0.:
+#            return numpy.NaN
+#        elif self == 0.:
+#            return -numpy.inf
+#        else:
+#            return 10.0*log10(self)
+#        
+#
+#        
+#    def __repr__(self):
+#        return str(self)
+#        
+#        
+#    def __str__(self):
+#        def toString(theArray):
+#            if theArray.shape == ():
+#                #return '{watt:e} W'.format(watt=self.watt())
+#                if theArray >= 0:
+#                    dBValue = theArray.dB()
+#                    prefix = ''
+#                else:
+#                    dBValue = (-1*theArray)
+#                    prefix = '<- '
+#                if dBValue == -numpy.inf:
+#                    return prefix+'-inf dB'
+#                else:
+#                    return prefix+'{dB:+.1f} dB'.format(dB=dBValue)
+#            else:
+#                returnList = []
+#                for item in theArray:
+#                    returnList.append(toString(item))
+#                return '[' + ', '.join(returnList) + ']'
+#                
+#        return toString(self)
+#
 
 
 #class UnitLess(float,Dommable):
@@ -220,20 +220,33 @@ def prefixToExponent(prefix):
 
 class DommableDimensionalArray(DommableArray):
     storageUnit = None
+    proportionWithPower = None
     
     def __new__(cls,value,unit=None):
+        value = numpy.asarray(value) * 1.0
         if unit == None:
             unit = cls.storageUnit
-        
-        value = numpy.asarray(value) * 10**cls._getExponent(unit)
+        if unit.startswith('dB'):
+            value = numpy.power(10.,value/(10.*cls.proportionWithPower))
+            unit = unit[2:]
+        value *= 10**cls._getExponent(unit)
         
         return DommableArray.__new__(cls,value)
     @classmethod
     def _getExponent(cls,jointUnit):
         assert jointUnit.endswith(cls.storageUnit),'Requested {jointUnit} does not end with {storageUnit}'.format(jointUnit=jointUnit,storageUnit=cls.storageUnit)
-        return prefixToExponent(jointUnit[:-1*len(cls.storageUnit)])
+        return prefixToExponent(jointUnit[:len(jointUnit)-1*len(cls.storageUnit)])
     def asUnit(self,jointUnit):
-        return numpy.asarray(self)/(10**self._getExponent(jointUnit))
+        if jointUnit.startswith('dB'):
+            dB = True
+            jointUnit = jointUnit[2:]
+        else:
+            dB = False
+        linearResult = numpy.asarray(self)/(10**self._getExponent(jointUnit))
+        if dB:
+            return self.proportionWithPower * 10. *numpy.log10(linearResult)
+        else:
+            return linearResult
     def preferredUnit(self):
         return exponentToPrefix(reasonableExponent(self.min())) + self.storageUnit
         
@@ -263,8 +276,7 @@ class Frequency(DommableDimensionalArray):
         
 class Position(DommableDimensionalArray):
     storageUnit = 'm'
-
-
+    
 class Power(DommableArray):
     storageUnit = 'W'
         
@@ -370,15 +382,60 @@ class Power(DommableArray):
             formatFunction = lambda value : str(value.asUnit())
         return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=separator)
 
-
-
+class PowerRatio(DommableDimensionalArray):
+    storageUnit = ''
+    proportionWithPower = 1
     
+    def linear(self):
+        return self.asUnit()
+    def preferredUnit(self):
+        return 'dB'
+        
+    
+    
+#    def dB(self):
+#        invalid = (lambda linearValue: numpy.NaN)
+#        infinite = (lambda linearValue: -numpy.inf)
+#        decibel = (lambda linearValue: 10.0*numpy.log10(linearValue))
+#        return numpy.piecewise(self,[self < 0.,self == 0.],[invalid,infinite,decibel])
+#        
+#    def asUnit(self,unit=None):
+#        if unit == None:
+#            unit = self.storageUnit
+#        if unit == 1:
+#            return numpy.asarray(self)
+#        elif unit == 'dB':
+#            return self.dB()
+#
+#    def __repr__(self):
+#        return self.__class__.__name__+'('+self.toArrayString()+")"
+#    def __str__(self):
+#        def safeDbFormat(value):
+#            if numpy.isnan(value):
+#                return 'NaN'
+#            if value >= 0:
+#                dBValue = value.dB()
+#                prefix = ''
+#            else:
+#                dBValue = (-1*value).dB()
+#                prefix = '<-- '
+#            if dBValue == -numpy.inf:
+#                return prefix+'-inf dB'
+#            else:
+#                return prefix+'{dB:+.1f} dB'.format(dB=dBValue)
+#        
+#        return self.toArrayString(safeDbFormat)
+#    def toArrayString(self,formatFunction=None,separator=', '):
+#        if not formatFunction:
+#            formatFunction = lambda value : str(value.asUnit())
+#        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=separator)
+
                         
 if __name__ == '__main__':
-    import numpy
-    a = Frequency([1,2 ],'GHz')
-    b= Frequency([1,0],'GHz')
-    print a == b
+#    import numpy
+#    a = Frequency([1,2 ],'GHz')
+#    b= Frequency([1,0],'GHz')
+#    print a == b
 #    print repr(Power([[0.001,0.002],[2.,1.]]))
 #    print repr(Power([2.,1.]))
 #    print repr(Power(2.))
@@ -399,7 +456,9 @@ if __name__ == '__main__':
 #    assert str(test) == '+0.0 dBm'
 #    assert str(test*2.0) == '+3.0 dBm'
 #    
-#    test = PowerRatio(-3.,'dB')
+    test = PowerRatio(20,'dB')
+    print test.asUnit('dB')
+    print test
 #    assert abs(test.linear()-0.5) < 0.1
 #    
 #    test = Power(30,'dBm')+Power(30,'dBm')

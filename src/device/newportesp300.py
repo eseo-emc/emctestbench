@@ -57,7 +57,8 @@ class NewportEsp300(Positioner,ScpiDevice):
     def putOnline(self):
         ScpiDevice.putOnline(self)
 #        self._deviceHandle.term_chars = '\r'
-        self.clear()
+        if self._deviceHandle:
+            self.clear()
 #        self.reset()
 #        self._turnOnAndHome()
     def tearDown(self):

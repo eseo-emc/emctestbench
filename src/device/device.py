@@ -97,6 +97,7 @@ class ScpiDevice(Device):
         else:
             logging.LogItem(self.visaAddress+' was offline',logging.info)
             self.online = False
+        
             
     def popError(self):
         return self.ask('SYSTem:ERRor?')
