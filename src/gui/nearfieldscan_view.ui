@@ -84,7 +84,7 @@
    <item row="4" column="4">
     <widget class="QPushButton" name="readStartPosition">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>Read current position</string>
@@ -110,7 +110,7 @@
    <item row="5" column="4">
     <widget class="QPushButton" name="readStopPosition">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>Read current position</string>

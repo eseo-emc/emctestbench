@@ -10,7 +10,6 @@ class VoltageCriterion(Experiment,persistance.Dommable):
         Experiment.__init__(self)
         self.undisturbedOutputVoltage = Property(quantities.Voltage(0.,'V'),changedSignal=self.settingsChanged)
         self.voltageMargin = Property(quantities.Voltage(100.,'mV'),changedSignal=self.settingsChanged)
-#        self.laresult = Result(self,0.)
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
         self.appendChildObject(element,self.undisturbedOutputVoltage.value,'undisturbed output voltage')

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'nearfieldscan_view.ui'
 #
-# Created: Thu May 24 14:49:23 2012
+# Created: Fri Jun 01 20:47:05 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,7 +62,7 @@ class Ui_Form(object):
         self.yStart.setObjectName(_fromUtf8("yStart"))
         self.gridLayout.addWidget(self.yStart, 4, 2, 1, 1)
         self.readStartPosition = QtGui.QPushButton(Form)
-        self.readStartPosition.setEnabled(False)
+        self.readStartPosition.setEnabled(True)
         self.readStartPosition.setText(QtGui.QApplication.translate("Form", "Read current position", None, QtGui.QApplication.UnicodeUTF8))
         self.readStartPosition.setFlat(False)
         self.readStartPosition.setObjectName(_fromUtf8("readStartPosition"))
@@ -76,7 +76,7 @@ class Ui_Form(object):
         self.yStop.setObjectName(_fromUtf8("yStop"))
         self.gridLayout.addWidget(self.yStop, 5, 2, 1, 1)
         self.readStopPosition = QtGui.QPushButton(Form)
-        self.readStopPosition.setEnabled(False)
+        self.readStopPosition.setEnabled(True)
         self.readStopPosition.setText(QtGui.QApplication.translate("Form", "Read current position", None, QtGui.QApplication.UnicodeUTF8))
         self.readStopPosition.setFlat(False)
         self.readStopPosition.setObjectName(_fromUtf8("readStopPosition"))

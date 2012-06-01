@@ -61,6 +61,9 @@ class NewportEsp300(Positioner,ScpiDevice):
             self.clear()
 #        self.reset()
 #        self._turnOnAndHome()
+    def prepare(self):
+        pass
+
     def tearDown(self):
         self._deleteGroup()
             
@@ -129,14 +132,16 @@ class NewportEsp300(Positioner,ScpiDevice):
             self._turnOnAndHome()
         self._createGroup()
         coordinateStrings = self.ask('1 HP?').split(', ')
+        self._deleteGroup()
         return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
 
     def setLocation(self,newLocation):
         if self.homed is not True:
             self._turnOnAndHome()
         self._createGroup()
-        test.write('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation.asUnit('mm')))
+        self.write('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation.asUnit('mm')))
         self._waitUntilMotionDone()
+        self._deleteGroup()
         return self.getLocation()
         
 if __name__ == '__main__':

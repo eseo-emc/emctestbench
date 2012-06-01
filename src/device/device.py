@@ -65,9 +65,9 @@ class ScpiDevice(Device):
         try:
             self._deviceHandle.write(message)
         except:
-            logging.LogItem(str(sys.exc_info()[1]),logging.error)
-#            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
-            raise             
+#            logging.LogItem(str(sys.exc_info()[1]),logging.error)
+            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
+#            raise             
             
     def ask(self,message):
         self.write(message)

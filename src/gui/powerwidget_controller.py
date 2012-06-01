@@ -24,7 +24,11 @@ class PowerWidgetController(QWidget,Ui_Form):
     def model(self,value):
         self._model = value
         self.update()        
-        
+        self.model.changed.connect(self.update)
+    
+    def setReadOnly(self,value):
+        self.value.setReadOnly(value)
+    
     def update(self):
         self._processChangeSignals = False
         if self.unit.currentText() == 'W':
@@ -38,7 +42,7 @@ class PowerWidgetController(QWidget,Ui_Form):
             self.value.setMinimum(-200.)
             self.value.setMaximum(50.)
             
-        self.value.setValue(self.model.value.asUnit(self.unit.currentText()))
+        self.value.setValue(self.model.value.asUnit(str(self.unit.currentText())))
         self._processChangeSignals = True
     def valueEntered(self):
         if self._processChangeSignals:

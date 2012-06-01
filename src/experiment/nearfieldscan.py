@@ -21,15 +21,15 @@ class NearFieldScan(Experiment,persistance.Dommable):
     def __init__(self):
         Experiment.__init__(self)
         self.transmittedPower = ExperimentSlot(parent=self,defaultValue='TransmittedPower')
-        self.measurement = ExperimentSlot(parent=self) #,defaultValue='VoltageCriterion')
+        self.measurement = ExperimentSlot(parent=self,defaultValue='ReceivedPower') #,defaultValue='VoltageCriterion')
         
         self.generatorPower = Property(Power(+10,'dBm'),changedSignal=self.settingsChanged)
         self.generatorFrequency = ScalarProperty(Frequency(1,'GHz'),changedSignal=self.settingsChanged,minimum=Frequency(1,'Hz'))
 
         self.startPosition = ScalarProperty(Position(-5,'mm'),changedSignal=self.settingsChanged)
         self.stopPosition = ScalarProperty(Position(5,'mm'),changedSignal=self.settingsChanged)
-        self.xPosition = ScalarProperty(Position(1,'mm'),changedSignal=self.settingsChanged)
-        self.zPosition = ScalarProperty(Position(1,'mm'),changedSignal=self.settingsChanged)
+        self.xPosition = ScalarProperty(Position(113,'mm'),changedSignal=self.settingsChanged)
+        self.zPosition = ScalarProperty(Position(84,'mm'),changedSignal=self.settingsChanged)
         
         self.numberOfSteps = Property(11,changedSignal=self.settingsChanged)
         
@@ -54,14 +54,20 @@ class NearFieldScan(Experiment,persistance.Dommable):
         
         return linearSteps(startPosition,stopPosition,self.numberOfSteps.value)
     
+    def readStartPosition(self):
+        location = self.positioner.getLocation()
+        self.startPosition.value = location[1]
+        self.xPosition.value = location[0]
+        self.zPosition.value = location[2]
+    
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
         self.positioner = knownDevices['positioner']
-        self.spectrumAnalyzer = knownDevices['spectrumAnalyzer0']
+        
         
         self.transmittedPower.value.connect()
-#        self.measurement.value.connect()
+        self.measurement.value.connect()
     def prepare(self):
         self.switchPlatform.setPreset('bridge')
         self.rfGenerator.enableOutput(False)
@@ -88,13 +94,14 @@ class NearFieldScan(Experiment,persistance.Dommable):
             location = self.positioner.setLocation(position)
             measurement = {'position':location}
             measurement.update( self.transmittedPower.value.measure().data )
-            measurement.update( {'received power':self.spectrumAnalyzer.powerAt(self.generatorFrequency.value)})
-#            measurement.update( self.measurement.value.measure() )
+#            measurement.update( {'received power':self.spectrumAnalyzer.powerAt(self.generatorFrequency.value)})
+            measurement.update( self.measurement.value.measure().data )
             result.append(measurement)
 
             self.progressed.emit(int(float(number+1)/self.numberOfSteps.value*100.))
             
-        self.rfGenerator.enableOutput(False)
+        self.rfGenerator.tearDown()
+        self.positioner.tearDown()
         
         self.finished.emit()
         logging.LogItem('Finished Near Field Scan',logging.success)

@@ -117,7 +117,8 @@ class DummySpectrumAnalyzer(SpectrumAnalyzer,Device):
         
         self.rfGenerator = rfGenerator
         self.positioner = positioner
-    
+    def reset(self):
+        pass
     def powerAt(self,frequency):
         noiseFloor = Power(-35,'dBm')
         if frequency == self.rfGenerator.getFrequency():

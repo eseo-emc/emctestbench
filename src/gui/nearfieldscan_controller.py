@@ -9,6 +9,8 @@ class NearFieldScanController(TopLevelExperimentController,Ui_Form):
         self.measurement.label = 'Measurement'        
 
     def setModel(self):
+        self.model.connect()        
+        
         #TODO: create three-dimensional position property controller
         self.xStart.model = self.model.xPosition
         self.yStart.model = self.model.startPosition        
@@ -24,6 +26,8 @@ class NearFieldScanController(TopLevelExperimentController,Ui_Form):
         
         self.measurement.model = self.model.measurement
         self.transmittedPower.model = self.model.transmittedPower
+        
+        self.readStartPosition.clicked.connect(self.model.readStartPosition)
 
     def enableInputs(self,enable):
         self.xStart.setEnabled(enable)    

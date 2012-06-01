@@ -1,6 +1,6 @@
 from rfgenerator import RfGenerator
 from device import ScpiDevice
-from utility.quantities import Amplitude,Power
+from utility.quantities import Amplitude,Power,Frequency
 
 class AgilentN5181a(RfGenerator,ScpiDevice):
     defaultName = 'Agilent N5181A RF Signal Generator'
@@ -23,9 +23,9 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
         powerString = self.ask(':SOURce:POWer:LEVel:IMMediate:AMPLitude?')
         return Power(float(powerString),'dBm')*self.getOutputEnable() 
     def setFrequency(self,frequency):
-        self.write(':SOURce:FREQuency:CW %e Hz' % (frequency))
+        self.write(':SOURce:FREQuency:CW %e Hz' % (frequency.asUnit('Hz')))
     def getFrequency(self):
-        return float(self.ask(':SOURce:FREQuency:CW?'))
+        return Frequency(float(self.ask(':SOURce:FREQuency:CW?')),'Hz')
     def setPower(self,power):
         setPowerString = ':SOURce:POWer:LEVel:IMMediate:AMPLitude {power:e} dBm'.format(power=power.dBm())
 #        print setPowerString
@@ -35,6 +35,8 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
             self.write('OUTPut ON')
         else:
             self.write('OUTPut OFF')
+    def tearDown(self):
+        self.enableOutput(False)
 
 if __name__ == '__main__':
     device = AgilentN5181a()
