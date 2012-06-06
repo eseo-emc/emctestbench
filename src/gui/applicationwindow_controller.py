@@ -17,7 +17,7 @@ import string
 class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setupUi(self)     
+        self.setupUi(self) 
         
         self.topLevelExperiment = ExperimentSlot(parent=None)
         self.mainDropWidget.model = self.topLevelExperiment
@@ -37,7 +37,6 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         
         
         
-
         logging.LogItem("EMC Testbench started",logging.info)
         self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(logging.warning))
         self.actionInfo.triggered.connect(lambda : self.logView.setLevel(logging.info))

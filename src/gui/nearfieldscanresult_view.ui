@@ -37,6 +37,9 @@
       </property>
       <item>
        <widget class="QCheckBox" name="transmittedPower">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string>Transmitted power</string>
         </property>

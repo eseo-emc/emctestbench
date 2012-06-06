@@ -93,6 +93,9 @@ class Dommable(object):
         if element.tagName == 'Power':
             from utility.quantities import Power
             factory = Power
+        elif element.tagName == 'PowerRatio':
+            from utility.quantities import PowerRatio
+            factory = PowerRatio
         elif element.tagName == 'Voltage':
             from utility.quantities import Voltage
             factory = Voltage
