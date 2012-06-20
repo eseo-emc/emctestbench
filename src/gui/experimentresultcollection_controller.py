@@ -1,11 +1,10 @@
-from PyQt4.QtGui import QWidget,QIcon,QMenu,QAction,QFileDialog
+from PyQt4 import uic
+
+from PyQt4.QtGui import QIcon,QMenu,QAction,QFileDialog
 from PyQt4.QtCore import pyqtSignal
-from gui.experimentresultcollection_view import Ui_ExperimentResultCollection
 from gui.experimentresultcollection import ExperimentResultCollection
 
 from PyQt4.QtGui import QTreeWidgetItem
-
-import logging
 
 class ExperimentResultTreeItem(QTreeWidgetItem):   
     def __init__(self,parent=None):
@@ -51,14 +50,15 @@ class ExperimentResultItem(ExperimentResultTreeItem):
             fileName = selectedExportFunction.exportType.appendExtensionToFileName( str(dialog.selectedFiles()[0]) )
             selectedExportFunction(fileName)
 
-        
-    
-class ExperimentResultCollectionController(QWidget,Ui_ExperimentResultCollection):
+
+formClass, qtBaseClass = uic.loadUiType('experimentresultcollection_view.ui')
+  
+class ExperimentResultCollectionController(qtBaseClass,formClass):
     experimentResultSelected = pyqtSignal(object)
     changed = pyqtSignal()
     
     def __init__(self,parent=None):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)
         
         self.model = ExperimentResultCollection.Instance()

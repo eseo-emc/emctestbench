@@ -1,7 +1,9 @@
 from gui.toplevelexperiment_controller import TopLevelExperimentController
-from gui.nearfieldscan_view import Ui_Form
 
-class NearFieldScanController(TopLevelExperimentController,Ui_Form):
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('nearfieldscan_view.ui')
+
+class NearFieldScanController(TopLevelExperimentController,formClass):
     def __init__(self,parent,topLevel=True):
         TopLevelExperimentController.__init__(self,parent,topLevel)
         
@@ -17,9 +19,7 @@ class NearFieldScanController(TopLevelExperimentController,Ui_Form):
         self.yStop.model = self.model.stopPosition
         self.zStart.model = self.model.zPosition        
         
-        #TODO: create integer property controller
-        self.numberOfSteps.setValue(self.model.numberOfSteps.value)
-        self.numberOfSteps.valueChanged.connect(self.model.numberOfSteps.setValue)
+        self.numberOfSteps.model = self.model.numberOfSteps
 
         self.generatorPower.model = self.model.generatorPower
         self.generatorFrequency.model = self.model.generatorFrequency

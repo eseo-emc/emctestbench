@@ -1,12 +1,9 @@
-from PyQt4.QtCore import pyqtSignal
 from gui.toplevelexperiment_controller import TopLevelExperimentController
 
-from gui.dpi_view import Ui_Form
-from experiment.dpi import Dpi
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('dpi_view.ui')
 
-import numpy
-
-class DpiController(TopLevelExperimentController,Ui_Form):
+class DpiController(TopLevelExperimentController,formClass):
     def __init__(self,parent,topLevel=True):
         TopLevelExperimentController.__init__(self,parent,topLevel)
                
@@ -20,8 +17,7 @@ class DpiController(TopLevelExperimentController,Ui_Form):
         self.frequencyMinimum.model = self.model.frequencies.start
         self.frequencyMaximum.model = self.model.frequencies.stop
         
-        self.frequencySteps.setValue(self.model.frequencies.numberOfPoints.value)
-        self.frequencySteps.valueChanged.connect(self.model.frequencies.numberOfPoints.setValue)
+        self.frequencySteps.model = self.model.frequencies.numberOfPoints
         
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)     

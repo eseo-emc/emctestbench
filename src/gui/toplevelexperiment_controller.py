@@ -5,7 +5,7 @@ class TopLevelExperimentController(QWidget):
         QWidget.__init__(self,parent)
         self.setupUi(self)  
         
-        self.topLevel = topLevel # shoudl be abolished
+        self.topLevel = topLevel # should be abolished
         self._model = None  
     
     @property

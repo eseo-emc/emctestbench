@@ -1,9 +1,9 @@
 from device import knownDevices
 from experiment import Experiment,ExperimentSlot,Property,ScalarProperty,SweepRange
-from utility.quantities import Power,Position,Frequency
+from utility.quantities import Power,Position,Frequency,Integer
 from result import persistance
 import numpy
-from gui import logging
+from gui import log
 from copy import deepcopy
 
 from result.resultset import ResultSet,exportFunction
@@ -31,7 +31,7 @@ class NearFieldScan(Experiment,persistance.Dommable):
         self.xPosition = ScalarProperty(Position(113,'mm'),changedSignal=self.settingsChanged)
         self.zPosition = ScalarProperty(Position(84,'mm'),changedSignal=self.settingsChanged)
         
-        self.numberOfSteps = Property(11,changedSignal=self.settingsChanged)
+        self.numberOfSteps = ScalarProperty(Integer(11),minimum=Integer(1),maximum=Integer(10001),changedSignal=self.settingsChanged)
         
 #    def asDom(self,parent):
 #        element = persistance.Dommable.asDom(self,parent)
@@ -90,7 +90,7 @@ class NearFieldScan(Experiment,persistance.Dommable):
             if self.stopRequested:
                 break
             
-            logging.LogItem('Passing to {position}'.format(position=position),logging.debug)
+            log.LogItem('Passing to {position}'.format(position=position),log.debug)
             location = self.positioner.setLocation(position)
             measurement = {'position':location}
             measurement.update( self.transmittedPower.value.measure().data )
@@ -104,7 +104,7 @@ class NearFieldScan(Experiment,persistance.Dommable):
         self.positioner.tearDown()
         
         self.finished.emit()
-        logging.LogItem('Finished Near Field Scan',logging.success)
+        log.LogItem('Finished Near Field Scan',log.success)
         
         self.stopRequested = False
         
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 #    from transmittedpower import TransmittedPower
 #    
 #    
-#    logging.LogModel.Instance().gui = False
+#    log.LogModel.Instance().gui = False
 #
 #
 #

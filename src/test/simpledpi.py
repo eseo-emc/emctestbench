@@ -32,6 +32,8 @@ class DummyRfGenerator(RfGenerator,Device):
         self._enableOutput = False
         self._frequency = 300e3
         Device.__init__(self)
+    def tearDown(self):
+        self.enableOutput(False)
     def setPower(self,newPower):
         self._power = newPower
     def setFrequency(self,newFrequency):
@@ -100,6 +102,8 @@ class DummyPositioner(Positioner,Device):
         self._position = None
     def prepare(self):
         self._position = Position([42,42,42],'mm')
+    def tearDown(self):
+        pass
     def setLocation(self,position):
         
         time.sleep(numpy.linalg.norm(position-self._position)/0.1)

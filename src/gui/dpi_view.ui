@@ -94,22 +94,6 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="frequencySteps">
-       <property name="decimals">
-        <number>0</number>
-       </property>
-       <property name="minimum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>10000.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>101.000000000000000</double>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="2">
       <widget class="QLabel" name="label_11">
        <property name="text">
@@ -168,6 +152,9 @@
        </property>
       </widget>
      </item>
+     <item row="3" column="1">
+      <widget class="IntegerWidgetController" name="frequencySteps"/>
+     </item>
     </layout>
    </item>
    <item>
@@ -180,6 +167,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QuantityWidgetController</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>gui.quantitywidget_controller.h</header>
+  </customwidget>
+  <customwidget>
    <class>DropWidget</class>
    <extends>QWidget</extends>
    <header>gui.dropwidget_controller.h</header>
@@ -191,9 +183,9 @@
    <header>gui.powerwidget_controller.h</header>
   </customwidget>
   <customwidget>
-   <class>QuantityWidgetController</class>
-   <extends>QDoubleSpinBox</extends>
-   <header>quantitywidget_controller.h</header>
+   <class>IntegerWidgetController</class>
+   <extends>QSpinBox</extends>
+   <header>gui.integerwidget_controller.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -1,11 +1,9 @@
-from PyQt4.QtGui import QWidget
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('scalarresult_view.ui')
 
-from gui.scalarresult_view import Ui_ScalarResult
-
-
-class ScalarResultController(QWidget,Ui_ScalarResult):
+class ScalarResultController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)  
         
         self._model = None
@@ -22,9 +20,6 @@ class ScalarResultController(QWidget,Ui_ScalarResult):
     def update(self,newData):
         self.textView.setText(str(newData))
         
-
-        
-
 
 if __name__ == '__main__':
     import sys

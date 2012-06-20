@@ -1,14 +1,13 @@
-from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import Qt
-from gui.dropwidget_view import Ui_Form
 
-import logging
-import sys
 import string
 
-class DropWidget(QWidget,Ui_Form):
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('dropwidget_view.ui')
+
+class DropWidget(qtBaseClass,formClass):
     def __init__(self,parent,topLevel=False):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)
         self.topLevel = topLevel
         
@@ -72,6 +71,6 @@ from {moduleName} import {controllerName}
 self.activeExperimentController = {controllerName}(self.frame,topLevel={topLevel})
 self.verticalLayout_2.addWidget(self.activeExperimentController)'''.format(moduleName=string.lower(experimentName)+'_controller',controllerName=experimentName+'Controller',topLevel=self.topLevel))
     #        except:
-    #            logging.LogItem(sys.exc_info()[1],logging.error)
+    #            log.LogItem(sys.exc_info()[1],log.error)
             self.activeExperimentController.model = experiment
         self._updateLabel()

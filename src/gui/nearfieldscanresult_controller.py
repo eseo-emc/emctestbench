@@ -1,9 +1,9 @@
-from PyQt4.QtGui import QWidget
-from gui.nearfieldscanresult_view import Ui_NearFieldScanResult
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('nearfieldscanresult_view.ui')
 
-class NearFieldScanResultController(QWidget,Ui_NearFieldScanResult):
+class NearFieldScanResultController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)  
         
         self._model = None

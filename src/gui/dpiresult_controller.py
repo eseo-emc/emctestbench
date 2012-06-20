@@ -1,9 +1,9 @@
-from PyQt4.QtGui import QWidget
-from gui.dpiresult_view import Ui_DpiResult
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('dpiresult_view.ui')
 
-class DpiResultController(QWidget,Ui_DpiResult):
+class DpiResultController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)  
         
         self._model = None

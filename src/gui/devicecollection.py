@@ -4,7 +4,7 @@ from device import knownDevices,Device
 
 from PyQt4.QtGui import QApplication
 
-import logging
+import log
 import inspect
 
 @Singleton

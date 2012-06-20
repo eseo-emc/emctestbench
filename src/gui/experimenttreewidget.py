@@ -4,7 +4,7 @@ from PyQt4.QtCore import Qt
 
 from experimentcollection import ExperimentCollection
 from devicecollection import DeviceCollection
-#import logging
+#import log
 
 class ExperimentTreeItem(QTreeWidgetItem):   
     def __init__(self,parent=None,name=None):

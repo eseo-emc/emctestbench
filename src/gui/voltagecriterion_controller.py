@@ -1,18 +1,12 @@
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QWidget
-
-from gui.voltagecriterion_view import Ui_Form
-from experiment.voltagecriterion import VoltageCriterion
-
-from experimentresult import ExperimentResult
 from experiment import experiment
 from utility import quantities
 
-import numpy
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('voltagecriterion_view.ui')
 
-class VoltageCriterionController(QWidget,Ui_Form):
+class VoltageCriterionController(qtBaseClass,formClass):
     def __init__(self,parent,topLevel=True):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self) 
         self.topLevel = topLevel
         

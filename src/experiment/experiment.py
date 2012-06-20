@@ -3,6 +3,7 @@ from PyQt4.QtCore import pyqtSignal
 import numpy
 import string
 
+from utility.quantities import Integer
 from result.persistance import Dommable
 from gui.experimentresult import ExperimentResult
 
@@ -23,9 +24,13 @@ class Property(QObject):
     @value.setter
     def value(self,value):
         self.setValue(value)
-    def setValue(self,value):
+    def _cast(self,value):
         if self._castTo is not None:
-            value = self._castTo(value)
+            return self._castTo(value)
+        else:
+            return value
+    def setValue(self,value):
+        value = self._cast(value)
         self._value = value
         self._emitChanged()
     def _emitChanged(self):
@@ -71,7 +76,8 @@ class SweepRange(Dommable):
     def __init__(self,startValue=0,stopValue=1,numberOfPoints=101,logarithmic=False,changedSignal=None):
         self.start = Property(startValue,changedSignal=changedSignal)
         self.stop = Property(stopValue,changedSignal=changedSignal)
-        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal,castTo=int)
+        self.numberOfPoints = ScalarProperty(Integer(numberOfPoints),minimum=Integer(1),maximum=Integer(10001))
+#        self.numberOfPoints = Property(numberOfPoints,changedSignal=changedSignal,castTo=int)
         self.logarithmic = Property(logarithmic,changedSignal=changedSignal)
     @property
     def values(self):

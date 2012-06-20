@@ -3,7 +3,7 @@ from experiment import Experiment,ExperimentSlot,Property,SweepRange
 from utility.quantities import Power,PowerRatio,Frequency
 from result import persistance
 import numpy
-from gui import logging
+from gui import log
 from copy import deepcopy
 
 from result.resultset import ResultSet,exportFunction
@@ -45,7 +45,7 @@ class DpiResult(ResultSet):
         try:
             fileHandle = open(fileName,'wb')
         except:
-            logging.LogItem(sys.exc_info()[1],logging.error)
+            log.LogItem(sys.exc_info()[1],log.error)
         tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
         writer = csv.DictWriter(fileHandle,tableHeaders,dialect='excel-tab')
         writer.writeheader()
@@ -79,7 +79,7 @@ class Dpi(Experiment,persistance.Dommable):
         self.powerMinimum = Property(Power(-30.,'dBm'),changedSignal=self.settingsChanged)
 
         self.powerMaximum = Property(Power(+15.,'dBm'),changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(Frequency(150e3),Frequency(1500e6),11,changedSignal=self.settingsChanged) 
+        self.frequencies = SweepRange(Frequency(150e3),Frequency(1500e6),21,changedSignal=self.settingsChanged) 
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
         self.appendChildObject(element,self.passCriterion.value,'pass criterion')
@@ -129,16 +129,16 @@ class Dpi(Experiment,persistance.Dommable):
                 return passNotFail
             # make it work
             for tryPower in Power(inclusiveRange(startPower.dBm(),self.powerMinimum.value.dBm(),-stepSizes[stepIndex]),'dBm'):
-                logging.LogItem('Try to make the test pass with {tryPower}...'.format(tryPower=tryPower),logging.debug)
+                log.LogItem('Try to make the test pass with {tryPower}...'.format(tryPower=tryPower),log.debug)
                 if measureAndSavePass(tryPower):
                     break
             else:
-                logging.LogItem('Did not succeed to make the test pass with {tryPower}...'.format(tryPower=tryPower),logging.warning)
+                log.LogItem('Did not succeed to make the test pass with {tryPower}...'.format(tryPower=tryPower),log.warning)
                 return tryPower
                 
             # make it fail
             for tryPower in Power(inclusiveRange(tryPower.dBm()+stepSizes[stepIndex],self.powerMaximum.value.dBm(),stepSizes[stepIndex]),'dBm'):
-                logging.LogItem('Try to make the test fail with {tryPower}...'.format(tryPower=tryPower),logging.debug)
+                log.LogItem('Try to make the test fail with {tryPower}...'.format(tryPower=tryPower),log.debug)
                 if not measureAndSavePass(tryPower):
                     break
             else:
@@ -155,7 +155,7 @@ class Dpi(Experiment,persistance.Dommable):
             if self.stopRequested:
                 break
             self.rfGenerator.setFrequency(frequency)
-            logging.LogItem('Passing to {frequency}'.format(frequency=frequency),logging.debug)
+            log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.value.measure()
             result.append({'injection frequency':frequency,
@@ -171,7 +171,7 @@ class Dpi(Experiment,persistance.Dommable):
         self.rfGenerator.enableOutput(False)
         
         self.finished.emit()
-        logging.LogItem('Finished DPI',logging.success)
+        log.LogItem('Finished DPI',log.success)
         
         self.stopRequested = False
         
@@ -188,7 +188,7 @@ if __name__ == '__main__':
 #    from transmittedpower import TransmittedPower
 #    
 #    
-#    logging.LogModel.Instance().gui = False
+#    log.LogModel.Instance().gui = False
 #
 #
 #

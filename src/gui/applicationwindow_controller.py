@@ -1,22 +1,21 @@
 # MEMO
-# To compile the UI:
-#    pyuic4 applicationwindow_view.ui > applicationwindow_view.py
 # To compile the resources:
 #    pyrcc4 icons\icons.qrc > icons_rc.py
 
-
-from PyQt4.QtGui import QMainWindow, QMessageBox,QDockWidget,QApplication
+from PyQt4.QtGui import QMessageBox,QDockWidget,QApplication
 from PyQt4.QtCore import Qt
-from gui.applicationwindow_view import Ui_ApplicationWindow
 from gui.applicationwindow_model import ApplicationWindowModel
-from gui import logging
+from gui import log
 from experiment.experiment import ExperimentSlot
 
 import string
 
-class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('applicationwindow_view.ui')
+
+class ApplicationWindowController(qtBaseClass,formClass):
     def __init__(self):
-        QMainWindow.__init__(self)
+        qtBaseClass.__init__(self)
         self.setupUi(self) 
         
         self.topLevelExperiment = ExperimentSlot(parent=None)
@@ -37,10 +36,10 @@ class ApplicationWindowController(QMainWindow,Ui_ApplicationWindow):
         
         
         
-        logging.LogItem("EMC Testbench started",logging.info)
-        self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(logging.warning))
-        self.actionInfo.triggered.connect(lambda : self.logView.setLevel(logging.info))
-        self.actionDebug.triggered.connect(lambda : self.logView.setLevel(logging.debug))
+        log.LogItem("EMC Testbench started",log.info)
+        self.actionErrors_only.triggered.connect(lambda : self.logView.setLevel(log.warning))
+        self.actionInfo.triggered.connect(lambda : self.logView.setLevel(log.info))
+        self.actionDebug.triggered.connect(lambda : self.logView.setLevel(log.debug))
         
         self.actionTree_left.triggered.connect(self.placeTreeLeft)
         self.actionTree_on_top.triggered.connect(self.placeTreeOnTop)
@@ -103,13 +102,13 @@ self.resultVerticalLayout.addWidget(self.activeResultController)
         self.activeResultController.model = experimentResult.result
         self.resultViewer.raise_()
 #        except:
-#            logging.LogItem(sys.exc_info()[1],logging.error)         
+#            log.LogItem(sys.exc_info()[1],log.error)         
     
     def showExperimentResultTree(self):
         self.mainTabWidget.setCurrentIndex(0)
     
     def aboutToQuit(self):
-        logging.LogItem('Bye!')
+        log.LogItem('Bye!')
     def about(self):
         progname = 'EMC Testbench'
         progversion = 0.1

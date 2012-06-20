@@ -1,13 +1,13 @@
-from PyQt4.QtGui import QWidget,QIcon
-from gui.passfailwidget_view import Ui_Form
+from PyQt4.QtGui import QIcon
 
-import logging
 import sys
-import string
 
-class PassFailWidget(QWidget,Ui_Form):
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('passfailwidget_view.ui')
+
+class PassFailWidget(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)
         
         self.passNotFail = None

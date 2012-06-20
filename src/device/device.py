@@ -6,7 +6,7 @@ import visa
 from pyvisa import vpp43
 
 import time
-from gui import logging
+from gui import log
 from PyQt4.QtCore import QObject,pyqtSignal
 import sys
 
@@ -43,10 +43,10 @@ class Device(QObject):
     def test(self):
         print 'Test'
     def putOnline(self):
-        logging.LogItem(str(self)+' has no putOnline implementation.',logging.warning)
+        log.LogItem(str(self)+' has no putOnline implementation.',log.warning)
         return False
     def drawAttention(self):
-        logging.LogItem(str(self)+' has no drawAttention implementation.',logging.warning)
+        log.LogItem(str(self)+' has no drawAttention implementation.',log.warning)
     
 class ScpiDevice(Device):
     def __init__(self,visaAddress=None,name=None):
@@ -65,8 +65,8 @@ class ScpiDevice(Device):
         try:
             self._deviceHandle.write(message)
         except:
-#            logging.LogItem(str(sys.exc_info()[1]),logging.error)
-            logging.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),logging.error)
+#            log.LogItem(str(sys.exc_info()[1]),log.error)
+            log.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),log.error)
 #            raise             
             
     def ask(self,message):
@@ -85,17 +85,17 @@ class ScpiDevice(Device):
         
     def putOnline(self):
         self._putOffline() #TODO: find a way of checking the status of a connection, disconnecting every time is a bit expensive
-        logging.LogItem('Trying to connect to '+self.visaAddress+'...',logging.debug)
+        log.LogItem('Trying to connect to '+self.visaAddress+'...',log.debug)
         if self._deviceHandle == None:
             try:
                 self._deviceHandle = visa.instrument(self.visaAddress)
             except Exception:
                 pass
         if self._deviceHandle:
-            logging.LogItem('Connected, verifiying identity of '+self.visaAddress+'...',logging.debug)
+            log.LogItem('Connected, verifiying identity of '+self.visaAddress+'...',log.debug)
             self.online = self.identify()
         else:
-            logging.LogItem(self.visaAddress+' was offline',logging.info)
+            log.LogItem(self.visaAddress+' was offline',log.info)
             self.online = False
         
             
@@ -113,10 +113,10 @@ class ScpiDevice(Device):
     def identify(self):
         identityString = self.askIdentity()
         if identityString.startswith(self.visaIdentificationStartsWith):
-            logging.LogItem('Identify succes, got "'+identityString+'".',logging.debug)
+            log.LogItem('Identify succes, got "'+identityString+'".',log.debug)
             return True
         else:
-            logging.LogItem('Failed to identify, got "'+identityString+'", expected it to start with "'+self.visaIdentificationStartsWith+'"',logging.warning)
+            log.LogItem('Failed to identify, got "'+identityString+'", expected it to start with "'+self.visaIdentificationStartsWith+'"',log.warning)
             return False
         
     def drawAttention(self):

@@ -1,22 +1,20 @@
-from PyQt4.QtGui import QWidget
-from gui.powerwidget_view import Ui_Form
 from utility import quantities
 
 import sys
 import numpy
 
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('powerwidget_view.ui')
 
-class QuantityWidgetController(QWidget,Ui_Form):
+class QuantityWidgetController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)
         
 #        self.value.setMinimum(0)
 #        self.value.setMaximum(1e99)
         self.value.setDecimals(3)
         self.value.setSingleStep(1.)
-        
-        
         
         self._processChangeSignals = 0
         

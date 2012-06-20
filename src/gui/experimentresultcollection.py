@@ -6,7 +6,7 @@ import experimentresult
 import glob
 import os
 import sys
-import logging
+import log
         
 
 @Singleton
@@ -33,7 +33,7 @@ class ExperimentResultCollection(QObject):
             try:
                 experimentresult.ExperimentResult.loadFromFileSystem(fileName)
             except:
-                logging.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),logging.error)
+                log.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),log.error)
                 raise 
     def append(self,newExperimentResult):
         self.experimentResults.append(newExperimentResult)

@@ -1,7 +1,7 @@
 from PyQt4.QtGui import QStandardItemModel,QStandardItem,QIcon
 
 from device import knownDevices
-import logging
+import log
 from experimentcollection import ExperimentCollection
 from devicecollection import DeviceCollection
 from experimentresultcollection import ExperimentResultCollection
@@ -15,11 +15,11 @@ class ApplicationWindowModel(object):
     def tryToConnectDevices(self):
         for deviceItemNumber in [0]: #range(self.devices.rowCount()):
             device = self.devices.child(deviceItemNumber).device
-            logging.LogItem('Refreshing ' + str(device),logging.info)
+            log.LogItem('Refreshing ' + str(device),log.info)
             try:
                 device.tryConnect()
             except Exception, errorDetail:
-                logging.LogItem(str(errorDetail),logging.error)
+                log.LogItem(str(errorDetail),log.error)
     def treeContextMenuRequested(self,point):
         print 'customContextMenuRequested'
         index = self.systemTreeModel.indexAt(point)

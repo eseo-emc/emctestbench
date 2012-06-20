@@ -1,7 +1,7 @@
 #from PyQt4.QtGui import QApplication,QDesktopServices
 from PyQt4.QtCore import QObject,pyqtSignal
 
-#import logging
+#import log
 #import inspect
 
 #from device import knownDevices,Device

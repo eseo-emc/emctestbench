@@ -1,13 +1,12 @@
-from PyQt4.QtGui import QWidget
-from gui.powerwidget_view import Ui_Form
 from utility import quantities
-
 import sys
 
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('powerwidget_view.ui')
 
-class PowerWidgetController(QWidget,Ui_Form):
+class PowerWidgetController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)
         
         self.value.valueChanged.connect(self.valueEntered)

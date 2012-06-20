@@ -1,12 +1,12 @@
 from PyQt4.QtGui import QTableWidget,QTableWidgetItem,QHeaderView,QIcon,QMessageBox
 from PyQt4.QtCore import QObject
-import logging
+import log
 
 
 class StdOutLogView(QObject):
     def __init__(self):
         QObject.__init__(self)
-        self.logModel = logging.LogModel.Instance()
+        self.logModel = log.LogModel.Instance()
         self.logModel.itemAdded.connect(self.update)
     def update(self,item):
         print str(item)
@@ -15,21 +15,21 @@ class StdOutLogView(QObject):
 class LogWidget(QTableWidget):
     def __init__(self,parent):
         QTableWidget.__init__(self,parent)
-        self.logModel = logging.LogModel.Instance()
+        self.logModel = log.LogModel.Instance()
         self.logModel.itemAdded.connect(self.update)      
-        self.maximumLevel = logging.warning
+        self.maximumLevel = log.warning
     def setLevel(self,level):
         self.maximumLevel = level
-        self.update()
+        self.updateList()
     def iconForItem(self,logItem):
-        return QIcon(':/logging/'+logging.logLevels[logItem.level])
+        return QIcon(':/logging/'+log.logLevels[logItem.level])
     def update(self,item):
         self.showDialog(item)
         self.updateList()
     def showDialog(self,item):
-        if item.level <= logging.error:
-            icon = (QMessageBox.Critical if item.level == logging.error else QMessageBox.Information)
-            title = 'EmcTestbench ' + logging.logLevels[item.level]
+        if item.level <= log.error:
+            icon = (QMessageBox.Critical if item.level == log.error else QMessageBox.Information)
+            title = 'EmcTestbench ' + log.logLevels[item.level]
             QMessageBox( icon, title, str(item) ).exec_()        
     def updateList(self):
         self.setHorizontalHeaderLabels(['Kind','Timestamp','Message'])
@@ -44,7 +44,7 @@ class LogWidget(QTableWidget):
 #                if self.rowCount <= itemNumber:
                 self.insertRow(itemNumber)
                 
-                levelItem = QTableWidgetItem(logging.logLevels[logItem.level])
+                levelItem = QTableWidgetItem(log.logLevels[logItem.level])
                 levelItem.setIcon(self.iconForItem(logItem))
                 self.setItem(itemNumber,0,levelItem)
                 self.setItem(itemNumber,1,QTableWidgetItem(logItem.timeStamp.strftime('%H:%m:%S')))

@@ -1,18 +1,12 @@
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QWidget
-
-from gui.receivedpower_view import Ui_Form
-
-
-from experimentresult import ExperimentResult
 from experiment import experiment
 from utility import quantities
 
-import numpy
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('receivedpower_view.ui')
 
-class ReceivedPowerController(QWidget,Ui_Form):
+class ReceivedPowerController(qtBaseClass,formClass):
     def __init__(self,parent,topLevel=True):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self) 
         self.topLevel = topLevel
         

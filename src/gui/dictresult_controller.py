@@ -1,11 +1,11 @@
-from PyQt4.QtGui import QWidget,QTableWidgetItem
+from PyQt4.QtGui import QTableWidgetItem
 
-from gui.dictresult_view import Ui_DictResult
+from PyQt4 import uic
+formClass, qtBaseClass = uic.loadUiType('dictresult_view.ui')
 
-
-class DictResultController(QWidget,Ui_DictResult):
+class DictResultController(qtBaseClass,formClass):
     def __init__(self,parent):
-        QWidget.__init__(self,parent)
+        qtBaseClass.__init__(self,parent)
         self.setupUi(self)  
         
         self._model = None
