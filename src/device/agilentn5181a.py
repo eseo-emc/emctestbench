@@ -28,15 +28,19 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
         return Frequency(float(self.ask(':SOURce:FREQuency:CW?')),'Hz')
     def setPower(self,power):
         setPowerString = ':SOURce:POWer:LEVel:IMMediate:AMPLitude {power:e} dBm'.format(power=power.dBm())
-#        print setPowerString
         self.write(setPowerString)
-    def enableOutput(self,enable=True):
+
+        if power.negligable:
+            self._enableOutput(False)
+        else:
+            self._enableOutput(True)
+    
+    def _enableOutput(self,enable=True):
         if enable:
             self.write('OUTPut ON')
         else:
             self.write('OUTPut OFF')
-    def tearDown(self):
-        self.enableOutput(False)
+
 
 if __name__ == '__main__':
     device = AgilentN5181a()

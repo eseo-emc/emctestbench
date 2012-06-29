@@ -29,21 +29,24 @@ class DummyRfGenerator(RfGenerator,Device):
     defaultName = 'Dummy RF Generator'
     def __init__(self):
         self._power = Power(-130.,'dBm')
-        self._enableOutput = False
+        self._outputEnabled = False
         self._frequency = 300e3
         Device.__init__(self)
-    def tearDown(self):
-        self.enableOutput(False)
+
     def setPower(self,newPower):
         self._power = newPower
+        if newPower.negligable:
+            self._enableOutput(False)
+        else:
+            self._enableOutput(True)
     def setFrequency(self,newFrequency):
         self._frequency = newFrequency
     def getFrequency(self):
         return self._frequency
-    def enableOutput(self,enable=True):
-        self._enableOutput = enable
+    def _enableOutput(self,enable=True):
+        self._outputEnabled = enable
     def getOutputEnable(self):
-        if self._enableOutput:
+        if self._outputEnabled:
             return 1.0
         else:
             return 0.0   
@@ -136,7 +139,7 @@ class DummySpectrumAnalyzer(SpectrumAnalyzer,Device):
 
 rfGenerator = DummyRfGenerator()
 switchPlatform = DummySwitchPlatform()
-switchPlatform.setPreset('bridge')
+#switchPlatform.setPreset('bridge')
 positioner = DummyPositioner()
 knownDevices = { \
     'multimeter' : DummyMultimeter(rfGenerator,switchPlatform),

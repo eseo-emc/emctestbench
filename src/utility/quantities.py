@@ -306,7 +306,11 @@ class Power(DommableArray):
         element = DommableArray.asDom(self,parent)
         element.setAttribute('unit',self.storageUnit)
         return element
-          
+    
+    @property
+    def negligable(self):
+        return self < 1e-16 # -130 dBm
+     
     def watt(self):
         return numpy.asarray(self) 
     def dBW(self):

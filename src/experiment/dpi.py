@@ -99,9 +99,6 @@ class Dpi(Experiment,persistance.Dommable):
         self.transmittedPower.value.connect()
         self.passCriterion.value.connect()
     def prepare(self):
-        self.switchPlatform.setPreset('bridge')
-        self.rfGenerator.enableOutput(False)
-        
         self.passCriterion.value.prepare()
         self.transmittedPower.value.prepare()
 
@@ -119,8 +116,8 @@ class Dpi(Experiment,persistance.Dommable):
                 return numpy.array([stop])
         def findFailureFromBelow(startPower,stepIndex=0):
             def measureAndSavePass(tryPower):
-                self.rfGenerator.setPower(tryPower)
-                self.rfGenerator.enableOutput()
+                self.transmittedPower.value.generatorPower = tryPower
+
                 passNotFail = self.passCriterion.value.measure()['pass']
                 result.append( {'injection frequency':frequency,
                              'generator power':tryPower,
@@ -154,7 +151,7 @@ class Dpi(Experiment,persistance.Dommable):
         for number,frequency in enumerate(self.frequencies.values):
             if self.stopRequested:
                 break
-            self.rfGenerator.setFrequency(frequency)
+            self.transmittedPower.value.generatorFrequency = frequency
             log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.value.measure()
@@ -168,7 +165,7 @@ class Dpi(Experiment,persistance.Dommable):
 
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
-        self.rfGenerator.enableOutput(False)
+        self.transmittedPower.value.tearDown()
         
         self.finished.emit()
         log.LogItem('Finished DPI',log.success)

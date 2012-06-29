@@ -6,5 +6,5 @@ class Generator(object):
     def iconName(self):
         return 'Generator'
         
-    def enableOutput(self):
+    def _enableOutput(self,outputEnable=True):
         raise NotImplementedError   

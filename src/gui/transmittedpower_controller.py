@@ -18,6 +18,7 @@ class TransmittedPowerController(qtBaseClass,formClass):
         self._model = value
     
         self.model.connect()
+        self.amplifier.model = self.model.amplifier
         self.model.newResult.connect(self.newResult)        
         self.measure.clicked.connect(self.measureOnce)
         
@@ -37,18 +38,18 @@ if __name__ == '__main__':
     from PyQt4.QtGui import QApplication,QMainWindow
     from device import knownDevices    
     from utility.quantities import Power
+    from experiment import transmittedpower
     
     application = QApplication(sys.argv)
     window = QMainWindow()
     
-    switchPlatform = knownDevices['switchPlatform']
-    switchPlatform.setPreset('bridge')
-    rfGenerator = knownDevices['rfGenerator']
-    rfGenerator.setPower(Power(10,'dBm'))
-    rfGenerator.enableOutput()
-    
+    experiment = transmittedpower.TransmittedPower()
     
     controller = TransmittedPowerController(window)
+    controller.model = experiment
+
+    experiment.generatorPower = Power(3,'dBm')
+    
     window.setCentralWidget(controller)
     window.show()
         

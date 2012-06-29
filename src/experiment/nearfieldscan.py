@@ -69,9 +69,6 @@ class NearFieldScan(Experiment,persistance.Dommable):
         self.transmittedPower.value.connect()
         self.measurement.value.connect()
     def prepare(self):
-        self.switchPlatform.setPreset('bridge')
-        self.rfGenerator.enableOutput(False)
-        
         self.positioner.prepare()
         
         self.transmittedPower.value.prepare()
@@ -80,10 +77,9 @@ class NearFieldScan(Experiment,persistance.Dommable):
     def run(self):
         result = NearFieldScanResult() 
         self.emitResult(result)   
-        
-        self.rfGenerator.setPower(self.generatorPower.value)
-        self.rfGenerator.setFrequency(self.generatorFrequency.value)
-        self.rfGenerator.enableOutput()
+
+        self.transmittedPower.value.generatorFrequency = self.generatorFrequency.value
+        self.transmittedPower.value.generatorPower = self.generatorPower.value
 
         self.progressed.emit(0)
         for number,position in enumerate(self.positions()):
@@ -100,7 +96,7 @@ class NearFieldScan(Experiment,persistance.Dommable):
 
             self.progressed.emit(int(float(number+1)/self.numberOfSteps.value*100.))
             
-        self.rfGenerator.tearDown()
+        self.transmittedPower.value.tearDown()
         self.positioner.tearDown()
         
         self.finished.emit()

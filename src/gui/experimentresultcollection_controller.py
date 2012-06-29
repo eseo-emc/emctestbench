@@ -27,7 +27,7 @@ class ExperimentResultItem(ExperimentResultTreeItem):
         self.experimentResult.changed.connect(self.update)
     def update(self):
         self.setText(0,self.experimentResult.name)  
-        self.setText(2,self.experimentResult.metadata['creation'].strftime('%H:%M:%S'))
+        self.setText(2,self.experimentResult.metadata['creation'].strftime('%Y-%m-%d %H:%M:%S'))
     def addContextMenuActions(self,menu):
         ExperimentResultTreeItem.addContextMenuActions(self,menu)
         if len(self.experimentResult.result.exportFunctions()) > 0:
