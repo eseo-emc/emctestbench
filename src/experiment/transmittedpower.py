@@ -18,11 +18,11 @@ class TransmittedPower(Experiment,persistance.Dommable):
         
         self.amplifiers = {'None':'bridge', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
         self.amplifier = EnumerateProperty('None',['Automatic'] + self.amplifiers.keys())
-        self.amplifier.changedTo.connect(self.setAmplifier)
+        self.amplifier.changed.connect(self.setAmplifier)
     
     def connect(self):
         self.switchPlatform = knownDevices['switchPlatform']
-        self.setAmplifier(self.amplifier.value)
+        self.setAmplifier()
         self.wattMeter = knownDevices['wattMeter']
         self.rfGenerator = knownDevices['rfGenerator']
 
@@ -48,14 +48,19 @@ class TransmittedPower(Experiment,persistance.Dommable):
             else:
                 knownDevices[self.amplifiers[self.amplifier.value]].turnRfOn()
     
-    def setAmplifier(self,amplifierName):
+    def setAmplifier(self):
 #        if not self.generatorPower.negligible:
 #            print "Trying to change amplifier while outputting RF... need to implement turn off, change, turn on sequence"
 #            raise NotImplementedError
         if self.amplifier.value == 'Automatic':
             raise ValueError, 'Automatic amplifier selection is not yet supported'
         else:
-            self.switchPlatform.setPreset(self.amplifiers[amplifierName])
+            self.switchPlatform.setPreset(self.amplifiers[self.amplifier.value])
+            if self.amplifier.value == 'Milmega 1':
+                knownDevices[self.amplifiers[self.amplifier.value]].switchToBand1()
+            elif self.amplifier.value == 'Milmega 2':
+                knownDevices[self.amplifiers[self.amplifier.value]].switchToBand2()
+            
             
     def measure(self):
         assert self.switchPlatform.checkPreset(self.amplifiers[self.amplifier.value]),'The switch platform is not in the {position} position'.format(position=self.amplifier.value)
@@ -137,9 +142,9 @@ if __name__ == '__main__':
     experiment.prepare()
 #    experiment.switchPlatform.setPreset('bridge')
 #    print experiment.tryTransmittedPower(Power(0,'dBm'))
-
+    experiment.amplifier.setValue('Milmega 2')
     experiment.generatorFrequency = Frequency(150000,'Hz')
-    experiment.generatorPower = Power(8.2,'dBm')
+    experiment.generatorPower = Power(-15,'dBm')
 #    experiment.rfGenerator.enableOutput()
     
     print experiment.measure()

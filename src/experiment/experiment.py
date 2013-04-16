@@ -35,7 +35,7 @@ class Property(QObject):
         self._emitChanged()
     def _emitChanged(self):
         self.changed.emit()
-        self.changedTo.emit(self.value)
+        self.changedTo.emit(self.value) # deprecated
         
 class EnumerateProperty(Property):
     def __init__(self,defaultValue,possibleValues):
