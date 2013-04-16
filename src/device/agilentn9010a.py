@@ -5,13 +5,22 @@ from spectrumanalyzer import SpectrumAnalyzer
 from utility import quantities
 
 import time
+import subprocess
 
 class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     defaultName = 'Agilent N9010A Vector Signal Analyzer'
-    defaultAddress = 'TCPIP0::172.20.1.209::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.179::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N9010A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N9060-90027.pdf','Specifications':'http://cp.literature.agilent.com/litweb/pdf/N9010-90025.pdf'}
     
+    def putOnline(self):
+        ScpiDevice.putOnline(self)
+        if not self._deviceHandle:
+            subprocess.call(['C:\Program Files\Agilent\SignalAnalysis\Infrastructure\LaunchXSA.exe','-s'])
+            time.sleep(90)
+            ScpiDevice.putOnline(self)
+            assert self._deviceHandle is not None
+            
     def reset(self):
         ScpiDevice.reset(self)
         

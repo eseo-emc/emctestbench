@@ -34,6 +34,7 @@ class ReceivedPowerController(qtBaseClass,formClass):
         
 
     def measureOnce(self):
+        self.model.prepare()
         self.model.measure()
     def newResult(self,result):
         self.result.setValue(result['received power'])

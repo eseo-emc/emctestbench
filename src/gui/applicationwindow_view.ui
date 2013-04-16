@@ -109,7 +109,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="font">
@@ -310,7 +310,7 @@
   </action>
   <action name="action_About">
    <property name="text">
-    <string>&amp;About EmcTestbench</string>
+    <string>&amp;About EmcTestbench...</string>
    </property>
   </action>
   <action name="actionErrors_only">

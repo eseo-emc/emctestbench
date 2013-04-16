@@ -50,13 +50,15 @@ class DpiResult(ResultSet):
         writer = csv.DictWriter(fileHandle,tableHeaders,dialect='excel-tab')
         writer.writeheader()
         
+
+        
         for result in self.byRow():
             if not(onlyLimits) or result['limit']:
-                writer.writerow({'frequency (Hz)':result['injection frequency'].Hz(),
-                                 'generator (dBm)':result['generator power'].dBm(),
-                                 'forward (dBm)':result['forward power'].dBm(),
-                                 'reflected (dBm)':result['reflected power'].dBm(),
-                                 'transmitted (dBm)':result['transmitted power'].dBm(),
+                writer.writerow({'frequency (Hz)':self.formatFloatLocale(result['injection frequency'].Hz()),
+                                 'generator (dBm)':self.formatFloatLocale(result['generator power'].dBm()),
+                                 'forward (dBm)':self.formatFloatLocale(result['forward power'].dBm()),
+                                 'reflected (dBm)':self.formatFloatLocale(result['reflected power'].dBm()),
+                                 'transmitted (dBm)':self.formatFloatLocale(result['transmitted power'].dBm()),
                                  'fail':(0 if result['pass'] else 1) })
         fileHandle.close()
         fileHandle = None
@@ -74,8 +76,8 @@ class Dpi(Experiment,persistance.Dommable):
         
     def __init__(self):
         Experiment.__init__(self)
-        self.passCriterion = ExperimentSlot(parent=self,defaultValue='VoltageCriterion')
-        self.transmittedPower = ExperimentSlot(parent=self,defaultValue='TransmittedPower')
+        self.passCriterion = ExperimentSlot(parent=self) #,defaultValue='VoltageCriterion')
+        self.transmittedPower = ExperimentSlot(parent=self) #,defaultValue='TransmittedPower')
         self.powerMinimum = Property(Power(-30.,'dBm'),changedSignal=self.settingsChanged)
 
         self.powerMaximum = Property(Power(+15.,'dBm'),changedSignal=self.settingsChanged)

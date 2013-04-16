@@ -3,7 +3,7 @@ from frequencycounter import FrequencyCounter
 
 class Agilent53220a(FrequencyCounter,ScpiDevice):
     defaultName = 'Agilent 53220A frequency counter'
-    defaultAddress = 'TCPIP0::172.20.1.206::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.186::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,53220A,'
     
     def measurePeriod(self,channel=1):

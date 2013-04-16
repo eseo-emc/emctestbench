@@ -6,7 +6,7 @@ from multimeter import Multimeter
 
 class AgilentL4411a(Multimeter,ScpiDevice):
     defaultName = 'Agilent L4411A Multimeter'
-    defaultAddress = 'TCPIP0::172.20.1.207::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.187::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,L4411A,'
     documentation = {'Users Manual':'http://cp.literature.agilent.com/litweb/pdf/34410-90001.pdf','Programming Reference':'http://www.home.agilent.com/upload/cmc_upload/All/34410A_Prog_Reference.exe'}
     

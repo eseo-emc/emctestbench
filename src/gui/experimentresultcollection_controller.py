@@ -1,6 +1,6 @@
 from PyQt4 import uic
 
-from PyQt4.QtGui import QIcon,QMenu,QAction,QFileDialog
+from PyQt4.QtGui import QIcon,QMenu,QAction,QFileDialog,QInputDialog
 from PyQt4.QtCore import pyqtSignal
 from gui.experimentresultcollection import ExperimentResultCollection
 
@@ -26,15 +26,33 @@ class ExperimentResultItem(ExperimentResultTreeItem):
         self.update()
         self.experimentResult.changed.connect(self.update)
     def update(self):
-        self.setText(0,self.experimentResult.name)  
+        viewName = self.experimentResult.name 
+        if viewName == None:
+            viewName = '<No name>'
+        self.setText(0,viewName)  
         self.setText(2,self.experimentResult.metadata['creation'].strftime('%Y-%m-%d %H:%M:%S'))
     def addContextMenuActions(self,menu):
-        ExperimentResultTreeItem.addContextMenuActions(self,menu)
+        deleteAction = QAction('Delete',menu)
+        deleteAction.triggered.connect(self.delete)
+        menu.addAction(deleteAction)
+        
+        renameAction = QAction('Rename',menu)
+        renameAction.triggered.connect(self.rename)
+        menu.addAction(renameAction)
+        
         if len(self.experimentResult.result.exportFunctions()) > 0:
-            menu.addSeparator()
             exportAction = QAction('Export',menu)
             exportAction.triggered.connect(self.export)
             menu.addAction(exportAction)
+
+        menu.addSeparator()            
+        ExperimentResultTreeItem.addContextMenuActions(self,menu)
+    def delete(self):
+        self.experimentResult.delete()
+    def rename(self):
+        newName,success = QInputDialog.getText(self.parent(),'Rename ExperimentResult:',self.experimentResult.name)
+        if success and newName != '':
+            self.experimentResult.name = newName
     def export(self):
         exportFunctions = self.experimentResult.result.exportFunctions()
         exportStrings = []
@@ -65,6 +83,7 @@ class ExperimentResultCollectionController(qtBaseClass,formClass):
         self.model.changed.connect(self.update)
 
         self.theTreeWidget.doubleClicked.connect(self.itemDoubleClicked)
+#        self.theTreeWidget.itemClicked.connect(self.itemClicked)
         self.theTreeWidget.customContextMenuRequested.connect(self.treeContextMenuRequested)
 
         
@@ -84,7 +103,8 @@ class ExperimentResultCollectionController(qtBaseClass,formClass):
             menu = QMenu()
             selectedItems[0].addContextMenuActions(menu)
             menu.exec_(self.theTreeWidget.mapToGlobal(point))      
-            
+#    def itemClicked(self,index,column):
+#        print index,column        
     def itemDoubleClicked(self,index):
         
         

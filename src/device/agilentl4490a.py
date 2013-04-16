@@ -14,7 +14,7 @@ class AgilentSwitch(Switch):
 
 class AgilentL4490a(SwitchPlatform,ScpiDevice):
     defaultName = 'Agilent L4490A Switching Platform'
-    defaultAddress = 'TCPIP0::172.20.1.201::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.181::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,L4490A,'
     
     def __init__(self,visaAddress=None):
@@ -75,5 +75,5 @@ if __name__ == '__main__':
     switchPlatform = AgilentL4490a()
 #    switchPlatform['DUT'].openSwitch() #
 #    switchPlatform['DUT'].setPosition('SAorVNA')
-    switchPlatform.setPreset('bridge')
+    switchPlatform.setPreset('Prana')
     print switchPlatform['DUT'].getPosition()

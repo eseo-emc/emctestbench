@@ -28,6 +28,8 @@ class NearFieldScanController(TopLevelExperimentController,formClass):
         self.transmittedPower.model = self.model.transmittedPower
         
         self.readStartPosition.clicked.connect(self.model.readStartPosition)
+        self.readStopPosition.clicked.connect(self.model.readStopPosition)
+        self.rehearsePath.clicked.connect(self.model.rehearsePath)
 
     def enableInputs(self,enable):
         self.xStart.setEnabled(enable)    

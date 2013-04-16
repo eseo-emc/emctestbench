@@ -61,6 +61,10 @@ class Result(QObject):
 #                exportMethod = getattr(self,attributeName)
                 types.append(attribute)
         return types
+        
+    def formatFloatLocale(self,floatOrString):
+        return str(floatOrString).replace('.',',')
+       
 
        
 class ScalarResult(Result,Dommable):
@@ -191,8 +195,8 @@ class ResultSet(Result,Dommable):
         return newRow
 
 if __name__ == '__main__':
-#    result = ScalarResult()
-#    result.data = 3.0
+    result = ScalarResult()
+    result.data = 3.0
 #    
 #    from xml.dom.minidom import getDOMImplementation
 #    document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
@@ -215,5 +219,5 @@ if __name__ == '__main__':
 #    print float(resultElement.childNodes[0].data)+1
 #    
     
-    import nose
-    nose.run(argv=['-v'])
+#    import nose
+#    nose.run(argv=['-v'])

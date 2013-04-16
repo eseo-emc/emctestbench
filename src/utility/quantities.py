@@ -41,105 +41,7 @@ class Amplitude():
     def __str__(self):
         return '%.2e Vp' % self.Vp()
        
-#class PowerRatio(float):
-#    def __new__(cls,value,unit=None):
-#        if unit == 'dB':
-#            return float.__new__(PowerRatio,pow(10.,float(value)/10))
-#        elif unit == None:
-#            return float.__new__(PowerRatio,float(value))
-#        else:
-#            raise ValueError, '''Power ratio unit '{unit}' not recognized.'''.format(unit=unit)
-#    def linear(self):
-#        return float(self)
-#    def dB(self):
-#        if self < 0.:
-#            raise numpy.NaN
-#        elif self == 0.:
-#            return -numpy.inf
-#        else:
-#            return 10.0*log10(self)
-#    def __repr__(self):
-#        return str(self)
-#    def __str__(self):
-#        dBValue = self.dB()
-#        if dBValue == -numpy.inf:
-#            return '-inf dB'
-#        else:
-#            return '{dB:+.1f} dB'.format(dB=dBValue)
 
-#class PowerRatio(numpy.ndarray):
-#    #http://docs.scipy.org/doc/numpy/user/basics.subclassing.html  
-#    def __new__(cls, value, unit='', info=None):
-#        value = numpy.asarray(value) * 1.0 #force values to be floats
-#
-#        if unit == '':
-#            pass         
-#        elif unit == 'dB':
-#            value = numpy.power(10.,value*0.1) * 1
-#        else:
-#            raise ValueError, '''Power unit '%s' not recognised.''' % unit
-#        
-#        newObject = numpy.asarray(value).view(cls)
-#        newObject.info = info
-#        return newObject
-#        
-#    def __getitem__(self,itemNumber):
-#        singleItem = numpy.ndarray.__getitem__(self,itemNumber)
-#        return Power(singleItem)
-#
-#    def __array_finalize__(self, obj):
-#        if obj is None: return
-#        self.info = getattr(obj, 'info', None)
-#            
-#    def linear(self):
-#        return numpy.asarray(self)
-#        
-#    def dB(self):
-#        if self < 0.:
-#            return numpy.NaN
-#        elif self == 0.:
-#            return -numpy.inf
-#        else:
-#            return 10.0*log10(self)
-#        
-#
-#        
-#    def __repr__(self):
-#        return str(self)
-#        
-#        
-#    def __str__(self):
-#        def toString(theArray):
-#            if theArray.shape == ():
-#                #return '{watt:e} W'.format(watt=self.watt())
-#                if theArray >= 0:
-#                    dBValue = theArray.dB()
-#                    prefix = ''
-#                else:
-#                    dBValue = (-1*theArray)
-#                    prefix = '<- '
-#                if dBValue == -numpy.inf:
-#                    return prefix+'-inf dB'
-#                else:
-#                    return prefix+'{dB:+.1f} dB'.format(dB=dBValue)
-#            else:
-#                returnList = []
-#                for item in theArray:
-#                    returnList.append(toString(item))
-#                return '[' + ', '.join(returnList) + ']'
-#                
-#        return toString(self)
-#
-
-
-#class UnitLess(float,Dommable):
-#    def asDom(self,parent):
-#        element = Dommable.asDom(self,parent)
-#        self.appendTextNode(element,str(self))
-#        return element
-#    @classmethod
-#    def fromDom(cls,dom):
-#        return cls(float(cls.getNodeText(dom)))
 
 class DommableArray(numpy.ndarray,Dommable):
     def __new__(cls, value):
@@ -308,7 +210,7 @@ class Power(DommableArray):
         return element
     
     @property
-    def negligable(self):
+    def negligible(self):
         return self < 1e-16 # -130 dBm
      
     def watt(self):

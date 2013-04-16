@@ -4,7 +4,7 @@ import time
 
 class AgilentN6700b(PowerSupply,ScpiDevice):
     defaultName = 'Agilent N6700B Power Supply'
-    defaultAddress = 'TCPIP0::172.20.1.203::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.183::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N6700B,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N6700-90902.pdf'}
             

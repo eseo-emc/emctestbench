@@ -4,7 +4,7 @@ import time
 
 class MilmegaAS0104_30_30(Amplifier,ScpiDevice):
     defaultName = 'Milmega AS0104 30/30'
-    defaultAddress = 'GPIB1::6::INSTR'
+    defaultAddress = 'GPIB2::6::INSTR'
     visaIdentificationStartsWith = '"MILMEGA,RF AMPLIFIER,'
            
     def turnRfOn(self):

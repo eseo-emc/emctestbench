@@ -6,7 +6,7 @@ from device import ScpiDevice
 from wattmeter import WattMeter
 
 class AgilentE4419b(WattMeter,ScpiDevice):
-    defaultAddress = 'GPIB1::13::INSTR'
+    defaultAddress = 'GPIB2::11::INSTR'
     defaultName = 'Agilent E4419B Power Meter'
     visaIdentificationStartsWith = 'Agilent Technologies,E4419B,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/E4418-90029.pdf'}

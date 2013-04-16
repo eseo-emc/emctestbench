@@ -62,16 +62,24 @@ class ScpiDevice(Device):
     def write(self,message):
         if not self._deviceHandle:
             self.putOnline()
+            if self._deviceHandle == None:
+                log.LogItem('Write error, {device} ({address}) is offline'.format(device=self,address=self.visaAddress),log.error)
+                raise Exception        
         try:
+#            print 'Writing',message
             self._deviceHandle.write(message)
         except:
 #            log.LogItem(str(sys.exc_info()[1]),log.error)
-            log.LogItem('Write error, {address} was offline when trying to write "{message}"'.format(message=message,address=self.visaAddress),log.error)
-#            raise             
+            log.LogItem('Error with {device} ({address}) when trying to write "{message}"\n{moreError}'.format(device=self,message=message,address=self.visaAddress,moreError=str(sys.exc_info()[1])),log.error)
+            raise             
             
     def ask(self,message):
         self.write(message)
-        return self._deviceHandle.read()
+        try:
+            return self._deviceHandle.read()
+        except:
+            log.LogItem('Error with {device} ({address}) when trying to ask "{message}"\n{moreError}'.format(device=self,message=message,address=self.visaAddress,moreError=str(sys.exc_info()[1])),log.error)
+            raise             
             
     def ask_for_values(self,message):
         self.write(message)

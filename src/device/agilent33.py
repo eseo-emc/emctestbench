@@ -23,7 +23,7 @@ class Agilent33(Generator,ScpiDevice):
 
 class Agilent33220A(Agilent33):
     defaultName = 'Agilent 33220A waveform generator'
-    defaultAddress = 'TCPIP0::172.20.1.204::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.18.184::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,33220A'
     def displayText(self,message):
         self.write('SYSTem:RWLock')
@@ -31,7 +31,7 @@ class Agilent33220A(Agilent33):
         
 class Agilent33250A(Agilent33):
     defaultName = 'Agilent 33250A waveform generator'
-    defaultAddress = 'GPIB1::10::INSTR'
+    defaultAddress = 'GPIB2::10::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,33250A'
 
 if __name__ == '__main__':

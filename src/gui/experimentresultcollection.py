@@ -33,11 +33,15 @@ class ExperimentResultCollection(QObject):
             try:
                 experimentresult.ExperimentResult.loadFromFileSystem(fileName)
             except:
-                log.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),log.error)
-                raise 
+                log.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),log.warning)
+                raise
+                 
     def append(self,newExperimentResult):
         self.experimentResults.append(newExperimentResult)
         self.extendedWith.emit(newExperimentResult)
+        self.changed.emit()
+    def remove(self,existingExperimentResult):
+        self.experimentResults.remove(existingExperimentResult)
         self.changed.emit()
         
 if __name__ == '__main__':

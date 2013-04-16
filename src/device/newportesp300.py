@@ -15,23 +15,25 @@ class NewportEsp300Error(object):
 
 class NewportEsp300(Positioner,ScpiDevice):
     defaultName = 'Newport ESP300 Motion Controller'
-    defaultAddress = 'GPIB1::1::INSTR'
-    visaIdentificationStartsWith = 'M-IMS300PP, '
+    defaultAddress = 'GPIB2::4::INSTR'
+    visaIdentificationStartsWith = 'ESP300 '
     documentation = {'Programmers Manual':'http://phubner.eng.ua.edu/Files/ESP300.pdf'}
-        
+    dangerousVectorZ = 1 # higher Z is closer to the DUT    
+    
     def __init__(self):
         Positioner.__init__(self)
         ScpiDevice.__init__(self)
 
         self.axesGrouped = None
         self.homed = None
+        self._lastPosition = None
 #        #self.deviceHandle = visa.instrument('TCPIP0::172.20.1.202::inst0::INSTR')
 #        self.deviceHandle = visa.instrument('GPIB1::1::INSTR', timeout = 10)
-    def askIdentity(self):
-        return self.ask('1 ID ?')
+
+
     def reset(self):
-        self.write('RS')
-        time.sleep(12)
+        self.write('RS',useSRQ=False)
+        time.sleep(16)
         self.clear()
     def clear(self):
         for errorNumber in range(10):
@@ -59,7 +61,7 @@ class NewportEsp300(Positioner,ScpiDevice):
 #        self._deviceHandle.term_chars = '\r'
         if self._deviceHandle:
             self.clear()
-#        self.reset()
+#            self.reset()
 #        self._turnOnAndHome()
     def prepare(self):
         pass
@@ -77,19 +79,22 @@ class NewportEsp300(Positioner,ScpiDevice):
             return NewportEsp300Error(errorCode,errorDescription,timeStamp)
         else:
             return None
-    def _raiseIfError(self,acceptErrorDescription=None):
+    def _raiseIfError(self,acceptErrorDescription=None,command='Unknown'):
         error = self._popError()
         if error and error.errorDescription != acceptErrorDescription:
             raise Exception, '{error} upon command "{command}"'.format(error=error,command=command)
             
             
-    def write(self,command):
-#        print 'Newport300.write',command
-        ScpiDevice.write(self,command + '; RQ')
-        self._deviceHandle.wait_for_srq(15)
+    def write(self,command,useSRQ=True,timeout=3):
+        if useSRQ:
+            ScpiDevice.write(self,command + '; RQ')
+            self._deviceHandle.wait_for_srq(timeout)
+        else:
+            ScpiDevice.write(self,command)
+            
     def _writeAndCheckError(self,command,acceptErrorDescription=""):
         self.write(command)
-        self._raiseIfError(acceptErrorDescription)
+        self._raiseIfError(acceptErrorDescription,command)
     def _turnOnAndHome(self,axis=None):
         self._deleteGroup()
         def homeAxis(axis):
@@ -103,6 +108,7 @@ class NewportEsp300(Positioner,ScpiDevice):
                 homeAxis(1)
         homeAxis(axis)
         self.homed = True
+        self.getLocation()
     def _motionDone(self,axis):
         if axis:
             query = '{axis} MD?'.format(axis=axis)
@@ -127,22 +133,37 @@ class NewportEsp300(Positioner,ScpiDevice):
             self._waitUntilMotionDone(3)
                 
    
-    def getLocation(self):
-        if self.homed is not True:
-            self._turnOnAndHome()
-        self._createGroup()
+    def getLocation(self,useBuffer=False):
+        if not useBuffer or type(self._lastPosition) is type(None):
+            if self.homed is not True:
+                self._turnOnAndHome()
+            self._createGroup()
+            self._lastPosition = self._readLocation()
+            self._deleteGroup()
+        return self._lastPosition
+    def _readLocation(self):
         coordinateStrings = self.ask('1 HP?').split(', ')
-        self._deleteGroup()
         return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
-
-    def setLocation(self,newLocation):
+    def setLocation(self,newLocation,safeMovementZ=True):
         if self.homed is not True:
             self._turnOnAndHome()
+        oldLocation = self.getLocation(useBuffer=True)
+        
         self._createGroup()
+        if safeMovementZ and (newLocation[2] != oldLocation[2]):
+            if numpy.sign(newLocation[2]-oldLocation[2]) == numpy.sign(self.dangerousVectorZ):
+                self._gotoLocation(quantities.Position([newLocation[0],newLocation[1],oldLocation[2]]))
+            else:
+                self._gotoLocation(quantities.Position([oldLocation[0],oldLocation[1],newLocation[2]]))
+            
+        self._gotoLocation(newLocation)
+        self._lastPosition = newLocation
+
+        self._deleteGroup()
+    def _gotoLocation(self,newLocation):
         self.write('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation.asUnit('mm')))
         self._waitUntilMotionDone()
-        self._deleteGroup()
-        return self.getLocation()
+        
         
 if __name__ == '__main__':
     test = NewportEsp300()
@@ -150,8 +171,15 @@ if __name__ == '__main__':
 #    for x in numpy.linspace(10,20,11):
 #        test.setLocation(quantities.Position([0+x,0,0],'mm'))
 #    test.tearDown()
-#    test.putOnline()
+    test.putOnline()
     
+#===============================================================================
+#    test.setLocation(quantities.Position([115.,60.,50.],'mm'))
+#    test.setLocation(quantities.Position([115.,80.,50.],'mm'))
+    test.setLocation(quantities.Position([0,0,0],'mm'))
+#    test.setLopoleras de polpoleras de aslpoleras de al;godom por un precio  de reducation(quantities.Position([84,-24,59],'mm'))
+
+#===============================================================================
 #    print test.askIdentity()
 #    for repetition in range(1000):
 #        print 'Try',repetition
@@ -159,9 +187,11 @@ if __name__ == '__main__':
 #     test.setLocation([0.,0.,0.])     
      
     while True:
-        for x in numpy.linspace(0,140,15):
-            print test.setLocation(quantities.Position([65.+x,-23.,35.],'mm'))
-        print test.setLocation(quantities.Position([0.,0.,0.],'mm'))
+        test._turnOnAndHome()
+        for y in numpy.linspace(-24,-34,3):
+            for x in numpy.linspace(84,100,3):
+                test.setLocation(quantities.Position([x,y,59],'mm'),safeMovementZ=False)
+#        print test.setLocation(quantities.Position([0.,0.,0.],'mm'))
 #     while True:
 #         
 #         for x in numpy.linspace(128,116,15):

@@ -6,7 +6,7 @@ from frequencycounter import FrequencyCounter
 
 class Agilent86100a(Oscilloscope,FrequencyCounter,ScpiDevice):
     defaultName = 'Agilent 86100A Oscilloscope'
-    defaultAddress = 'GPIB1::7::INSTR'
+    defaultAddress = 'GPIB2::12::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,86100A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/86100-90131.pdf'}
         

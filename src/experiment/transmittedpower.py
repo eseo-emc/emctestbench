@@ -2,7 +2,7 @@ from device import knownDevices
 from utility.quantities import Power,PowerRatio,Frequency
 from experiment import Experiment,EnumerateProperty
 from result import persistance
-from numpy import pi,sqrt,sin
+from numpy import pi,sqrt,sin,NaN
 from copy import copy
 
 from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
@@ -25,12 +25,6 @@ class TransmittedPower(Experiment,persistance.Dommable):
         self.setAmplifier(self.amplifier.value)
         self.wattMeter = knownDevices['wattMeter']
         self.rfGenerator = knownDevices['rfGenerator']
-        
-    def setAmplifier(self,amplifierName):
-        if self.amplifier.value == 'Automatic':
-            raise ValueError, 'Automatic amplifier selection is not yet supported'
-        else:
-            self.switchPlatform.setPreset(self.amplifiers[amplifierName])
 
     def prepare(self):
         self.wattMeter.reset()
@@ -48,7 +42,21 @@ class TransmittedPower(Experiment,persistance.Dommable):
     @generatorPower.setter
     def generatorPower(self,newPower):
         self.rfGenerator.setPower(newPower)
+        if self.amplifier.value is not 'None':
+            if newPower.negligible:
+                knownDevices[self.amplifiers[self.amplifier.value]].turnRfOff()
+            else:
+                knownDevices[self.amplifiers[self.amplifier.value]].turnRfOn()
     
+    def setAmplifier(self,amplifierName):
+#        if not self.generatorPower.negligible:
+#            print "Trying to change amplifier while outputting RF... need to implement turn off, change, turn on sequence"
+#            raise NotImplementedError
+        if self.amplifier.value == 'Automatic':
+            raise ValueError, 'Automatic amplifier selection is not yet supported'
+        else:
+            self.switchPlatform.setPreset(self.amplifiers[amplifierName])
+            
     def measure(self):
         assert self.switchPlatform.checkPreset(self.amplifiers[self.amplifier.value]),'The switch platform is not in the {position} position'.format(position=self.amplifier.value)
 
@@ -61,13 +69,15 @@ class TransmittedPower(Experiment,persistance.Dommable):
         # in the reflected path, these losses appear (the signal suffers from two cables and twice the switch platform)
            
         if self.amplifier.value == 'None':
-            forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
-            reflectedPower = self.wattMeter.getPower(2) / bridgeCouplingFactorAt(frequency)
-#            insertionLoss = PowerRatio(1.5,'dB') * switchAttenuation
-#            reflectedAttenuation = PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
-#
-#            forwardPower = generatorPower / insertionLoss
-#            reflectedPower = self.wattMeter.getPower(2) * reflectedAttenuation * switchAttenuation
+            reflectedPowerReadout = self.wattMeter.getPower(2)
+            forwardPowerReadout = Power(NaN)
+#            forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
+#            reflectedPower = reflectedPowerReadout / bridgeCouplingFactorAt(frequency)
+            insertionLoss = PowerRatio(1.5,'dB')
+            reflectedAttenuation = PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
+
+            forwardPower = generatorPower / insertionLoss
+            reflectedPower = self.wattMeter.getPower(2) * reflectedAttenuation * switchAttenuation
         else:
             if self.amplifier.value == 'Prana':
                 forwardAttenuation = PowerRatio(48.7 - 0.4*sin(2*pi*frequency/Frequency(1,'GHz')),'dB')
@@ -81,15 +91,17 @@ class TransmittedPower(Experiment,persistance.Dommable):
             else:
                 raise ValueError, 'The switch platform is in an unsupported position.'
                 
-            abPowers = self.wattMeter.getPower()
-            forwardPower = abPowers(1) * forwardAttenuation
-            reflectedPower = abPowers(2) * reflectedAttenuation * switchAttenuation
+            (forwardPowerReadout,reflectedPowerReadout) = self.wattMeter.getPower()
+            forwardPower = forwardPowerReadout * forwardAttenuation
+            reflectedPower = reflectedPowerReadout * reflectedAttenuation * switchAttenuation
 
 
         result.data = {'generator power':generatorPower,
-                       'transmitted power':forwardPower-reflectedPower,
+                       'forward power readout':forwardPowerReadout,
+                       'reflected power readout':reflectedPowerReadout,
                        'forward power':forwardPower,
-                       'reflected power':reflectedPower}
+                       'reflected power':reflectedPower,
+                       'transmitted power':forwardPower-reflectedPower}
         self.emitResult(result)
         return result
         
@@ -97,7 +109,8 @@ class TransmittedPower(Experiment,persistance.Dommable):
     def run(self):
         self.measure()  
     def tearDown(self):
-        self.rfGenerator.tearDown()          
+        self.generatorPower = Power(0)    
+        
             
     def tryTransmittedPower(self,nominalPower):
         generatorMaximum = Power(20,'dBm')
@@ -122,11 +135,11 @@ if __name__ == '__main__':
     experiment = TransmittedPower()
     experiment.connect()
     experiment.prepare()
-    experiment.switchPlatform.setPreset('bridge')
+#    experiment.switchPlatform.setPreset('bridge')
 #    print experiment.tryTransmittedPower(Power(0,'dBm'))
 
-    experiment.rfGenerator.setFrequency(150000.)
-    experiment.rfGenerator.setPower(Power(8.2,'dBm'))
-    experiment.rfGenerator.enableOutput()
+    experiment.generatorFrequency = Frequency(150000,'Hz')
+    experiment.generatorPower = Power(8.2,'dBm')
+#    experiment.rfGenerator.enableOutput()
     
     print experiment.measure()
