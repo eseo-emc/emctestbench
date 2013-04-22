@@ -50,7 +50,7 @@ class ExperimentResultItem(ExperimentResultTreeItem):
     def delete(self):
         self.experimentResult.delete()
     def rename(self):
-        newName,success = QInputDialog.getText(self.parent(),'Rename ExperimentResult:',self.experimentResult.name)
+        newName,success = QInputDialog.getText(self.parent(),'Rename ExperimentResult',self.experimentResult.name,text=self.experimentResult.name)
         if success and newName != '':
             self.experimentResult.name = newName
     def export(self):
