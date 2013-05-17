@@ -22,6 +22,7 @@ class ReceivedPowerController(qtBaseClass,formClass):
         self.model.connect()
         
         self.span.model = self.model.span
+        self.centerFrequency.model = self.model.centerFrequency
         
         #TODO: create integer property controller
         self.numberOfAveragingPoints.setValue(self.model.numberOfAveragingPoints.value)

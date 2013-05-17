@@ -14,6 +14,8 @@ class ReceivedPower(Experiment,persistance.Dommable):
     
     def __init__(self):
         Experiment.__init__(self)
+        
+        self.centerFrequency = ScalarProperty(Frequency(50,'kHz'),changedSignal=self.settingsChanged,minimum=Frequency(1,'Hz'))
         self.span = ScalarProperty(Frequency(100,'kHz'),changedSignal=self.settingsChanged,minimum=Frequency(1,'Hz'))
         self.numberOfAveragingPoints = Property(1,changedSignal=self.settingsChanged)
     

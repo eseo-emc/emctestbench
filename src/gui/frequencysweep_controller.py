@@ -18,8 +18,6 @@ class FrequencySweepController(TopLevelExperimentController,formClass):
         self.frequencySteps.model = self.model.frequencies.numberOfPoints
         self.logarithmic.setChecked(self.model.frequencies.logarithmic.value)
         self.logarithmic.stateChanged.connect(self.model.frequencies.logarithmic.setValue)     
-        
-        self.transmittedPower.model = self.model.transmittedPower
 
     def enableInputs(self,enable):
         self.frequencyMinimum.setEnabled(enable)             
