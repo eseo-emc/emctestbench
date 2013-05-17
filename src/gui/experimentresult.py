@@ -102,7 +102,7 @@ class ExperimentResult(QObject,Dommable):
         self.asDom(document.documentElement)
         fileHandle.write(document.toxml(encoding='utf-8'))
         fileHandle.close()
-#        self.saveCount += 1
-#        print self.saveCount
+        self.saveCount += 1
+        print self.saveCount
         del(fileHandle)
         

@@ -24,11 +24,17 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
     def setPower(self,power):
         setPowerString = ':SOURce:POWer:LEVel:IMMediate:AMPLitude {power:e} dBm'.format(power=max(-110.,power.dBm()))
         self.write(setPowerString)
+        
 
         if power.negligible:
             self._enableOutput(False)
         else:
             self._enableOutput(True)
+        assert not(self.isSettling()) # TODO: wait until settled using polling 
+    def _getStandardOperationRegister(self):
+        return int(self.ask('STATUS:OPERATION:CONDITION?'))
+    def isSettling(self):
+        return bool(self._getStandardOperationRegister() & 2)
     
     def _enableOutput(self,enable=True):
         if enable:
@@ -47,9 +53,12 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
 if __name__ == '__main__':
     device = AgilentN5181a()
     print device.getFrequency()
-    device.setPower(Power(0,'dBm'))
+    
+    device.setPower(Power(-42,'dBm'))
+    
+    print device.getPower()
+
     device.tearDown()
-#    print device.getPower()
     
 #    device.enableOutput(False)
 #    device.setWaveform(800e6,Amplitude(-25,'dBm'))

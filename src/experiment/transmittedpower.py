@@ -16,8 +16,8 @@ class TransmittedPower(Experiment,persistance.Dommable):
         Experiment.__init__(self)
         persistance.Dommable.__init__(self)
         
-        self.amplifiers = {'None':'bridge', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
-        self.amplifier = EnumerateProperty('None',['Automatic'] + self.amplifiers.keys())
+        self.amplifiers = {'None (86205A)':'bridge 86205A', 'None (773D)':'bridge 773D', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
+        self.amplifier = EnumerateProperty('None (86205A)',['Automatic'] + self.amplifiers.keys())
         self.amplifier.changed.connect(self.setAmplifier)
     
     def connect(self):
@@ -42,7 +42,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
     @generatorPower.setter
     def generatorPower(self,newPower):
         self.rfGenerator.setPower(newPower)
-        if self.amplifier.value is not 'None':
+        if not self.amplifier.value.startswith('None'):
             if newPower.negligible:
                 knownDevices[self.amplifiers[self.amplifier.value]].turnRfOff()
             else:
@@ -73,13 +73,20 @@ class TransmittedPower(Experiment,persistance.Dommable):
         # in the incident path, these losses cancel (same loss for DUT and incident power meter)
         # in the reflected path, these losses appear (the signal suffers from two cables and twice the switch platform)
            
-        if self.amplifier.value == 'None':
+        if self.amplifier.value.startswith('None'):
             reflectedPowerReadout = self.wattMeter.getPower(2)
             forwardPowerReadout = Power(NaN)
 #            forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
 #            reflectedPower = reflectedPowerReadout / bridgeCouplingFactorAt(frequency)
-            insertionLoss = PowerRatio(1.5,'dB')
-            reflectedAttenuation = PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
+            if self.amplifier.value == 'None (86205A)':
+                insertionLoss = PowerRatio(1.5,'dB')
+                reflectedAttenuation = PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
+            elif self.amplifier.value == 'None (773D)':
+                # http://cp.literature.agilent.com/litweb/pdf/00772-90001.pdf
+                insertionLoss = PowerRatio(0.9,'dB')
+                reflectedAttenuation = PowerRatio(20.0,'dB')
+            else:
+                raise ValueError, 'Non-existant bridge specifier'                
 
             forwardPower = generatorPower / insertionLoss
             reflectedPower = self.wattMeter.getPower(2) * reflectedAttenuation * switchAttenuation
@@ -106,7 +113,8 @@ class TransmittedPower(Experiment,persistance.Dommable):
                        'reflected power readout':reflectedPowerReadout,
                        'forward power':forwardPower,
                        'reflected power':reflectedPower,
-                       'transmitted power':forwardPower-reflectedPower}
+                       'transmitted power':forwardPower-reflectedPower,
+                       'reflection coefficient':reflectedPower/forwardPower}
         self.emitResult(result)
         return result
         

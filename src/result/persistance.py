@@ -102,6 +102,9 @@ class Dommable(object):
         elif element.tagName == 'DpiResult':
             from experiment.dpi import DpiResult
             factory = DpiResult
+        elif element.tagName == 'FrequencySweepResult':
+            from experiment.frequencysweep import FrequencySweepResult
+            factory = FrequencySweepResult
         elif element.tagName == 'NearFieldScanResult':
             from experiment.nearfieldscan import NearFieldScanResult
             factory = NearFieldScanResult
