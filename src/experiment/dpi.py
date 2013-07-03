@@ -46,7 +46,7 @@ class DpiResult(ResultSet):
             fileHandle = open(fileName,'wb')
         except:
             log.LogItem(sys.exc_info()[1],log.error)
-        tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail']
+        tableHeaders = ['frequency (Hz)','generator (dBm)','forward (dBm)','reflected (dBm)','transmitted (dBm)','fail','limit']
         writer = csv.DictWriter(fileHandle,tableHeaders,dialect='excel-tab')
         writer.writeheader()
         
@@ -59,7 +59,8 @@ class DpiResult(ResultSet):
                                  'forward (dBm)':self.formatFloatLocale(result['forward power'].dBm()),
                                  'reflected (dBm)':self.formatFloatLocale(result['reflected power'].dBm()),
                                  'transmitted (dBm)':self.formatFloatLocale(result['transmitted power'].dBm()),
-                                 'fail':(0 if result['pass'] else 1) })
+                                 'fail':(0 if result['pass'] else 1),
+                                 'limit':(1 if result['limit'] else 0)   })
         fileHandle.close()
         fileHandle = None
 

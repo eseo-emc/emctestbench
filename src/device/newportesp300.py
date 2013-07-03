@@ -166,39 +166,39 @@ class NewportEsp300(Positioner,ScpiDevice):
         
         
 if __name__ == '__main__':
-    test = NewportEsp300()
+    device = NewportEsp300()
 #    test.reset()
 #    for x in numpy.linspace(10,20,11):
 #        test.setLocation(quantities.Position([0+x,0,0],'mm'))
 #    test.tearDown()
-    test.putOnline()
-    
-#===============================================================================
-#    test.setLocation(quantities.Position([115.,60.,50.],'mm'))
-#    test.setLocation(quantities.Position([115.,80.,50.],'mm'))
-    test.setLocation(quantities.Position([0,0,0],'mm'))
-#    test.setLopoleras de polpoleras de aslpoleras de al;godom por un precio  de reducation(quantities.Position([84,-24,59],'mm'))
-
-#===============================================================================
-#    print test.askIdentity()
-#    for repetition in range(1000):
-#        print 'Try',repetition
+    device.putOnline()
+#    
+##===============================================================================
+##    test.setLocation(quantities.Position([115.,60.,50.],'mm'))
+##    test.setLocation(quantities.Position([115.,80.,50.],'mm'))
+#    test.setLocation(quantities.Position([0,0,0],'mm'))
+##    test.setLopoleras de polpoleras de aslpoleras de al;godom por un precio  de reducation(quantities.Position([84,-24,59],'mm'))
+#
+##===============================================================================
+##    print test.askIdentity()
+##    for repetition in range(1000):
+##        print 'Try',repetition
+##        test._turnOnAndHome()
+##     test.setLocation([0.,0.,0.])     
+#     
+#    while True:
 #        test._turnOnAndHome()
-#     test.setLocation([0.,0.,0.])     
-     
-    while True:
-        test._turnOnAndHome()
-        for y in numpy.linspace(-24,-34,3):
-            for x in numpy.linspace(84,100,3):
-                test.setLocation(quantities.Position([x,y,59],'mm'),safeMovementZ=False)
-#        print test.setLocation(quantities.Position([0.,0.,0.],'mm'))
-#     while True:
-#         
-#         for x in numpy.linspace(128,116,15):
-#             test.setLocation([x,-38.,35.])
-#         test.setLocation([0.,0.,0.])
-# 
-#     print 'Go'
-#     print test.setLocation(51)
-# #     test.setLocation(test.getLocation()-100)
-#     print 'Returned'
+#        for y in numpy.linspace(-24,-34,3):
+#            for x in numpy.linspace(84,100,3):
+#                test.setLocation(quantities.Position([x,y,59],'mm'),safeMovementZ=False)
+##        print test.setLocation(quantities.Position([0.,0.,0.],'mm'))
+##     while True:
+##         
+##         for x in numpy.linspace(128,116,15):
+##             test.setLocation([x,-38.,35.])
+##         test.setLocation([0.,0.,0.])
+## 
+##     print 'Go'
+##     print test.setLocation(51)
+## #     test.setLocation(test.getLocation()-100)
+##     print 'Returned'
