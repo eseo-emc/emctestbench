@@ -21,13 +21,16 @@ class Timestamp(DommableArray):
         parseTimestampString = lambda dateString : datetime.strptime(dateString,Timestamp.storageFormatString)
         parseTimestampString = numpy.vectorize(parseTimestampString)
         return Timestamp(parseTimestampString(newInstance))
-    def toArrayString(self,separator=', '):
-        formatFunction = lambda value : value.strftime("'"+Timestamp.storageFormatString+"'")
-        return DommableArray.toArrayString(self,formatFunction,separator)
-
+    @classmethod
+    def _safeFormat(cls, value):
+        return value.strftime("'"+Timestamp.storageFormatString+"'")
+    
 if __name__ == '__main__':
     a = Timestamp()
     print a
+    
+    b = Timestamp([datetime.now(),datetime.now()])
+    print repr(b)
     
 #class Timestamp(Dommable): #TODO make a subclass of the (immutable) datetime to improve performance
 #    def __init__(self,data =None):

@@ -80,9 +80,17 @@ class DommableArray(numpy.ndarray,Dommable):
         
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+")"
+
+    @classmethod
+    def _safeFormat(cls, value):
+        return str(numpy.asarray(value))
+    
     def __str__(self):
-        return self.toArrayString(separator=' ')
+        return self.toArrayString(formatFunction=self._safeFormat)
+#        return self.toArrayString(separator=' ')
+
     def toArrayString(self,formatFunction=None,separator=', '):
+        #TODO: remove formatFunction and use self._safeFormat
         if not formatFunction:
             formatFunction = lambda value : str(numpy.asarray(value))
         def toString(theArray):
@@ -163,9 +171,13 @@ class DommableDimensionalArray(DommableArray):
     
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"    
-    def __str__(self):        
-        formatFunction = lambda value : str(value.asUnit(value.preferredUnit())) + ' ' + value.preferredUnit()
-        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=' ')
+    @classmethod
+    def _safeFormat(cls, value):
+        if numpy.isnan(value):
+            return 'NaN'
+        else:
+            return str(value.asUnit(value.preferredUnit())) + ' ' + value.preferredUnit()
+
 
 class Voltage(DommableDimensionalArray):
     storageUnit = 'V'    
@@ -267,22 +279,22 @@ class Power(DommableArray):
 
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"
-    def __str__(self):
-        def safeDbmFormat(value):
-            if numpy.isnan(value):
-                return 'NaN'
-            if value >= 0:
-                dBmValue = value.dBm()
-                prefix = ''
-            else:
-                dBmValue = (-1*value).dBm()
-                prefix = '<-- '
-            if dBmValue == -numpy.inf:
-                return prefix+'-inf dBm'
-            else:
-                return prefix+'{dBm:+.1f} dBm'.format(dBm=dBmValue)
-        
-        return self.toArrayString(safeDbmFormat)
+
+    @classmethod
+    def _safeFormat(cls,value):
+        if numpy.isnan(value):
+            return 'NaN'
+        if value >= 0:
+            dBmValue = value.dBm()
+            prefix = ''
+        else:
+            dBmValue = (-1*value).dBm()
+            prefix = '<-- '
+        if dBmValue == -numpy.inf:
+            return prefix+'-inf dBm'
+        else:
+            return prefix+'{dBm:+.1f} dBm'.format(dBm=dBmValue)
+    
     def toArrayString(self,formatFunction=None,separator=', '):
         if not formatFunction:
             formatFunction = lambda value : str(value.asUnit())
@@ -298,44 +310,7 @@ class PowerRatio(DommableDimensionalArray):
         return 'dB'
         
     
-    
-#    def dB(self):
-#        invalid = (lambda linearValue: numpy.NaN)
-#        infinite = (lambda linearValue: -numpy.inf)
-#        decibel = (lambda linearValue: 10.0*numpy.log10(linearValue))
-#        return numpy.piecewise(self,[self < 0.,self == 0.],[invalid,infinite,decibel])
-#        
-#    def asUnit(self,unit=None):
-#        if unit == None:
-#            unit = self.storageUnit
-#        if unit == 1:
-#            return numpy.asarray(self)
-#        elif unit == 'dB':
-#            return self.dB()
-#
-#    def __repr__(self):
-#        return self.__class__.__name__+'('+self.toArrayString()+")"
-#    def __str__(self):
-#        def safeDbFormat(value):
-#            if numpy.isnan(value):
-#                return 'NaN'
-#            if value >= 0:
-#                dBValue = value.dB()
-#                prefix = ''
-#            else:
-#                dBValue = (-1*value).dB()
-#                prefix = '<-- '
-#            if dBValue == -numpy.inf:
-#                return prefix+'-inf dB'
-#            else:
-#                return prefix+'{dB:+.1f} dB'.format(dB=dBValue)
-#        
-#        return self.toArrayString(safeDbFormat)
-#    def toArrayString(self,formatFunction=None,separator=', '):
-#        if not formatFunction:
-#            formatFunction = lambda value : str(value.asUnit())
-#        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=separator)
-
+ 
                         
 if __name__ == '__main__':
 #    import numpy
@@ -362,9 +337,9 @@ if __name__ == '__main__':
 #    assert str(test) == '+0.0 dBm'
 #    assert str(test*2.0) == '+3.0 dBm'
 #    
-    test = PowerRatio(20,'dB')
-    print test.asUnit('dB')
-    print test
+#    test = PowerRatio(20,'dB')
+#    print test.asUnit('dB')
+#    print test
 #    assert abs(test.linear()-0.5) < 0.1
 #    
 #    test = Power(30,'dBm')+Power(30,'dBm')
@@ -378,3 +353,9 @@ if __name__ == '__main__':
 #    test = Amplitude(0,'dBm')
 #    print test.watt()
 #    print test
+
+    f = Frequency([1,2,nan],'Hz')
+    print f
+    p = Power([1,2,nan],'W')
+    print p
+    print repr(p)
