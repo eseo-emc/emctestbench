@@ -1,11 +1,11 @@
 from device import knownDevices
-from utility.quantities import Power,PowerRatio,Frequency
+from utility.quantities import Power,Frequency
 from experiment import Experiment,EnumerateProperty
 from result import persistance
-from numpy import pi,sqrt,sin,NaN
 from copy import copy
 
-from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt
+
+from calibration.bench import CompositeBenchCorrections as BenchCorrections
 
 from result.resultset import DictResult
 
@@ -68,48 +68,19 @@ class TransmittedPower(Experiment,persistance.Dommable):
         result = DictResult()  
         generatorPower = self.rfGenerator.getPower()
         frequency = self.rfGenerator.getFrequency()        
-        
-        switchAttenuation = PowerRatio(sqrt(frequency/Frequency(170,'GHz')),'dB') # 2 switches - cable - cable - 2 switches
-        # in the incident path, these losses cancel (same loss for DUT and incident power meter)
-        # in the reflected path, these losses appear (the signal suffers from two cables and twice the switch platform)
-        
+          
         (forwardPowerReadout,reflectedPowerReadout) = self.wattMeter.getPower()
-        reflectedImage = reflectedPowerReadout
         
+        reflectedImage = reflectedPowerReadout        
         if self.amplifier.value.startswith('None'):
             forwardImage = generatorPower
-            
-#            forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
-#            reflectedPower = reflectedPowerReadout / bridgeCouplingFactorAt(frequency)
-            if self.amplifier.value == 'None (86205A)':
-                forwardCorrection = 1/PowerRatio(1.5,'dB')
-                reflectedCorrection = switchAttenuation * PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
-            elif self.amplifier.value == 'None (773D)':
-                # http://cp.literature.agilent.com/litweb/pdf/00772-90001.pdf
-                forwardCorrection = 1/PowerRatio(0.9,'dB')
-                reflectedCorrection = switchAttenuation * PowerRatio(20.0,'dB')
-            else:
-                raise ValueError, 'Non-existant bridge specifier'                
-
         else:
             forwardImage = forwardPowerReadout
-            
-            if self.amplifier.value == 'Prana':
-                forwardCorrection = PowerRatio(48.7 - 0.4*sin(2*pi*frequency/Frequency(1,'GHz')),'dB')
-                reflectedCorrection = switchAttenuation * forwardCorrection / PowerRatio(0.1,'dB')            
-            elif self.amplifier.value == 'Milmega 1':
-                forwardCorrection = PowerRatio(44.9 - 0.6*sin(2*pi*(frequency-Frequency(900,'MHz'))/Frequency(2,'GHz')),'dB')
-                reflectedCorrection = switchAttenuation * forwardCorrection * PowerRatio(0.4,'dB')
-            elif self.amplifier.value == 'Milmega 2':
-                forwardCorrection = PowerRatio(43.6 - 0.6*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
-                reflectedCorrection = switchAttenuation * PowerRatio(44.4 - 1.1*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
-            else:
-                raise ValueError, 'The switch platform is in an unsupported position.'
-                
+
+        (forwardCorrection,reflectedCorrection) = BenchCorrections().corrections(self.amplifier.value,frequency)                
             
         forwardPower = forwardImage * forwardCorrection
         reflectedPower = reflectedImage * reflectedCorrection
-
 
         result.data = {'generator power':generatorPower,
                        'forward power image':forwardImage,

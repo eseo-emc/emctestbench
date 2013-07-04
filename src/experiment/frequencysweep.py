@@ -100,8 +100,7 @@ class FrequencySweep(Experiment,persistance.Dommable):
             if self.stopRequested:
                 break
             self.transmittedPower.value.generatorFrequency = frequency
-            
-            print frequency   
+             
             log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             measurement = self.transmittedPower.value.measure()
             result.append({'frequency':frequency,
