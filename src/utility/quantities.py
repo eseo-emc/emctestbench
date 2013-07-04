@@ -75,24 +75,33 @@ class DommableArray(numpy.ndarray,Dommable):
         return eval('cls('+cls.getNodeText(dom)+')')
     def asDom(self,parent):
         element = Dommable.asDom(self,parent)
-        self.appendTextNode(element,self.toArrayString(separator=',\n'))
+        self.appendTextNode(element,self.toArrayString(forDisplay=False))
         return element
         
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+")"
 
-    @classmethod
-    def _safeFormat(cls, value):
-        return str(numpy.asarray(value))
+    
     
     def __str__(self):
-        return self.toArrayString(formatFunction=self._safeFormat)
-#        return self.toArrayString(separator=' ')
+        return self.toArrayString(forDisplay=True)
 
-    def toArrayString(self,formatFunction=None,separator=', '):
-        #TODO: remove formatFunction and use self._safeFormat
-        if not formatFunction:
-            formatFunction = lambda value : str(numpy.asarray(value))
+    @classmethod
+    def _storageFormat(cls, value):
+        return str(numpy.asarray(value))
+    @classmethod
+    def _displayFormat(cls, value):
+        return cls._storageFormat(value)
+
+    def toArrayString(self,forDisplay=False):
+        if forDisplay:
+            formatFunction = self._displayFormat
+            separator = '\n ' 
+        else:
+            formatFunction = self._storageFormat
+            separator = ', ' 
+                   
+            
         def toString(theArray):
             if theArray.shape == ():
                 return formatFunction(theArray)
@@ -172,7 +181,7 @@ class DommableDimensionalArray(DommableArray):
     def __repr__(self):
         return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"    
     @classmethod
-    def _safeFormat(cls, value):
+    def _displayFormat(cls, value):
         if numpy.isnan(value):
             return 'NaN'
         else:
@@ -281,7 +290,11 @@ class Power(DommableArray):
         return self.__class__.__name__+'('+self.toArrayString()+",'"+self.storageUnit+"')"
 
     @classmethod
-    def _safeFormat(cls,value):
+    def _storageFormat(cls,value):
+        return str(value.asUnit())
+        
+    @classmethod
+    def _displayFormat(self,value):
         if numpy.isnan(value):
             return 'NaN'
         if value >= 0:
@@ -294,12 +307,7 @@ class Power(DommableArray):
             return prefix+'-inf dBm'
         else:
             return prefix+'{dBm:+.1f} dBm'.format(dBm=dBmValue)
-    
-    def toArrayString(self,formatFunction=None,separator=', '):
-        if not formatFunction:
-            formatFunction = lambda value : str(value.asUnit())
-        return DommableArray.toArrayString(self,formatFunction=formatFunction,separator=separator)
-
+   
 class PowerRatio(DommableDimensionalArray):
     storageUnit = ''
     proportionWithPower = 1
@@ -356,6 +364,7 @@ if __name__ == '__main__':
 
     f = Frequency([1,2,nan],'Hz')
     print f
+    print repr(f)
     p = Power([1,2,nan],'W')
     print p
     print repr(p)

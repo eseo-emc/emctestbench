@@ -22,14 +22,16 @@ class Timestamp(DommableArray):
         parseTimestampString = numpy.vectorize(parseTimestampString)
         return Timestamp(parseTimestampString(newInstance))
     @classmethod
-    def _safeFormat(cls, value):
+    def _storageFormat(cls, value):
         return value.strftime("'"+Timestamp.storageFormatString+"'")
     
 if __name__ == '__main__':
     a = Timestamp()
     print a
+    print repr(a)
     
     b = Timestamp([datetime.now(),datetime.now()])
+    print b
     print repr(b)
     
 #class Timestamp(Dommable): #TODO make a subclass of the (immutable) datetime to improve performance
