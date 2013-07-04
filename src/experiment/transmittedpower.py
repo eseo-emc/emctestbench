@@ -72,45 +72,48 @@ class TransmittedPower(Experiment,persistance.Dommable):
         switchAttenuation = PowerRatio(sqrt(frequency/Frequency(170,'GHz')),'dB') # 2 switches - cable - cable - 2 switches
         # in the incident path, these losses cancel (same loss for DUT and incident power meter)
         # in the reflected path, these losses appear (the signal suffers from two cables and twice the switch platform)
-           
+        
+        (forwardPowerReadout,reflectedPowerReadout) = self.wattMeter.getPower()
+        reflectedImage = reflectedPowerReadout
+        
         if self.amplifier.value.startswith('None'):
-            reflectedPowerReadout = self.wattMeter.getPower(2)
-            forwardPowerReadout = Power(NaN)
+            forwardImage = generatorPower
+            
 #            forwardPower = generatorPower * bridgeInsertionTransferAt(frequency)
 #            reflectedPower = reflectedPowerReadout / bridgeCouplingFactorAt(frequency)
             if self.amplifier.value == 'None (86205A)':
-                insertionLoss = PowerRatio(1.5,'dB')
-                reflectedAttenuation = PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
+                forwardCorrection = 1/PowerRatio(1.5,'dB')
+                reflectedCorrection = switchAttenuation * PowerRatio(16.0 + 0.6*sin(2*pi*frequency/Frequency(12,'GHz')),'dB')
             elif self.amplifier.value == 'None (773D)':
                 # http://cp.literature.agilent.com/litweb/pdf/00772-90001.pdf
-                insertionLoss = PowerRatio(0.9,'dB')
-                reflectedAttenuation = PowerRatio(20.0,'dB')
+                forwardCorrection = 1/PowerRatio(0.9,'dB')
+                reflectedCorrection = switchAttenuation * PowerRatio(20.0,'dB')
             else:
                 raise ValueError, 'Non-existant bridge specifier'                
 
-            forwardPower = generatorPower / insertionLoss
-            reflectedPower = self.wattMeter.getPower(2) * reflectedAttenuation * switchAttenuation
         else:
+            forwardImage = forwardPowerReadout
+            
             if self.amplifier.value == 'Prana':
-                forwardAttenuation = PowerRatio(48.7 - 0.4*sin(2*pi*frequency/Frequency(1,'GHz')),'dB')
-                reflectedAttenuation = forwardAttenuation / PowerRatio(0.1,'dB')            
+                forwardCorrection = PowerRatio(48.7 - 0.4*sin(2*pi*frequency/Frequency(1,'GHz')),'dB')
+                reflectedCorrection = switchAttenuation * forwardCorrection / PowerRatio(0.1,'dB')            
             elif self.amplifier.value == 'Milmega 1':
-                forwardAttenuation = PowerRatio(44.9 - 0.6*sin(2*pi*(frequency-Frequency(900,'MHz'))/Frequency(2,'GHz')),'dB')
-                reflectedAttenuation = forwardAttenuation * PowerRatio(0.4,'dB')
+                forwardCorrection = PowerRatio(44.9 - 0.6*sin(2*pi*(frequency-Frequency(900,'MHz'))/Frequency(2,'GHz')),'dB')
+                reflectedCorrection = switchAttenuation * forwardCorrection * PowerRatio(0.4,'dB')
             elif self.amplifier.value == 'Milmega 2':
-                forwardAttenuation = PowerRatio(43.6 - 0.6*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
-                reflectedAttenuation = PowerRatio(44.4 - 1.1*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
+                forwardCorrection = PowerRatio(43.6 - 0.6*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
+                reflectedCorrection = switchAttenuation * PowerRatio(44.4 - 1.1*sin(2*pi*(frequency-Frequency(1.9,'GHz'))/Frequency(4,'GHz')),'dB')
             else:
                 raise ValueError, 'The switch platform is in an unsupported position.'
                 
-            (forwardPowerReadout,reflectedPowerReadout) = self.wattMeter.getPower()
-            forwardPower = forwardPowerReadout * forwardAttenuation
-            reflectedPower = reflectedPowerReadout * reflectedAttenuation * switchAttenuation
+            
+        forwardPower = forwardImage * forwardCorrection
+        reflectedPower = reflectedImage * reflectedCorrection
 
 
         result.data = {'generator power':generatorPower,
-                       'forward power readout':forwardPowerReadout,
-                       'reflected power readout':reflectedPowerReadout,
+                       'forward power image':forwardImage,
+                       'reflected power image':reflectedPowerReadout,
                        'forward power':forwardPower,
                        'reflected power':reflectedPower,
                        'transmitted power':forwardPower-reflectedPower,
