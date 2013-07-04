@@ -204,7 +204,15 @@ class Dict(Dommable):
         return self._data.values()
     def items(self):
         return self._data.items()
-        
+    def keys(self):
+        return self._data.keys()
+    def has_key(self,fieldName):
+        return self._data.has_key(fieldName)
         
     def append(self,values):
         self.update()
+
+if __name__ == '__main__':
+    testDict = Dict({'name':'Mohamed','age':27})
+    print testDict['name']
+    print testDict.keys()

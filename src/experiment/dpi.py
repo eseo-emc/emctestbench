@@ -82,7 +82,7 @@ class Dpi(Experiment,persistance.Dommable):
         self.powerMinimum = Property(Power(-30.,'dBm'),changedSignal=self.settingsChanged)
 
         self.powerMaximum = Property(Power(+15.,'dBm'),changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(Frequency(150e3),Frequency(1500e6),21,changedSignal=self.settingsChanged) 
+        self.frequencies = SweepRange(Frequency(100e6),Frequency(4000e6),21,changedSignal=self.settingsChanged) 
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
         self.appendChildObject(element,self.passCriterion.value,'pass criterion')
@@ -158,13 +158,10 @@ class Dpi(Experiment,persistance.Dommable):
             log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             generatorPower = findFailureFromBelow(guessPower)
             measurement = self.transmittedPower.value.measure()
-            result.append({'injection frequency':frequency,
-                             'generator power':generatorPower,
+            measurement.update({'injection frequency':frequency,
                              'pass':self.passCriterion.value.measure()['pass'],
-                             'reflected power':measurement['reflected power'],
-                             'forward power':measurement['forward power'],
-                             'transmitted power':measurement['transmitted power'],
                              'limit':True})
+            result.append(measurement)
 
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
@@ -179,29 +176,26 @@ class Dpi(Experiment,persistance.Dommable):
         
         
 if __name__ == '__main__':
-    import copy
-    a = Dpi()
-    print a.powerMaximum.value
-    b = copy.deepcopy(a)
-    print b.powerMaximum.value
-#    from voltagecriterion import VoltageCriterion
-#    from transmittedpower import TransmittedPower
-#    
-#    
-#    log.LogModel.Instance().gui = False
-#
-#
-#
-#
-#    import numpy
-#    experiment = Dpi()
-#    experiment.passCriterion.value = VoltageCriterion
-#    experiment.transmittedPower.value = TransmittedPower
-#
-#    experiment.connect()
-#    experiment.prepare()
-#    results = experiment.run()
-#    print results._data
+#    import copy
+#    a = Dpi()
+#    print a.powerMaximum.value
+#    b = copy.deepcopy(a)
+#    print b.powerMaximum.value
+    from voltagecriterion import VoltageCriterion
+    from transmittedpower import TransmittedPower
+    
+    
+    log.LogModel.Instance().gui = False
+
+
+    experiment = Dpi()
+    experiment.passCriterion.value = VoltageCriterion
+    experiment.transmittedPower.value = TransmittedPower
+
+    experiment.connect()
+    experiment.prepare()
+    results = experiment.run()
+    print results._data
     
         
                         
