@@ -103,12 +103,9 @@ class FrequencySweep(Experiment,persistance.Dommable):
              
             log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             measurement = self.transmittedPower.value.measure()
-            result.append({'frequency':frequency,
-                             'reflected power':measurement['reflected power'],
-                             'forward power':measurement['forward power'],
-                             'transmitted power':measurement['transmitted power'],
-                             'reflection coefficient':measurement['reflection coefficient']})
-
+            measurement.update({'frequency':frequency})
+            result.append(measurement)
+                            
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
         self.transmittedPower.value.tearDown()

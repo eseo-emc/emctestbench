@@ -5,7 +5,7 @@ from result import persistance
 from copy import copy
 
 
-from calibration.bench import CompositeBenchCorrections as BenchCorrections
+from calibration.bench import AnalyticBenchCorrections as BenchCorrections
 
 from result.resultset import DictResult
 
@@ -77,7 +77,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
         else:
             forwardImage = forwardPowerReadout
 
-        (forwardCorrection,reflectedCorrection) = BenchCorrections().corrections(self.amplifier.value,frequency)                
+        (forwardCorrection,reflectedCorrection) = BenchCorrections(self.amplifier.value).corrections(frequency)                
             
         forwardPower = forwardImage * forwardCorrection
         reflectedPower = reflectedImage * reflectedCorrection
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 #    print experiment.tryTransmittedPower(Power(0,'dBm'))
     experiment.amplifier.setValue('Milmega 2')
     experiment.generatorFrequency = Frequency(150000,'Hz')
-    experiment.generatorPower = Power(-15,'dBm')
+    experiment.generatorPower = Power(-60,'dBm')
 #    experiment.rfGenerator.enableOutput()
     
     print experiment.measure()

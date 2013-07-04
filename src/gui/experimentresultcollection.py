@@ -27,14 +27,22 @@ class ExperimentResultCollection(QObject):
         
     def __getitem__(self,key):
         return self.experimentResults[key]
-    def refresh(self):
-        self.experimentResults = []
-        for fileName in glob.glob(self.resultPath+'*'+self.resultExtension):
+    def experimentResultFiles(self,relativePath):
+        return glob.glob(self.resultPath+relativePath+'*'+self.resultExtension)
+    def loadExperimentResultFiles(self,relativePath):
+        experimentResults = {}
+        for fileName in self.experimentResultFiles(relativePath):
             try:
-                experimentresult.ExperimentResult.loadFromFileSystem(fileName)
+                experimentResult = experimentresult.ExperimentResult.loadFromFileSystem(fileName)
+                experimentResults.update({experimentResult.name : experimentResult})
             except:
                 log.LogItem('Error while reading {fileName}: {errorMessage}'.format(fileName=fileName,errorMessage=sys.exc_info()[1]),log.warning)
-                 
+        return experimentResults
+
+    def refresh(self):
+        self.experimentResults = []
+        self.loadExperimentResultFiles(relativePath='')
+                         
     def append(self,newExperimentResult):
         self.experimentResults.append(newExperimentResult)
         self.extendedWith.emit(newExperimentResult)
