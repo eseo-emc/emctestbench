@@ -1,6 +1,7 @@
 from device import knownDevices
 from utility.quantities import PowerRatio,Frequency
-
+from utility.smoothing import smoothBoxcar
+from gui import log
 
 from numpy import pi,sqrt,sin
 import numpy
@@ -8,27 +9,41 @@ import pylab
 
 
 from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt,calibrationFrequencies
-
 from gui.experimentresultcollection import ExperimentResultCollection
-calibrationMeasurements = ExperimentResultCollection.Instance().loadExperimentResultFiles('Calibration/Bench/')
+
 
 class BenchCorrectionsSet(object):
     def __init__(self,amplifier):
         self.amplifier = amplifier
-    def corrections(self):
+    def corrections(self,frequency):
         return NotImplementedError
     def name(self):
         return self.__class__.__name__
-    def frequencies(self):
-        return calibrationFrequencies
+    def _frequencies(self):
+        return numpy.linspace(0,20e9,1000)
     def plotCorrection(self):
         pylab.title(self.amplifier)
-        frequencies = self.frequencies()
+        frequencies = self._frequencies()
         corrections = self.corrections(frequencies)
         pylab.plot(frequencies,corrections[0].asUnit('dB'),label=self.name()+' forward')
-        pylab.plot(frequencies,corrections[1].asUnit('dB'),label=self.name()+' reflected')
+        pylab.plot(frequencies,corrections[1].asUnit('dB'),label=self.name()+' reflected')    
 
-    
+class BestBenchCorrections(BenchCorrectionsSet):
+    def __init__(self,*args):
+        super(BestBenchCorrections,self).__init__(*args)
+        try:
+            self._correctionsSet = MeasuredBenchCorrections(self.amplifier)
+            
+        except KeyError:
+            log.LogItem('Did not find "{amplifier} output" and "{amplifier} output reflect" files in /EmcTestbench/Calibration/Bench, reverting to analytical corrections'.format(amplifier=self.amplifier),log.warning)
+            self._correctionsSet = AnalyticBenchCorrections(self.amplifier)
+        except:
+            raise
+        
+    def corrections(self,frequency):
+        return self._correctionsSet.corrections(frequency)
+    def _frequencies(self):
+        return self._correctionsSet._frequencies()
 
 class AnalyticBenchCorrections(BenchCorrectionsSet):
     def corrections(self,frequency):
@@ -70,40 +85,47 @@ class CompositeBenchCorrections(BenchCorrectionsSet):
         return (forwardCorrection,reflectedCorrection)
 
 class MeasuredBenchCorrections(BenchCorrectionsSet):
+    smoothingSamples = 1   
+    
     def __init__(self,*args,**kwargs):
         super(MeasuredBenchCorrections,self).__init__(*args,**kwargs)
         
+        calibrationMeasurements = ExperimentResultCollection.Instance().loadExperimentResultFiles('Calibration/Bench/'+self.amplifier)
         self._outputMeasurement = calibrationMeasurements[self.amplifier+' output'].result
         self._openReflectMeasurement = calibrationMeasurements[self.amplifier+' open reflect'].result
 
-    def forwardCorrection(self,frequency):
-        return PowerRatio(numpy.interp(frequency,
-                                       self._outputMeasurement['frequency'],
-                                       self._outputMeasurement['reflected power image']/self._outputMeasurement['generator power'] ))
-    def corrections(self,frequency):
-        forwardCorrection = self.forwardCorrection(frequency)
-        
-        forwardPowers = self._openReflectMeasurement['generator power']*self.forwardCorrection(self._openReflectMeasurement['frequency'])
+    def _smoothRatio(self,frequency,measuredFrequency,measuredCorrection):
+        smoothedCorrection = smoothBoxcar(measuredCorrection,self.smoothingSamples)
+        return PowerRatio(numpy.interp(frequency,measuredFrequency,smoothedCorrection ))
+    def _forwardCorrection(self,frequency):
+        measuredCorrection = self._outputMeasurement['reflected power image']/self._outputMeasurement['generator power']
+        return self._smoothRatio(frequency,self._outputMeasurement['frequency'],measuredCorrection)
+    def _reflectedCorrection(self,frequency):
+        openReflectFrequency = self._openReflectMeasurement['frequency']
+        forwardPowers = self._openReflectMeasurement['generator power']*self._forwardCorrection(openReflectFrequency)
         reflectedCorrectionMeasurement = forwardPowers/self._openReflectMeasurement['reflected power image']
-        reflectedCorrection = reflectedCorrectionMeasurement
-        return (forwardCorrection,reflectedCorrection)
+        return self._smoothRatio(frequency,openReflectFrequency,reflectedCorrectionMeasurement)
+
+    def corrections(self,frequency):          
+        return (self._forwardCorrection(frequency),self._reflectedCorrection(frequency))
         
-    def frequencies(self):
+    def _frequencies(self):
         return self._outputMeasurement['frequency']
 
 if __name__ == '__main__':
-    compositeCorrections = CompositeBenchCorrections('None (86205A)')
-    analyticCorrections = AnalyticBenchCorrections('None (86205A)')
-    measuredCorrections = MeasuredBenchCorrections('None (86205A)')
-    for corrections in [compositeCorrections,analyticCorrections,measuredCorrections]:
-        corrections.plotCorrection()
-    
-    pylab.legend()
-    pylab.xlabel('Frequency (Hz)')
-    pylab.ylabel('Correction (dB)')
-    pylab.show()
+    def plotCorrections(amplifier):
+        try:
+            CompositeBenchCorrections(amplifier).plotCorrection()
+        except:
+            pass
+        AnalyticBenchCorrections(amplifier).plotCorrection()
+        MeasuredBenchCorrections(amplifier).plotCorrection()
 
-    from gui.experimentresultcollection import ExperimentResultCollection
-    calibrationMeasurements = ExperimentResultCollection.Instance().loadExperimentResultFiles('Calibration/Bench/')
-    
-    
+        
+        pylab.legend()
+        pylab.xlabel('Frequency (Hz)')
+        pylab.ylabel('Correction (dB)')
+        pylab.show()
+
+    plotCorrections('None (86205A)')    
+    plotCorrections('None (773D)')

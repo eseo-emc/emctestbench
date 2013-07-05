@@ -5,7 +5,7 @@ from result import persistance
 from copy import copy
 
 
-from calibration.bench import AnalyticBenchCorrections as BenchCorrections
+from calibration.bench import BestBenchCorrections
 
 from result.resultset import DictResult
 
@@ -19,6 +19,10 @@ class TransmittedPower(Experiment,persistance.Dommable):
         self.amplifiers = {'None (86205A)':'bridge 86205A', 'None (773D)':'bridge 773D', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
         self.amplifier = EnumerateProperty('None (86205A)',['Automatic'] + self.amplifiers.keys())
         self.amplifier.changed.connect(self.setAmplifier)
+
+        self.amplifierCorrections = {}        
+        for amplifier in self.amplifiers.keys():
+            self.amplifierCorrections.update({amplifier:BestBenchCorrections(amplifier)})
     
     def connect(self):
         self.switchPlatform = knownDevices['switchPlatform']
@@ -77,7 +81,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
         else:
             forwardImage = forwardPowerReadout
 
-        (forwardCorrection,reflectedCorrection) = BenchCorrections(self.amplifier.value).corrections(frequency)                
+        (forwardCorrection,reflectedCorrection) = self.amplifierCorrections[self.amplifier.value].corrections(frequency)                
             
         forwardPower = forwardImage * forwardCorrection
         reflectedPower = reflectedImage * reflectedCorrection
@@ -124,7 +128,7 @@ if __name__ == '__main__':
     experiment.prepare()
 #    experiment.switchPlatform.setPreset('bridge')
 #    print experiment.tryTransmittedPower(Power(0,'dBm'))
-    experiment.amplifier.setValue('Milmega 2')
+    experiment.amplifier.setValue('None (86205A)')
     experiment.generatorFrequency = Frequency(150000,'Hz')
     experiment.generatorPower = Power(-60,'dBm')
 #    experiment.rfGenerator.enableOutput()
