@@ -66,14 +66,15 @@ class ScpiDevice(Device):
             
         return self.defaultName  + ' (' + self.visaAddress + serialString + ')'
     
-    def write(self,message):
+    def write(self,message,log=False):
         if not self._deviceHandle:
             self.putOnline()
             if self._deviceHandle == None:
                 log.LogItem('Write error, {device} ({address}) is offline'.format(device=self,address=self.visaAddress),log.error)
                 raise Exception        
         try:
-#            print self.name, 'Writing:',message
+            if log:
+                self.name, 'Writing:',message
             self._deviceHandle.write(message)
         except:
 #            log.LogItem(str(sys.exc_info()[1]),log.error)

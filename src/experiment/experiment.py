@@ -37,10 +37,13 @@ class Property(QObject):
         self.changed.emit()
         self.changedTo.emit(self.value) # deprecated
         
+class BooleanProperty(Property):
+    pass
+        
 class EnumerateProperty(Property):
-    def __init__(self,defaultValue,possibleValues):
+    def __init__(self,defaultValue,possibleValues,*args,**kwargs):
         self.possibleValues = possibleValues
-        Property.__init__(self,defaultValue)
+        Property.__init__(self,defaultValue,*args,**kwargs)
     def setValue(self,value):
         assert value in self.possibleValues, 'Value {newValue} is not in possible values {possibleValues} of EnumerateProperty'.format(newValue=value,possibleValues=self.possibleValues)
         Property.setValue(self,value)

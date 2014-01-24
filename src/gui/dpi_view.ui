@@ -21,6 +21,9 @@
     <number>3</number>
    </property>
    <item>
+    <widget class="DropWidget" name="dutSupply" native="true"/>
+   </item>
+   <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0" colspan="4">
       <widget class="QProgressBar" name="progress"/>
@@ -106,6 +109,9 @@
      </item>
      <item row="3" column="3" colspan="2">
       <widget class="QComboBox" name="searchMethod">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <item>
         <property name="text">
          <string>IEC 62132-4</string>

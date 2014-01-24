@@ -98,14 +98,17 @@ class Dpi(Experiment,persistance.Dommable):
         
     def __init__(self):
         Experiment.__init__(self)
-        self.passCriterion = ExperimentSlot(parent=self) #,defaultValue='VoltageCriterion')
-        self.transmittedPower = ExperimentSlot(parent=self) #,defaultValue='TransmittedPower')
+        self.dutSupply = self.passCriterion = ExperimentSlot(parent=self)
+        self.passCriterion = ExperimentSlot(parent=self,defaultValue='VoltageCriterion')
+        self.transmittedPower = ExperimentSlot(parent=self,defaultValue='TransmittedPower')
         self.powerMinimum = Property(Power(-30.,'dBm'),changedSignal=self.settingsChanged)
 
-        self.powerMaximum = Property(Power(+15.,'dBm'),changedSignal=self.settingsChanged)
-        self.frequencies = SweepRange(Frequency(10e6),Frequency(4200e6),101,changedSignal=self.settingsChanged) 
+        self.powerMaximum = Property(Power(+23.,'dBm'),changedSignal=self.settingsChanged)
+        self.frequencies = SweepRange(Frequency(10e6),Frequency(1000e6),101,changedSignal=self.settingsChanged) 
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
+        if self.dutSupply.value != None:
+            self.appendChildObject(element,self.dutSupply.value,'DUT supply')        
         self.appendChildObject(element,self.passCriterion.value,'pass criterion')
         self.appendChildObject(element,self.transmittedPower.value,'transmitted power')
         
@@ -119,10 +122,13 @@ class Dpi(Experiment,persistance.Dommable):
     def connect(self):
         self.rfGenerator = knownDevices['rfGenerator']   
         self.switchPlatform = knownDevices['switchPlatform'] 
-        
+        if self.dutSupply.value != None:
+            self.dutSupply.value.connect()
         self.transmittedPower.value.connect()
         self.passCriterion.value.connect()
     def prepare(self):
+        if self.dutSupply.value != None:
+            self.dutSupply.value.prepare()
         self.passCriterion.value.prepare()
         self.transmittedPower.value.prepare()
 
@@ -137,7 +143,9 @@ class Dpi(Experiment,persistance.Dommable):
         def findFailureFromBelow(startPower,stepIndex=0):
             def measureAndSavePass(tryPower):
 #                self.transmittedPower.value.rfGenerator._enableOutput(False)            
-#                self.passCriterion.value.prepare()                  
+#                self.passCriterion.value.prepare()     
+                if self.dutSupply.value != None:
+                    self.dutSupply.value.interrupt()             
                 
                 self.transmittedPower.value.generatorPower = tryPower                
                 
@@ -179,6 +187,8 @@ class Dpi(Experiment,persistance.Dommable):
                 break
             
             self.transmittedPower.value.rfGenerator._enableOutput(False) 
+#            if self.dutSupply.value != None:
+#                self.dutSupply.value.interrupt()
             self.transmittedPower.value.generatorFrequency = frequency
             log.LogItem('Passing to {frequency}'.format(frequency=frequency),log.debug)
             
@@ -232,52 +242,52 @@ if __name__ == '__main__':
     experiment.connect()
     experiment.prepare()
     experiment.run()
-    
-    limitCsv = result._writeToCsv(fileName=None,onlyLimits=False)
-    expectedFileContents = u'''frequency (Hz)	generator (dBm)	forward (dBm)	reflected (dBm)	transmitted (dBm)	fail	limit
-10000000,0	-30,0	nan	nan	nan	0	0
-10000000,0	-25,0	nan	nan	nan	0	0
-10000000,0	-20,0	nan	nan	nan	0	0
-10000000,0	-15,0	nan	nan	nan	0	0
-10000000,0	-10,0	nan	nan	nan	0	0
-10000000,0	-5,0	nan	nan	nan	0	0
-10000000,0	0,0	nan	nan	nan	0	0
-10000000,0	5,0	nan	nan	nan	0	0
-10000000,0	10,0	nan	nan	nan	1	0
-10000000,0	5,0	nan	nan	nan	0	0
-10000000,0	6,0	nan	nan	nan	0	0
-10000000,0	7,0	nan	nan	nan	0	0
-10000000,0	8,0	nan	nan	nan	0	0
-10000000,0	9,0	nan	nan	nan	1	0
-10000000,0	8,0	nan	nan	nan	0	0
-10000000,0	8,5	nan	nan	nan	0	0
-10000000,0	9,0	nan	nan	nan	1	0
-10000000,0	8,5	nan	nan	nan	0	0
-10000000,0	8,75	7,25	1,26081122819	5,9900915638	1	1
-1000000000,0	-30,0	nan	nan	nan	0	0
-1000000000,0	-25,0	nan	nan	nan	0	0
-1000000000,0	-20,0	nan	nan	nan	0	0
-1000000000,0	-15,0	nan	nan	nan	0	0
-1000000000,0	-10,0	nan	nan	nan	0	0
-1000000000,0	-5,0	nan	nan	nan	0	0
-1000000000,0	0,0	nan	nan	nan	0	0
-1000000000,0	5,0	nan	nan	nan	0	0
-1000000000,0	10,0	nan	nan	nan	1	0
-1000000000,0	5,0	nan	nan	nan	0	0
-1000000000,0	6,0	nan	nan	nan	0	0
-1000000000,0	7,0	nan	nan	nan	0	0
-1000000000,0	8,0	nan	nan	nan	0	0
-1000000000,0	9,0	nan	nan	nan	1	0
-1000000000,0	8,0	nan	nan	nan	0	0
-1000000000,0	8,5	nan	nan	nan	0	0
-1000000000,0	9,0	nan	nan	nan	1	0
-1000000000,0	8,5	nan	nan	nan	0	0
-1000000000,0	8,75	7,25	1,62669649888	5,8596715417	1	1
-'''.replace('\n','\r\n')
-    actualFileContents = limitCsv.getvalue()
-    assert actualFileContents == expectedFileContents
-#    for (actual,expected) in zip(actualFileContents,expectedFileContents):
-#        if actual != expected:
-#            print 'Err',ord(actual),ord(expected)
-#            break
-        
+#    
+#    limitCsv = result._writeToCsv(fileName=None,onlyLimits=False)
+#    expectedFileContents = u'''frequency (Hz)	generator (dBm)	forward (dBm)	reflected (dBm)	transmitted (dBm)	fail	limit
+#10000000,0	-30,0	nan	nan	nan	0	0
+#10000000,0	-25,0	nan	nan	nan	0	0
+#10000000,0	-20,0	nan	nan	nan	0	0
+#10000000,0	-15,0	nan	nan	nan	0	0
+#10000000,0	-10,0	nan	nan	nan	0	0
+#10000000,0	-5,0	nan	nan	nan	0	0
+#10000000,0	0,0	nan	nan	nan	0	0
+#10000000,0	5,0	nan	nan	nan	0	0
+#10000000,0	10,0	nan	nan	nan	1	0
+#10000000,0	5,0	nan	nan	nan	0	0
+#10000000,0	6,0	nan	nan	nan	0	0
+#10000000,0	7,0	nan	nan	nan	0	0
+#10000000,0	8,0	nan	nan	nan	0	0
+#10000000,0	9,0	nan	nan	nan	1	0
+#10000000,0	8,0	nan	nan	nan	0	0
+#10000000,0	8,5	nan	nan	nan	0	0
+#10000000,0	9,0	nan	nan	nan	1	0
+#10000000,0	8,5	nan	nan	nan	0	0
+#10000000,0	8,75	7,25	1,26081122819	5,9900915638	1	1
+#1000000000,0	-30,0	nan	nan	nan	0	0
+#1000000000,0	-25,0	nan	nan	nan	0	0
+#1000000000,0	-20,0	nan	nan	nan	0	0
+#1000000000,0	-15,0	nan	nan	nan	0	0
+#1000000000,0	-10,0	nan	nan	nan	0	0
+#1000000000,0	-5,0	nan	nan	nan	0	0
+#1000000000,0	0,0	nan	nan	nan	0	0
+#1000000000,0	5,0	nan	nan	nan	0	0
+#1000000000,0	10,0	nan	nan	nan	1	0
+#1000000000,0	5,0	nan	nan	nan	0	0
+#1000000000,0	6,0	nan	nan	nan	0	0
+#1000000000,0	7,0	nan	nan	nan	0	0
+#1000000000,0	8,0	nan	nan	nan	0	0
+#1000000000,0	9,0	nan	nan	nan	1	0
+#1000000000,0	8,0	nan	nan	nan	0	0
+#1000000000,0	8,5	nan	nan	nan	0	0
+#1000000000,0	9,0	nan	nan	nan	1	0
+#1000000000,0	8,5	nan	nan	nan	0	0
+#1000000000,0	8,75	7,25	1,62669649888	5,8596715417	1	1
+#'''.replace('\n','\r\n')
+#    actualFileContents = limitCsv.getvalue()
+#    assert actualFileContents == expectedFileContents
+##    for (actual,expected) in zip(actualFileContents,expectedFileContents):
+##        if actual != expected:
+##            print 'Err',ord(actual),ord(expected)
+##            break
+#        

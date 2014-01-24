@@ -196,6 +196,9 @@ class DommableDimensionalArray(DommableArray):
 class Voltage(DommableDimensionalArray):
     storageUnit = 'V'    
 
+class Current(DommableDimensionalArray):
+    storageUnit = 'A'    
+
 class Time(DommableDimensionalArray):
     storageUnit = 's'  
 

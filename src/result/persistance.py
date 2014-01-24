@@ -103,6 +103,9 @@ class Dommable(object):
         elif element.tagName == 'Voltage':
             from utility.quantities import Voltage
             factory = Voltage
+        elif element.tagName == 'Current':
+            from utility.quantities import Current
+            factory = Current
         elif element.tagName == 'DpiResult':
             from experiment.dpi import DpiResult
             factory = DpiResult

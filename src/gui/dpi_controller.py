@@ -9,6 +9,7 @@ class DpiController(TopLevelExperimentController,formClass):
                
         self.criterion.label = 'Criterion'
         self.stimulus.label = 'Stimulus'
+        self.dutSupply.label = 'DUT Power Supply'
         
     def setModel(self):
         self.powerMinimum.model = self.model.powerMinimum        
@@ -24,6 +25,7 @@ class DpiController(TopLevelExperimentController,formClass):
         
         self.criterion.model = self.model.passCriterion
         self.stimulus.model = self.model.transmittedPower
+        self.dutSupply.model = self.model.dutSupply
 
     def enableInputs(self,enable):
         self.frequencyMinimum.setEnabled(enable)             
@@ -32,7 +34,7 @@ class DpiController(TopLevelExperimentController,formClass):
         self.powerMaximum.setEnabled(enable)             
         self.logarithmic.setEnabled(enable)  
         self.saveTransmittedPowers.setEnabled(enable)
-        self.searchMethod.setEnabled(enable)    
+#        self.searchMethod.setEnabled(enable)    
         self.frequencySteps.setEnabled(enable)
 
 

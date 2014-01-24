@@ -11,7 +11,7 @@ class VoltageCriterion(Experiment,persistance.Dommable):
     def __init__(self):
         Experiment.__init__(self)
         self.undisturbedOutputVoltage = ScalarProperty(quantities.Voltage(0.,'V'),changedSignal=self.settingsChanged,minimum=quantities.Voltage(-500.,'V'),maximum=quantities.Voltage(500.,'V'))
-        self.voltageMargin = ScalarProperty(quantities.Voltage(200.,'uV'),changedSignal=self.settingsChanged,minimum=quantities.Voltage(0.,'V'),maximum=quantities.Voltage(500.,'V'))
+        self.voltageMargin = ScalarProperty(quantities.Voltage(200.,'mV'),changedSignal=self.settingsChanged,minimum=quantities.Voltage(0.,'V'),maximum=quantities.Voltage(500.,'V'))
     def asDom(self,parent):
         element = persistance.Dommable.asDom(self,parent)
         self.appendChildObject(element,self.undisturbedOutputVoltage.value,'undisturbed output voltage')
