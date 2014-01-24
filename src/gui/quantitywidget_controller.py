@@ -59,7 +59,6 @@ class QuantityWidgetController(qtBaseClass,formClass):
         self.value.setMinimum(self.model.minimum.asUnit(str(self.unit.currentText())))
         self.value.setMaximum(self.model.maximum.asUnit(str(self.unit.currentText())))
         self.value.setValue(self.model.value.asUnit(str(self.unit.currentText())))
-
         self._processChangeSignals += 1
     def valueEntered(self):
         if self._processChangeSignals == 0:

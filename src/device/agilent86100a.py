@@ -94,20 +94,24 @@ if __name__ == '__main__':
     device = Agilent86100a()
     device.putOnline()
 
-    print device.measureJitter(channel=1,count=500)
-    print 'OK'    
+#    print device.measureJitter(channel=1,count=500)
+#    print 'OK'    
 #    for iteration in range(1):
-#        #time.sleep(1)
+        #time.sleep(1)
 #        print iteration
 #        calibratedResponse = device.getChannelWaveform(1,response=True)
-#        rawSignal = device.getChannelWaveform(1)
+    rawSignal = device.getChannelWaveform(1)
 #        signal2 = device.getChannelWaveform(2)
-#         signal,signal2 = device.getChannelWaveforms()
+#        signal,signal2 = device.getChannelWaveforms()
 #        
 #        
-#    pyplot.plot(rawSignal[0,:],rawSignal[1,:],'b-')
+    pyplot.plot(rawSignal[0,:],rawSignal[1,:],'b-')
 #    pyplot.plot(calibratedResponse[0,:],calibratedResponse[1,:],'r-')
-#    pyplot.show()
+    
+    import numpy
+    numpy.savetxt('TDR.xls',rawSignal.T,delimiter='\t')
+
+    pyplot.show()
 
 
 

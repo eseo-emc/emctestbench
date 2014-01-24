@@ -57,7 +57,14 @@ class ScpiDevice(Device):
         self._deviceHandle = None
     @property
     def detailedInformation(self):
-        return self.defaultName  + ' ' + self.visaAddress
+        serialString = ''
+        if self.online:        
+            try:
+                serialString = ' ,serial: ' + self.askIdentityItems()['serial number']
+            except:
+                pass
+            
+        return self.defaultName  + ' (' + self.visaAddress + serialString + ')'
     
     def write(self,message):
         if not self._deviceHandle:
@@ -66,7 +73,7 @@ class ScpiDevice(Device):
                 log.LogItem('Write error, {device} ({address}) is offline'.format(device=self,address=self.visaAddress),log.error)
                 raise Exception        
         try:
-#            print 'Writing',message
+#            print self.name, 'Writing:',message
             self._deviceHandle.write(message)
         except:
 #            log.LogItem(str(sys.exc_info()[1]),log.error)
@@ -76,14 +83,16 @@ class ScpiDevice(Device):
     def ask(self,message):
         self.write(message)
         try:
-            return self._deviceHandle.read()
+            readData = self._deviceHandle.read()
         except:
             log.LogItem('Error with {device} ({address}) when trying to ask "{message}"\n{moreError}'.format(device=self,message=message,address=self.visaAddress,moreError=str(sys.exc_info()[1])),log.error)
             raise             
+#        print self.name, 'Read back:', readData
+        return readData
             
-    def ask_for_values(self,message):
+    def ask_for_values(self,message,format=None):
         self.write(message)
-        return self._deviceHandle.read_values(message)
+        return self._deviceHandle.read_values(format)
     
     def _putOffline(self):
         if self._deviceHandle:
@@ -118,6 +127,9 @@ class ScpiDevice(Device):
         self.write('CLR')
     def askIdentity(self):
         return self.ask('*IDN?')
+    def askIdentityItems(self):
+        identityItems = self.askIdentity().split(',')
+        return {'mark':identityItems[0],'type':identityItems[1],'serial number':identityItems[2],'firmware version':identityItems[3]}
     def identify(self):
         identityString = self.askIdentity()
         if identityString.startswith(self.visaIdentificationStartsWith):

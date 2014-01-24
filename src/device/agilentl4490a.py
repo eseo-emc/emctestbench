@@ -17,19 +17,19 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice):
     defaultAddress = 'TCPIP0::192.168.18.181::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,L4490A,'
     
-    def __init__(self,visaAddress=None):
-        ScpiDevice.__init__(self)
+    def __init__(self,*args,**kwargs):
+        ScpiDevice.__init__(self,*args,**kwargs)
         SwitchPlatform.__init__(self,{ \
             'generator':AgilentSwitch(self,{ \
-                'bridge 773D':   1102,
-                'bridge 86205A': 1103, 
+                '773D':   1102,
+                '86205A': 1103, 
                 'Prana':         1105, 
                 'Milmega':       1106, 
                 'open':          1108 \
             }),
             'DUT':AgilentSwitch(self,{ \
-                'bridge 773D':   1112,
-                'bridge 86205A': 1113, 
+                '773D':   1112,
+                '86205A': 1113, 
                 'Prana':         1115, 
                 'Milmega':       1116, 
                 'open':          1118 \
@@ -41,8 +41,8 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice):
                 'open':          1128 \
             }),
             'powerMeterReflected':AgilentSwitch(self,{ \
-                'bridge 773D':   1132,                
-                'bridge 86205A': 1133, 
+                '773D':   1132,                
+                '86205A': 1133, 
                 'Prana':         1135, 
                 'Milmega':       1136, 
                 'open':          1138 \
@@ -50,8 +50,8 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice):
         })
         
         self._presets = { \
-            'bridge 86205A'  : {'DUT':'bridge 86205A',  'powerMeterReflected':'bridge 86205A', 'generator':'bridge 86205A'},
-            'bridge 773D'  : {'DUT':'bridge 773D',  'powerMeterReflected':'bridge 773D', 'generator':'bridge 773D'},
+            '86205A'  : {'DUT':'86205A',  'powerMeterReflected':'86205A', 'generator':'86205A'},
+            '773D'  : {'DUT':'773D',  'powerMeterReflected':'773D', 'generator':'773D'},
             'Prana'   : {'DUT':'Prana',   'powerMeterIncident':'Prana',   'powerMeterReflected':'Prana',   'generator':'Prana'},
             'Milmega' : {'DUT':'Milmega', 'powerMeterIncident':'Milmega', 'powerMeterReflected':'Milmega', 'generator':'Milmega'} \
         }
@@ -79,5 +79,5 @@ if __name__ == '__main__':
     switchPlatform = AgilentL4490a()
 #    switchPlatform['DUT'].openSwitch() #
 #    switchPlatform['DUT'].setPosition('SAorVNA')
-    switchPlatform.setPreset('bridge 86205A')
+    switchPlatform.setPreset('86205A')
     print switchPlatform['DUT'].getPosition()

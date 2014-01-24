@@ -14,7 +14,7 @@ class AgilentL4411a(Multimeter,ScpiDevice):
     def measure(self):
         self.write('CONF:VOLT:DC AUTO')
         voltageString = self.ask('MEASure?')
-#         voltageString = self.ask('MEASure:VOLTage:DC?')
+#        voltageString = self.ask('MEASure:VOLTage:DC? 100E-3,1E-8')
         return quantities.Voltage(float(voltageString),'V')
     
 if __name__ == '__main__':

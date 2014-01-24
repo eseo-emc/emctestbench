@@ -14,6 +14,7 @@ http://www.everythingrf.com/rf-microwave-amplifiers/p/Planar-Monolithics-Industr
 import numpy
 import time
 from matplotlib import pyplot
+from utility import quantities
 
 
 import device
@@ -25,36 +26,38 @@ import datetime
 
 class NearFieldMode:
     def __init__(self):
-        self.oscilloscope = device.Agilent86100a()
-        self.robot = device.NewportEsp300()
+        self.oscilloscope = device.agilent86100a.Agilent86100a()
+        self.robot = device.newportesp300.NewportEsp300()
         
-        self.powerSupply = device.AgilentN6700b()
-        self.powerSupply.setChannelParameters(4,12.0,0.45)
+        self.powerSupply = device.agilentn6700b.AgilentN6700b()
+        self.powerSupply.setChannelParameters(3,12.0,0.8)
         
 
-    def xSweep(self):
-        self.powerSupply.turnChannelOn(4)
+    def sweep(self):
+        self.powerSupply.turnChannelOn(3)
         
         xRange = numpy.arange(50,235,5) #(0,20,10) #
-#         xRange = numpy.hstack((xRange,xRange[::-1]))
+        yRange = numpy.arange(25,35,5)
+        zPosition = 10
         moments = []
         voltages = []
         for xPosition in xRange:
-            print xPosition
-            self.robot.setLocation(xPosition)
-            waveform = self.oscilloscope.getChannelWaveform(2)
-            moments = waveform[0,:]
-            voltages.append(waveform[1,:])
+            for yPosition in yRange:
+                print [xPosition,yPosition,zPosition]
+                self.robot.setLocation(quantities.Position([xPosition,yPosition,zPosition], 'mm'))
+                waveform = self.oscilloscope.getChannelWaveform(2)
+                moments = waveform[0,:]
+                voltages.append(waveform[1,:])
                             
-        self.powerSupply.turnChannelOff(4)        
+        self.powerSupply.turnChannelOff(3)        
         
-        return (xRange,moments,numpy.vstack(voltages))
+        return ([xRange,yRange,zPosition],moments,numpy.vstack(voltages))
         
  
 if __name__ == '__main__':
     print 'Start mode scan'
     test = NearFieldMode()
-    (xRange,moments,voltages) = test.xSweep()
+    ([xRange,yRange,zPosition],moments,voltages) = test.sweep()
 
 ## plot at time instant n
 theFigure = pyplot.figure()

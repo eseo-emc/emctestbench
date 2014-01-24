@@ -63,7 +63,7 @@ class NearFieldScan(Experiment,persistance.Dommable):
 #        
 #
 #        self.appendChildObject(element,self.powerMaximum.value,'power maximum')
-#        return element
+#       return element
     
     def positions(self):
         def linearSteps(start,stop,steps):
@@ -79,11 +79,13 @@ class NearFieldScan(Experiment,persistance.Dommable):
         self.startPosition.value = location[1]
         self.xPosition.value = location[0]
         self.zPosition.value = location[2]
+#         self.yPosition.value = location[3]
     def readStopPosition(self):
         location = self.positioner.getLocation()
         self.stopPosition.value = location[1]
         self.xPosition.value = location[0]
         self.zPosition.value = location[2]
+#          self.yPosition.value = location[3]
     def rehearsePath(self):
         for position in [self.positions()[0],self.positions()[-1]]:
             self.positioner.setLocation(position)

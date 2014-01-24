@@ -1,9 +1,15 @@
+import time
+
 class Amplifier(object):
     @property
     def iconName(self):
         return 'Amplifier'
         
     def turnRfOn(self):
-        raise NotImplementedError
+        self._turnRfOn()
+        if not(hasattr(self,'onProxy') and self.onProxy):
+            time.sleep(4)
+        self.onProxy = True
     def turnRfOff(self):
-        raise NotImplementedError
+        self._turnRfOff()
+        self.onProxy = False

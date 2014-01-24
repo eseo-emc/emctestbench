@@ -11,7 +11,7 @@ class VoltageCriterionController(qtBaseClass,formClass):
         self.topLevel = topLevel
         
         self._model = None
-        self.result = experiment.Property(quantities.Voltage(0.0))
+        self.result = experiment.ScalarProperty(quantities.Voltage(0.0),minimum=quantities.Voltage(-500,'V'),maximum=quantities.Voltage(500.,'V'))
     @property
     def model(self):
         return self._model
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     window = QMainWindow()
     
     switchPlatform = knownDevices['switchPlatform']
-    switchPlatform.setPreset('bridge')
+    switchPlatform.setPreset('86205A')
     
     
     controller = VoltageCriterionController(window)

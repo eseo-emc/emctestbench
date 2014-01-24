@@ -15,9 +15,11 @@ class TransmittedPower(Experiment,persistance.Dommable):
     def __init__(self):
         Experiment.__init__(self)
         persistance.Dommable.__init__(self)
+
+        self._physicalAmplifier = None
         
-        self.amplifiers = {'None (86205A)':'bridge 86205A', 'None (773D)':'bridge 773D', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
-        self.amplifier = EnumerateProperty('None (86205A)',['Automatic'] + self.amplifiers.keys())
+        self.amplifiers = {'None (86205A)':'86205A', 'None (773D)':'773D', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
+        self.amplifier = EnumerateProperty('Automatic (coupler)',['Automatic (coupler)','Automatic (amplifier)'] + self.amplifiers.keys())
         self.amplifier.changed.connect(self.setAmplifier)
 
         self.amplifierCorrections = {}        
@@ -25,10 +27,13 @@ class TransmittedPower(Experiment,persistance.Dommable):
             self.amplifierCorrections.update({amplifier:BestBenchCorrections(amplifier)})
     
     def connect(self):
-        self.switchPlatform = knownDevices['switchPlatform']
-        self.setAmplifier()
         self.wattMeter = knownDevices['wattMeter']
         self.rfGenerator = knownDevices['rfGenerator']
+        
+        self.switchPlatform = knownDevices['switchPlatform']
+        self.physicalAmplifier = 'None (86205A)'        
+        
+        self.setAmplifier()
 
     def prepare(self):
         self.wattMeter.reset()
@@ -39,60 +44,94 @@ class TransmittedPower(Experiment,persistance.Dommable):
     @generatorFrequency.setter
     def generatorFrequency(self,value):
         self.rfGenerator.setFrequency(value)
+        self.setAmplifier()
     
     @property
-    def generatorPower(self):        
+    def generatorPower(self): 
         return self.rfGenerator.getPower()
     @generatorPower.setter
-    def generatorPower(self,newPower):
+    def generatorPower(self,newPower):    
         self.rfGenerator.setPower(newPower)
-        if not self.amplifier.value.startswith('None'):
+        if self.physicalAmplifier and not self.physicalAmplifier.startswith('None'):
             if newPower.negligible:
-                knownDevices[self.amplifiers[self.amplifier.value]].turnRfOff()
+                knownDevices[self.amplifiers[self.physicalAmplifier]].turnRfOff()
             else:
-                knownDevices[self.amplifiers[self.amplifier.value]].turnRfOn()
+                knownDevices[self.amplifiers[self.physicalAmplifier]].turnRfOn()
     
     def setAmplifier(self):
-#        if not self.generatorPower.negligible:
-#            print "Trying to change amplifier while outputting RF... need to implement turn off, change, turn on sequence"
-#            raise NotImplementedError
-        if self.amplifier.value == 'Automatic':
-            raise ValueError, 'Automatic amplifier selection is not yet supported'
+        if self.amplifier.value == 'Automatic (coupler)':
+            frequency = self.generatorFrequency
+            if frequency <= Frequency(2,'GHz'):
+                self.physicalAmplifier = 'None (86205A)'
+            else:
+                self.physicalAmplifier = 'None (773D)'
+        elif self.amplifier.value == 'Automatic (amplifier)':
+            frequency = self.generatorFrequency
+            if frequency <= Frequency(1,'GHz'):
+                self.physicalAmplifier = 'Prana'
+            elif frequency <= Frequency(2,'GHz'):
+                self.physicalAmplifier = 'Milmega 1'
+            else:
+                self.physicalAmplifier = 'Milmega 2'
         else:
-            self.switchPlatform.setPreset(self.amplifiers[self.amplifier.value])
-            if self.amplifier.value == 'Milmega 1':
-                knownDevices[self.amplifiers[self.amplifier.value]].switchToBand1()
-            elif self.amplifier.value == 'Milmega 2':
-                knownDevices[self.amplifiers[self.amplifier.value]].switchToBand2()
+            self.physicalAmplifier = self.amplifier.value
             
-            
-    def measure(self):
-        assert self.switchPlatform.checkPreset(self.amplifiers[self.amplifier.value]),'The switch platform is not in the {position} position'.format(position=self.amplifier.value)
+    @property
+    def physicalAmplifier(self):
+        if self._physicalAmplifier:
+            correctPosition = self.amplifiers[self._physicalAmplifier]
+            assert self.switchPlatform.checkPreset(correctPosition),'The switch platform is not in the {position} position'.format(position=correctPosition)
+        return self._physicalAmplifier   
+    @physicalAmplifier.setter         
+    def physicalAmplifier(self,newAmplifierName):
+        if self.physicalAmplifier == newAmplifierName:
+            return
+        
+        oldPower = self.generatorPower
+        self.generatorPower = Power(0,'W')
+        
+        self.switchPlatform.setPreset(self.amplifiers[newAmplifierName])
+        if newAmplifierName == 'Milmega 1':
+            knownDevices[self.amplifiers[newAmplifierName]].switchToBand1()
+        elif newAmplifierName == 'Milmega 2':
+            knownDevices[self.amplifiers[newAmplifierName]].switchToBand2()
+        
+        self._physicalAmplifier = newAmplifierName
+        self.generatorPower = oldPower
 
+        
+    def statusData(self):
+        return {'amplifier':self.physicalAmplifier,
+                'generator power':self.rfGenerator.getPower()}
+        
+    def measure(self):
         result = DictResult()  
-        generatorPower = self.rfGenerator.getPower()
+        result.data = self.statusData()
+        generatorPower = result.data['generator power']
+        physicalAmplifier = result.data['amplifier']
+        
         frequency = self.rfGenerator.getFrequency()        
           
         (forwardPowerReadout,reflectedPowerReadout) = self.wattMeter.getPower()
         
         reflectedImage = reflectedPowerReadout        
-        if self.amplifier.value.startswith('None'):
+        if physicalAmplifier.startswith('None'):
             forwardImage = generatorPower
         else:
             forwardImage = forwardPowerReadout
 
-        (forwardCorrection,reflectedCorrection) = self.amplifierCorrections[self.amplifier.value].corrections(frequency)                
+        (forwardCorrection,reflectedCorrection) = self.amplifierCorrections[physicalAmplifier].corrections(frequency)                
             
         forwardPower = forwardImage * forwardCorrection
         reflectedPower = reflectedImage * reflectedCorrection
 
-        result.data = {'generator power':generatorPower,
-                       'forward power image':forwardImage,
+
+        result.data.update({'forward power image':forwardImage,
                        'reflected power image':reflectedPowerReadout,
                        'forward power':forwardPower,
                        'reflected power':reflectedPower,
                        'transmitted power':forwardPower-reflectedPower,
-                       'reflection coefficient':reflectedPower/forwardPower}
+                       'reflection coefficient':reflectedPower/forwardPower})
         self.emitResult(result)
         return result
         
@@ -103,22 +142,22 @@ class TransmittedPower(Experiment,persistance.Dommable):
         self.generatorPower = Power(0)    
         
             
-    def tryTransmittedPower(self,nominalPower):
-        generatorMaximum = Power(20,'dBm')
-        tryForwardPower = copy(nominalPower)
-        for tryNumber in range(4):
-#            print tryForwardPower
-            self.rfGenerator.setPower(tryForwardPower)
-            self.rfGenerator.enableOutput()
-            realTransmittedPower = self.measure()['transmitted power']
-            realTransmittedPower = realTransmittedPower.max(Power(-40,'dBm'))
-
-            gain = nominalPower/realTransmittedPower
-
-            tryForwardPower *= gain
-            tryForwardPower = tryForwardPower.min(generatorMaximum)
-
-        return self.measure()['transmitted power']
+#    def tryTransmittedPower(self,nominalPower):
+#        generatorMaximum = Power(20,'dBm')
+#        tryForwardPower = copy(nominalPower)
+#        for tryNumber in range(4):
+##            print tryForwardPower
+#            self.rfGenerator.setPower(tryForwardPower)
+#            self.rfGenerator.enableOutput()
+#            realTransmittedPower = self.measure()['transmitted power']
+#            realTransmittedPower = realTransmittedPower.max(Power(-40,'dBm'))
+#
+#            gain = nominalPower/realTransmittedPower
+#
+#            tryForwardPower *= gain
+#            tryForwardPower = tryForwardPower.min(generatorMaximum)
+#
+#        return self.measure()['transmitted power']
 
         
     

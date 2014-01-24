@@ -1,4 +1,5 @@
-from xml.dom.minidom import Element
+from xml.dom.minidom import Element,getDOMImplementation
+
 import string
 #from utility.quantities import Power,UnitLess
 from datetime import datetime
@@ -32,6 +33,9 @@ class Dommable(object):
         elif type(anything) == str:
             casted = String(anything)
             return casted
+        elif ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'S' ):
+            from utility.quantities import StringArray
+            return StringArray(anything)
         else:
             print type(anything),anything,isinstance(anything,numpy.ndarray),anything.dtype.kind
             raise ValueError,'Not castable to Dommable'
@@ -121,6 +125,9 @@ class Dommable(object):
             factory = DictResult
         elif element.tagName == 'String':
             factory = String
+        elif element.tagName == 'StringArray':
+            from utility.quantities import StringArray
+            factory = StringArray
         elif element.tagName == 'List':
             factory = List
         elif element.tagName == 'Timestamp':
@@ -143,14 +150,12 @@ class Dommable(object):
             
         return factory.fromDom(element)
         
-class String(Dommable,str):
-    @classmethod
-    def fromDom(cls,dom):
-        return str.__new__(cls,cls.getNodeText(dom))
-    def asDom(self,parent):
-        element = Dommable.asDom(self,parent)
-        self.appendTextNode(element,self)
-        return element
+    def toXml(self):
+        document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
+        self.asDom(document.documentElement)
+        return document.toprettyxml(encoding='utf-8')
+        
+
         
         
 class List(Dommable,list):
@@ -204,6 +209,8 @@ class Dict(Dommable):
         return self._data.values()
     def items(self):
         return self._data.items()
+    def iteritems(self):
+        return self._data.iteritems()
     def keys(self):
         return self._data.keys()
     def has_key(self,fieldName):
@@ -212,7 +219,17 @@ class Dict(Dommable):
     def append(self,values):
         self.update()
 
+class String(Dommable,str):
+    @classmethod
+    def fromDom(cls,dom):
+        return str.__new__(cls,cls.getNodeText(dom))
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        self.appendTextNode(element,self)
+        return element
+
 if __name__ == '__main__':
     testDict = Dict({'name':'Mohamed','age':27})
     print testDict['name']
     print testDict.keys()
+    print testDict.toXml()

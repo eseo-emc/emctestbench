@@ -49,6 +49,7 @@ class Result(QObject):
         self.changedTo.emit(self)
         self.changed.emit()
 
+
     def __eq__(self,other):
         return self._data == other._data
         
@@ -108,7 +109,7 @@ class DictResult(Dict,Result):
 
         
 class ResultSet(Result,Dommable):
-    extendedWidth = pyqtSignal(dict)    
+    extendedWith = pyqtSignal(dict)    
     
     def __init__(self,fields):
         Result.__init__(self)
@@ -152,20 +153,32 @@ class ResultSet(Result,Dommable):
         self.appendChildObject(element,consolidatedDict,'data')
         return element
             
-    def append(self,values):
+    def _registerFields(self,values):
         values.update({'timestamp':Timestamp()})
         for fieldName in values.keys():
             if fieldName not in self._fields.keys():
                 self._fields.update({fieldName:type(values[fieldName])})
                 self._data.update({fieldName:[None]*self.numberOfRows()})
+        return values  
+            
+    def append(self,values):
+        values = self._registerFields(values)        
         for fieldName in self._fields.keys():
             fieldValue = None
             if values.has_key(fieldName):
                 fieldValue = values[fieldName]
             self._data[fieldName].append(fieldValue)
             
-        self.extendedWidth.emit(self.row(-1))
+        self.extendedWith.emit(self.row(-1))
         self._emitChanged()
+        
+    def updateRow(self,rowNumber,values):
+        values = self._registerFields(values)
+        for (fieldName,fieldValue) in values.iteritems():
+            self._data[fieldName][rowNumber] = fieldValue
+            
+        self._emitChanged()
+        
     def __getitem__(self,key):
         fieldType = self._fields[key]
         
@@ -195,8 +208,13 @@ class ResultSet(Result,Dommable):
         return newRow
 
 if __name__ == '__main__':
-    result = ScalarResult()
-    result.data = 3.0
+    result = ResultSet({})
+    result.append({'name':'Sjoerd','age':27})
+    result.append({'name':'Mohamed','age':28})
+    print result.toXml()
+    
+#    result = ScalarResult()
+#    result.data = 3.0
 #    
 #    from xml.dom.minidom import getDOMImplementation
 #    document = getDOMImplementation().createDocument(None,'EmcTestbench',None)

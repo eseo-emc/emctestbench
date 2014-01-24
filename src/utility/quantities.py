@@ -6,7 +6,7 @@ import string
 
 #siPrefices = ['y','z','a','f','p','n','u','m','','k','M','G','T','P','E','Z','Y']
 #siUnitIndex = 8
-siPrefices = ['n','u','m','','k','M','G']
+siPrefices = ['n','u','m','','k','M','G','T']
 siUnitIndex = 3
 
 class Amplitude():
@@ -118,6 +118,11 @@ class UnitLess(DommableArray):
 class Integer(DommableArray):
     pass
 
+class StringArray(DommableArray):
+    @classmethod
+    def _storageFormat(cls, value):
+        return "'"+numpy.asscalar(value)+"'"
+
 class Boolean(DommableArray):
     pass
 
@@ -190,6 +195,9 @@ class DommableDimensionalArray(DommableArray):
 
 class Voltage(DommableDimensionalArray):
     storageUnit = 'V'    
+
+class Time(DommableDimensionalArray):
+    storageUnit = 's'  
 
 class Frequency(DommableDimensionalArray):
     storageUnit = 'Hz'

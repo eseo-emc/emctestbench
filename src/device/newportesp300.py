@@ -144,12 +144,14 @@ class NewportEsp300(Positioner,ScpiDevice):
     def _readLocation(self):
         coordinateStrings = self.ask('1 HP?').split(', ')
         return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
-    def setLocation(self,newLocation,safeMovementZ=True):
+    def setLocation(self,newLocation,safeMovementZ=False):
         if self.homed is not True:
             self._turnOnAndHome()
         oldLocation = self.getLocation(useBuffer=True)
         
         self._createGroup()
+        #print(newLocation)
+        #print(oldLocation)
         if safeMovementZ and (newLocation[2] != oldLocation[2]):
             if numpy.sign(newLocation[2]-oldLocation[2]) == numpy.sign(self.dangerousVectorZ):
                 self._gotoLocation(quantities.Position([newLocation[0],newLocation[1],oldLocation[2]]))
@@ -167,17 +169,19 @@ class NewportEsp300(Positioner,ScpiDevice):
         
 if __name__ == '__main__':
     device = NewportEsp300()
-#    test.reset()
-#    for x in numpy.linspace(10,20,11):
-#        test.setLocation(quantities.Position([0+x,0,0],'mm'))
-#    test.tearDown()
-    device.putOnline()
+#    device.reset()
+    device.setLocation(quantities.Position([150.0,-8.0,0.0],'mm'))
+    for y in numpy.linspace(0,20,5):
+        device.setLocation(quantities.Position([165,-53-y,28],'mm'))
+        device.setLocation(quantities.Position([185,-53-y,28],'mm'))
+    device.tearDown()
+#    device.putOnline()
 #    
 ##===============================================================================
 ##    test.setLocation(quantities.Position([115.,60.,50.],'mm'))
 ##    test.setLocation(quantities.Position([115.,80.,50.],'mm'))
 #    test.setLocation(quantities.Position([0,0,0],'mm'))
-##    test.setLopoleras de polpoleras de aslpoleras de al;godom por un precio  de reducation(quantities.Position([84,-24,59],'mm'))
+##    test.setLocation(quantities.Position([84,-24,59],'mm'))
 #
 ##===============================================================================
 ##    print test.askIdentity()

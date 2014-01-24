@@ -11,15 +11,18 @@ import time
 from random import gauss
 import numpy
 
+slow = False
+
 class DummyMultimeter(Multimeter,Device):
     defaultName = 'Dummy Multimeter'
-    standardDeviation = 0.01
+    standardDeviation = 0.00000001
     def __init__(self,rfGenerator,switchPlatform):
         self.rfGenerator = rfGenerator
         self.switchPlatform = switchPlatform
         Device.__init__(self)
     def measure(self):
-        time.sleep(0.1)
+        if slow:
+            time.sleep(0.1)
         if incidentPower() > Power(+7.1,'dBm'):
             return Voltage(gauss(4.7,self.standardDeviation),'V')
         else:
@@ -35,7 +38,7 @@ class DummyRfGenerator(RfGenerator,Device):
 
     def setPower(self,newPower):
         self._power = newPower
-        if newPower.negligable:
+        if newPower.negligible:
             self._enableOutput(False)
         else:
             self._enableOutput(True)
@@ -73,7 +76,8 @@ class DummySwitchPlatform(SwitchPlatform,Device):
 class DummyWattMeter(WattMeter,Device):
     defaultName = 'Dummy Wattmeter'
     def putOnline(self):
-        time.sleep(.5)
+        if slow:
+            time.sleep(.5)
         self.online = True
     
     def __init__(self,rfGenerator,switchPlatform):
@@ -86,7 +90,8 @@ class DummyWattMeter(WattMeter,Device):
     def reset(self):
         self._wasReset = 1.0
     def getPower(self,channel=None):
-        time.sleep(.5)
+        if slow:
+            time.sleep(.5)
         channel1Power = Power(0,'W') *self._wasReset
         channel2Power = reflectedPower()*self._wasReset
         if channel == 1:
@@ -108,8 +113,8 @@ class DummyPositioner(Positioner,Device):
     def tearDown(self):
         pass
     def setLocation(self,position):
-        
-        time.sleep(numpy.linalg.norm(position-self._position)/0.1)
+        if slow:
+            time.sleep(numpy.linalg.norm(position-self._position)/0.1)
         self._position = position
         return self.getLocation()
     def getLocation(self):
@@ -151,8 +156,8 @@ knownDevices = { \
 }
 
 def incidentPower():
-    assert switchPlatform.preset == 'bridge'
-    return rfGenerator.getPower() * bridgeInsertionTransferAt(rfGenerator.getFrequency())
+    assert switchPlatform.preset == '86205A'
+    return rfGenerator.getPower() * PowerRatio(-1.5,'dB') #* bridgeInsertionTransferAt(rfGenerator.getFrequency())
 def reflectedPower():
-    assert switchPlatform.preset == 'bridge'
-    return incidentPower() * PowerRatio(-6,'dB') * bridgeCouplingFactorAt(rfGenerator.getFrequency())
+    assert switchPlatform.preset == '86205A'
+    return incidentPower() * PowerRatio(-6,'dB') * PowerRatio(-16,'dB') #* bridgeCouplingFactorAt(rfGenerator.getFrequency())

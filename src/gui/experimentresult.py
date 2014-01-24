@@ -50,13 +50,16 @@ class ExperimentResult(QObject,Dommable):
         self.name = name
 
         self.experiment = deepcopy(experiment)
+
         self.result = result
         
         if save:
             self.saveToFileSystem()
+
         experimentresultcollection.ExperimentResultCollection.Instance().append(self)
         
         self.result.changed.connect(self.saveToFileSystem)
+
         
     def delete(self):
         experimentresultcollection.ExperimentResultCollection.Instance().remove(self)

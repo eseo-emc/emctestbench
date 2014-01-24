@@ -21,12 +21,12 @@
     <number>3</number>
    </property>
    <item row="0" column="0" colspan="2">
-    <widget class="MatplotlibWidget" name="frequencySweepGraph"/>
+    <widget class="MatplotlibWidget" name="graph"/>
    </item>
    <item row="1" column="0">
     <widget class="QGroupBox" name="additional">
      <property name="title">
-      <string>More data</string>
+      <string>Triggering</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
@@ -36,9 +36,16 @@
        <number>3</number>
       </property>
       <item>
-       <widget class="QCheckBox" name="forwardReflected">
+       <widget class="QPushButton" name="start">
         <property name="text">
-         <string>Forward and reflected</string>
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="continuous">
+        <property name="text">
+         <string>Continuous</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -46,19 +53,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="s11">
+       <widget class="QCheckBox" name="differential">
         <property name="text">
-         <string>|S11|</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="images">
-        <property name="text">
-         <string>Images</string>
+         <string>Differential</string>
         </property>
        </widget>
       </item>

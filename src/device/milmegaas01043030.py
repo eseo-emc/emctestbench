@@ -7,10 +7,10 @@ class MilmegaAS0104_30_30(Amplifier,ScpiDevice):
     defaultAddress = 'GPIB2::6::INSTR'
     visaIdentificationStartsWith = '"MILMEGA,RF AMPLIFIER,'
            
-    def turnRfOn(self):
+    def _turnRfOn(self):
         self._turnLineOn()
         self.write('OUT1 1')
-    def turnRfOff(self):
+    def _turnRfOff(self):
         self.write('OUT1 0')
         self._turnLineOff()
     

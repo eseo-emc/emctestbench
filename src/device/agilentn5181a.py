@@ -49,7 +49,11 @@ class AgilentN5181a(RfGenerator,ScpiDevice):
         RfGenerator.tearDown(self)
         self.enableLocalControl()
 
-
+class AgilentN5183a(AgilentN5181a):
+    defaultName = 'Agilent N5183A RF Signal Generator'
+    visaIdentificationStartsWith = 'Agilent Technologies, N5183A,' 
+    
+    
 if __name__ == '__main__':
     device = AgilentN5181a()
     print device.getFrequency()

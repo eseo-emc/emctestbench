@@ -1,6 +1,5 @@
 from device import ScpiDevice
 from amplifier import Amplifier
-import time
 
 class PranaAP32DT120(Amplifier,ScpiDevice):
     defaultName = 'Prana AP32 DT120 Power Amplifier'
@@ -8,13 +7,13 @@ class PranaAP32DT120(Amplifier,ScpiDevice):
     visaIdentificationStartsWith = 'AP32 DT120'
 
         
-    def turnRfOn(self):
+    def _turnRfOn(self):
         self.write('MHF')
         self.write('MHF')
         self.write('MHF')
         self.write('MHF')
-        time.sleep(2)
-    def turnRfOff(self):
+
+    def _turnRfOff(self):
         self.write('AHF')
         self.write('AHF')
         self.write('AHF')

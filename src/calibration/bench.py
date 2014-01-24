@@ -8,9 +8,20 @@ import numpy
 import pylab
 
 
+
 from calibration.bridge import bridgeInsertionTransferAt,bridgeCouplingFactorAt,calibrationFrequencies
 from gui.experimentresultcollection import ExperimentResultCollection
 
+class ForwardMeasurementAttenuator(object):
+    def __init__(self,amplifierName):
+        self.amplifierName = amplifierName
+        
+    def transfer(self,frequencies):
+        if self.amplifierName.startswith('None '):
+            return PowerRatio(0*frequencies,'dB')
+        else:
+            model = -29.75-0.65*numpy.sin((frequencies+2.5e9)/4e9 /(1+frequencies/100e9))
+            return PowerRatio(model,'dB')
 
 class BenchCorrectionsSet(object):
     def __init__(self,amplifier):
@@ -26,7 +37,8 @@ class BenchCorrectionsSet(object):
         frequencies = self._frequencies()
         corrections = self.corrections(frequencies)
         pylab.plot(frequencies,corrections[0].asUnit('dB'),label=self.name()+' forward')
-        pylab.plot(frequencies,corrections[1].asUnit('dB'),label=self.name()+' reflected')    
+        pylab.plot(frequencies,corrections[1].asUnit('dB'),label=self.name()+' reflected') 
+        pylab.xlim(frequencies[0],frequencies[-1])
 
 class BestBenchCorrections(BenchCorrectionsSet):
     def __init__(self,*args):
@@ -35,7 +47,7 @@ class BestBenchCorrections(BenchCorrectionsSet):
             self._correctionsSet = MeasuredBenchCorrections(self.amplifier)
             
         except KeyError:
-            log.LogItem('Did not find "{amplifier} output" and "{amplifier} output reflect" files in /EmcTestbench/Calibration/Bench, reverting to analytical corrections'.format(amplifier=self.amplifier),log.warning)
+            log.LogItem('Did not find "{amplifier} output" and "{amplifier} reflect" files in /EmcTestbench/Calibration/Bench, reverting to analytical corrections'.format(amplifier=self.amplifier),log.warning)
             self._correctionsSet = AnalyticBenchCorrections(self.amplifier)
         except:
             raise
@@ -85,39 +97,45 @@ class CompositeBenchCorrections(BenchCorrectionsSet):
         return (forwardCorrection,reflectedCorrection)
 
 class MeasuredBenchCorrections(BenchCorrectionsSet):
-    smoothingSamples = 1   
+    smoothingSamples = 21   
     
     def __init__(self,*args,**kwargs):
         super(MeasuredBenchCorrections,self).__init__(*args,**kwargs)
         
         calibrationMeasurements = ExperimentResultCollection.Instance().loadExperimentResultFiles('Calibration/Bench/'+self.amplifier)
+        self.forwardMeasurementAttenuator = ForwardMeasurementAttenuator(self.amplifier)        
         self._outputMeasurement = calibrationMeasurements[self.amplifier+' output'].result
-        self._openReflectMeasurement = calibrationMeasurements[self.amplifier+' open reflect'].result
-
+        self._openReflectMeasurement = calibrationMeasurements[self.amplifier+' reflect'].result
     def _smoothRatio(self,frequency,measuredFrequency,measuredCorrection):
         smoothedCorrection = smoothBoxcar(measuredCorrection,self.smoothingSamples)
         return PowerRatio(numpy.interp(frequency,measuredFrequency,smoothedCorrection ))
+
     def _forwardCorrection(self,frequency):
-        measuredCorrection = self._outputMeasurement['reflected power image']/self._outputMeasurement['generator power']
+        measuredForwardPower = self._outputMeasurement['reflected power image'] / self.forwardMeasurementAttenuator.transfer(frequency)
+        measuredCorrection = measuredForwardPower/self._outputMeasurement['forward power image']
         return self._smoothRatio(frequency,self._outputMeasurement['frequency'],measuredCorrection)
     def _reflectedCorrection(self,frequency):
         openReflectFrequency = self._openReflectMeasurement['frequency']
-        forwardPowers = self._openReflectMeasurement['generator power']*self._forwardCorrection(openReflectFrequency)
+        forwardPowers = self._openReflectMeasurement['forward power image']*self._forwardCorrection(openReflectFrequency)
         reflectedCorrectionMeasurement = forwardPowers/self._openReflectMeasurement['reflected power image']
         return self._smoothRatio(frequency,openReflectFrequency,reflectedCorrectionMeasurement)
 
     def corrections(self,frequency):          
         return (self._forwardCorrection(frequency),self._reflectedCorrection(frequency))
-        
+#    def plotCorrection(self):
+#        super(MeasuredBenchCorrections,self).plotCorrection()
+#        frequency =self._frequencies()
+#        pylab.plot(frequency,self.forwardMeasurementAttenuator.transfer(frequency).asUnit('dB'),label='Power attenuator')    
+
     def _frequencies(self):
         return self._outputMeasurement['frequency']
 
 if __name__ == '__main__':
     def plotCorrections(amplifier):
-        try:
-            CompositeBenchCorrections(amplifier).plotCorrection()
-        except:
-            pass
+#        try:
+#            CompositeBenchCorrections(amplifier).plotCorrection()
+#        except:
+#            pass
         AnalyticBenchCorrections(amplifier).plotCorrection()
         MeasuredBenchCorrections(amplifier).plotCorrection()
 
@@ -129,3 +147,6 @@ if __name__ == '__main__':
 
     plotCorrections('None (86205A)')    
     plotCorrections('None (773D)')
+    plotCorrections('Prana')
+    plotCorrections('Milmega 1')
+    plotCorrections('Milmega 2')

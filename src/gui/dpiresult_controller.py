@@ -46,7 +46,6 @@ class DpiResultController(qtBaseClass,formClass):
             self.dpiGraph.axes.plot(frequency, result['transmitted power'][limitPoints].asUnit(unitName),label='Transmitted power')
             self.dpiGraph.axes.hold(True)
             if self.generated.isChecked():
-                print frequency
                 self.dpiGraph.axes.plot(frequency, result['generator power'][limitPoints].asUnit(unitName),label='Generator power')
             if self.forwardReflected.isChecked():
                 self.dpiGraph.axes.plot(frequency, result['forward power'][limitPoints].asUnit(unitName),label='Forward power')
@@ -63,7 +62,7 @@ class DpiResultController(qtBaseClass,formClass):
         
         self.dpiGraph.axes.set_xlabel('Frequency (Hz)')
         self.dpiGraph.axes.set_ylabel('Power ({unitName})'.format(unitName=unitName))
-        self.dpiGraph.axes.legend()
+        self.dpiGraph.axes.legend(loc='best')
         self.dpiGraph.draw() #redraw_in_frame()
 #        self.dpiGraph.figure.set_frameon(False)
 

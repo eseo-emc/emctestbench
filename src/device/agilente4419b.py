@@ -4,6 +4,8 @@ import time
 from utility.quantities import Power
 from device import ScpiDevice
 from wattmeter import WattMeter
+from PyQt4 import QtGui
+
 
 class AgilentE4419b(WattMeter,ScpiDevice):
     defaultAddress = 'GPIB2::11::INSTR'
@@ -24,9 +26,11 @@ class AgilentE4419b(WattMeter,ScpiDevice):
         if channelNumber==None:
             self._initializeMeasurement(1)
             self._initializeMeasurement(2)
+            QtGui.QApplication.sendPostedEvents()
             return (self._fetchMeasurement(1),self._fetchMeasurement(2))
         else:
             self._initializeMeasurement(channelNumber)
+            QtGui.QApplication.sendPostedEvents()
             return self._fetchMeasurement(channelNumber)
             
     def _initializeMeasurement(self,channelNumber):
