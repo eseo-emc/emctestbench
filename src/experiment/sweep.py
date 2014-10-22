@@ -61,6 +61,7 @@ class Sweep(Experiment,persistance.Dommable):
         self.stimulus.value.tearDown()
         self.measurement.value.tearDown()
         
+        result.finish()
         self.finished.emit()
         log.LogItem('Finished sweep',log.success)
         

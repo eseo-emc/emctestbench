@@ -37,6 +37,7 @@ class exportFunction(object):
 class Result(QObject):
     changed = pyqtSignal()    
     changedTo = pyqtSignal(object)
+    finished = pyqtSignal()
     exportTypes = []
     
     def __init__(self):
@@ -48,6 +49,8 @@ class Result(QObject):
     def _emitChanged(self):
         self.changedTo.emit(self)
         self.changed.emit()
+    def finish(self):
+        self.finished.emit()
 
 
     def __eq__(self,other):

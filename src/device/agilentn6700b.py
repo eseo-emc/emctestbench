@@ -10,7 +10,7 @@ class AgilentN6700b(PowerSupply,ScpiDevice):
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N6700-90902.pdf'}
             
     def setChannelParameters(self,channel,voltage,current):
-        self.write('VOLTAGE {0},(@{1}); CURRENT {2},(@{1});'.format(voltage.asUnit('V'),channel,current.asUnit('A')),log=True)
+        self.write('VOLTAGE {0},(@{1}); CURRENT {2},(@{1});'.format(voltage.asUnit('V'),channel,current.asUnit('A')),logging=True)
     def turnChannelOn(self,channel):
         self.write('OUTPUT ON,(@%d)' % channel)
     def turnChannelOff(self,channel):

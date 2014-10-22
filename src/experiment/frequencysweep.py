@@ -110,6 +110,7 @@ class FrequencySweep(Experiment,persistance.Dommable):
             
         self.transmittedPower.value.tearDown()
         
+        result.finish()
         self.finished.emit()
         log.LogItem('Finished frequency sweep',log.success)
         

@@ -15,7 +15,7 @@ class NewportEsp300Error(object):
 
 class NewportEsp300(Positioner,ScpiDevice):
     defaultName = 'Newport ESP300 Motion Controller'
-    defaultAddress = 'GPIB2::4::INSTR'
+    defaultAddress = 'ASRL1::INSTR' #'GPIB10::4::INSTR' #
     visaIdentificationStartsWith = 'ESP300 '
     documentation = {'Programmers Manual':'http://phubner.eng.ua.edu/Files/ESP300.pdf'}
     dangerousVectorZ = 1 # higher Z is closer to the DUT    
@@ -27,8 +27,6 @@ class NewportEsp300(Positioner,ScpiDevice):
         self.axesGrouped = None
         self.homed = None
         self._lastPosition = None
-#        #self.deviceHandle = visa.instrument('TCPIP0::172.20.1.202::inst0::INSTR')
-#        self.deviceHandle = visa.instrument('GPIB1::1::INSTR', timeout = 10)
 
 
     def reset(self):
@@ -43,12 +41,16 @@ class NewportEsp300(Positioner,ScpiDevice):
         else:
             raise Exception, 'Popping 10 errors was not enough to empty the Newport error queue'
 
-    def _createGroup(self):
+    def _createGroup(self,highSpeed=False):
         if self.axesGrouped is not True:
             self._writeAndCheckError('1 HN 1,2,3',acceptErrorDescription="GROUP NUMBER ALREADY ASSIGNED") # create group 1, all axes together
             self._writeAndCheckError('1 HV 50.0') # max velocity, must be defined!
-            self._writeAndCheckError('1 HA 30.0') # max acceleration
-            self._writeAndCheckError('1 HD 10.0') # max deceleration
+            if highSpeed:            
+                self._writeAndCheckError('1 HA 200.0') #30.0') # max acceleration
+                self._writeAndCheckError('1 HD 200.0') #10.0') # max deceleration
+            else:
+                self._writeAndCheckError('1 HA 15.0') # safe acceleration
+                self._writeAndCheckError('1 HD 25.0') # safe deceleration
             self._writeAndCheckError('1 HO') # activate
             self.axesGrouped = True
     def _deleteGroup(self):
@@ -58,11 +60,34 @@ class NewportEsp300(Positioner,ScpiDevice):
 
     def putOnline(self):
         ScpiDevice.putOnline(self)
-#        self._deviceHandle.term_chars = '\r'
+
         if self._deviceHandle:
             self.clear()
 #            self.reset()
 #        self._turnOnAndHome()
+    def createHandle(self):
+        ScpiDevice.createHandle(self)
+        if type(self._deviceHandle).__name__ == 'SerialInstrument':
+            self._deviceHandle.term_chars = '\r\n'
+            self._deviceHandle.baud_rate = 19200
+            self._deviceHandle.parity = 0
+            self._deviceHandle.stop_bits = 1
+            self._deviceHandle.clear()
+            
+            self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_READ_BUF_DISCARD)
+            self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_WRITE_BUF_DISCARD)            
+            
+            # TODO: remove dirty nobody-knows-why flushing by having one timeout
+            for tryNumber in range(10):            
+                try:
+                    print 'Trying to get serial interface in a well-known state'
+                    print self._deviceHandle.ask('*IDN?')
+                    break
+                except:
+                    pass
+
+
+
     def prepare(self):
         pass
 
@@ -85,12 +110,17 @@ class NewportEsp300(Positioner,ScpiDevice):
             raise Exception, '{error} upon command "{command}"'.format(error=error,command=command)
             
             
-    def write(self,command,useSRQ=True,timeout=3):
-        if useSRQ:
-            ScpiDevice.write(self,command + '; RQ')
-            self._deviceHandle.wait_for_srq(timeout)
+    def _write(self,command,useSRQ=False,timeout=3):
+        if type(self._deviceHandle).__name__ == 'GpibInstrument':
+            if useSRQ:
+                ScpiDevice._write(self,command + '; RQ')
+                self._deviceHandle.wait_for_srq(timeout)
+            else:
+                ScpiDevice._write(self,command)
+        elif type(self._deviceHandle).__name__ == 'SerialInstrument':
+            ScpiDevice._write(self,command)
         else:
-            ScpiDevice.write(self,command)
+            raise ValueError('Device handle of type ' + type(self._deviceHandle).__name__ + ' not supported')
             
     def _writeAndCheckError(self,command,acceptErrorDescription=""):
         self.write(command)
@@ -144,12 +174,12 @@ class NewportEsp300(Positioner,ScpiDevice):
     def _readLocation(self):
         coordinateStrings = self.ask('1 HP?').split(', ')
         return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
-    def setLocation(self,newLocation,safeMovementZ=False):
+    def setLocation(self,newLocation,safeMovementZ=False,highSpeed=False):
         if self.homed is not True:
             self._turnOnAndHome()
         oldLocation = self.getLocation(useBuffer=True)
         
-        self._createGroup()
+        self._createGroup(highSpeed=highSpeed)
         #print(newLocation)
         #print(oldLocation)
         if safeMovementZ and (newLocation[2] != oldLocation[2]):
@@ -170,11 +200,12 @@ class NewportEsp300(Positioner,ScpiDevice):
 if __name__ == '__main__':
     device = NewportEsp300()
 #    device.reset()
+#    while True:
     device.setLocation(quantities.Position([150.0,-8.0,0.0],'mm'))
-    for y in numpy.linspace(0,20,5):
-        device.setLocation(quantities.Position([165,-53-y,28],'mm'))
-        device.setLocation(quantities.Position([185,-53-y,28],'mm'))
-    device.tearDown()
+#        for y in numpy.linspace(0,20,5):
+#            device.setLocation(quantities.Position([165,-53-y,28],'mm'))
+#            device.setLocation(quantities.Position([185,-53-y,28],'mm'))
+#        device.tearDown()
 #    device.putOnline()
 #    
 ##===============================================================================

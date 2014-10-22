@@ -134,7 +134,8 @@ class NearFieldScan(Experiment,persistance.Dommable):
             try:             
                 self.transmittedPower.value.tearDown()
                 self.positioner.tearDown()
-            finally:            
+            finally:   
+                result.finish()
                 self.finished.emit()
                 self.stopRequested = False
         

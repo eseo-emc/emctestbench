@@ -35,19 +35,6 @@ class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     def align(self):
         self.write(':CAL') 
         
-    def waitUntilReady(self,timeOut=15):
-        self.write('*OPC') # let OPeration Complete bit be set upon finish
-        if hasattr(self._deviceHandle,'wait_for_srq'):
-            self.write('*ESE 1') # OPeration Complete -> Event Status sum Bit
-            self.write('*SRE 32') # ESB -> Service ReQuest
-            self._deviceHandle.wait_for_srq(timeOut)
-        else:
-            for waitingPeriod in range(timeOut*10):
-                if int(self.ask('*ESR?')) & 0x01:
-                    break
-                time.sleep(0.1)
-            else:
-                raise Exception,'Waiting for OPeration Complete bit to be set took longer than {timeOut}s'.format(timeOut=timeOut)
 
     
     @property

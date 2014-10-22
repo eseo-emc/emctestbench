@@ -58,8 +58,8 @@ class ExperimentResult(QObject,Dommable):
 
         experimentresultcollection.ExperimentResultCollection.Instance().append(self)
         
-        self.result.changed.connect(self.saveToFileSystem)
-
+#        self.result.changed.connect(self.saveToFileSystem)
+        self.result.finished.connect(self.saveToFileSystem)        
         
     def delete(self):
         experimentresultcollection.ExperimentResultCollection.Instance().remove(self)

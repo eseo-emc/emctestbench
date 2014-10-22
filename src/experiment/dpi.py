@@ -142,8 +142,9 @@ class Dpi(Experiment,persistance.Dommable):
 
         def findFailureFromBelow(startPower,stepIndex=0):
             def measureAndSavePass(tryPower):
-#                self.transmittedPower.value.rfGenerator._enableOutput(False)            
-#                self.passCriterion.value.prepare()     
+                self.transmittedPower.value.rfGenerator._enableOutput(False)            
+                self.passCriterion.value.prepare()   
+                
                 if self.dutSupply.value != None:
                     self.dutSupply.value.interrupt()             
                 
@@ -204,7 +205,7 @@ class Dpi(Experiment,persistance.Dommable):
             self.progressed.emit(int(float(number+1)/self.frequencies.numberOfPoints.value*100.))
             
         self.transmittedPower.value.tearDown()
-        
+        result.finish()
         self.finished.emit()
         log.LogItem('Finished DPI',log.success)
         
