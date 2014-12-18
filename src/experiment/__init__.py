@@ -1,1 +1,1 @@
-__all__ = ['transmittedpower','receivedpower','dpi','frequencysweep','sweep','voltagecriterion','nearfieldscan','experiment','supplycontroller']
+__all__ = ['transmittedpower','receivedpower','dpi','frequencysweep','sweep','voltagecriterion','nearfieldscan','experiment','supplycontroller','probecalibration']

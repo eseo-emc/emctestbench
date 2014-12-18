@@ -40,7 +40,7 @@ class DpiResultController(qtBaseClass,formClass):
 
         if result is not None:
             limitPoints = result['limit']
-            frequency = result['injection frequency'][limitPoints]      
+            frequency = result['injection frequency'][limitPoints].asUnit('Hz')     
             
             self.dpiGraph.axes.hold(False)
             self.dpiGraph.axes.plot(frequency, result['transmitted power'][limitPoints].asUnit(unitName),label='Transmitted power')
@@ -52,12 +52,12 @@ class DpiResultController(qtBaseClass,formClass):
                 self.dpiGraph.axes.plot(frequency, result['reflected power'][limitPoints].asUnit(unitName),label='Reflected power')
             if self.passFail.isChecked():
                 passNotFail = result['pass']
-                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail], result['generator power'][passNotFail].asUnit(unitName),'+g',label='Pass')
-                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail==False], result['generator power'][passNotFail==False].asUnit(unitName),'xr',label='Fail')
+                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail].asUnit('Hz'), result['generator power'][passNotFail].asUnit(unitName),'+g',label='Pass')
+                self.dpiGraph.axes.plot(result['injection frequency'][passNotFail==False].asUnit('Hz'), result['generator power'][passNotFail==False].asUnit(unitName),'xr',label='Fail')
         
         
         self.dpiGraph.axes.set_ylim(result.powerLimits.asUnit(unitName))
-        self.dpiGraph.axes.set_xlim(result.frequencyRange.start.value,result.frequencyRange.stop.value)
+        self.dpiGraph.axes.set_xlim(result.frequencyRange.start.value.asUnit('Hz'),result.frequencyRange.stop.value.asUnit('Hz'))
         self.dpiGraph.axes.set_xscale('symlog' if self.model.frequencyRange.logarithmic.value else 'linear') 
         
         self.dpiGraph.axes.set_xlabel('Frequency (Hz)')

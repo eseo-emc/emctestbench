@@ -5,6 +5,8 @@ from device import ScpiDevice
 from positioner import Positioner
 from utility import quantities
 
+from pyvisa import visa
+
 class NewportEsp300Error(object):
     def __init__(self,errorCode,errorDescription,timeStamp):
         self.errorCode = errorCode
@@ -15,19 +17,27 @@ class NewportEsp300Error(object):
 
 class NewportEsp300(Positioner,ScpiDevice):
     defaultName = 'Newport ESP300 Motion Controller'
-    defaultAddress = 'ASRL1::INSTR' #'GPIB10::4::INSTR' #
+    defaultAddress = 'GPIB0::4::INSTR' #'ASRL1::INSTR' 
     visaIdentificationStartsWith = 'ESP300 '
     documentation = {'Programmers Manual':'http://phubner.eng.ua.edu/Files/ESP300.pdf'}
-    dangerousVectorZ = 1 # higher Z is closer to the DUT    
+    dangerousVectorZ = -1 # lower Z is closer to the DUT    
+    safePosition = quantities.Position([8.0, 100.0, 15.0],'mm')
+    axisMapping = numpy.array([[-1.0,0,0],[0,1,0],[0,0,-1]]) # position_in_mm = axisMapping * axisData
     
     def __init__(self):
         Positioner.__init__(self)
         ScpiDevice.__init__(self)
 
         self.axesGrouped = None
-        self.homed = None
         self._lastPosition = None
 
+    # One bit of state stored on the Newport in the port direction register
+    @property
+    def _homed(self):
+        return self.ask('BO?') == '1'
+    @_homed.setter
+    def _homed(self,value):
+        self.write('BO '+ ('1' if value else '0') +'H')
 
     def reset(self):
         self.write('RS',useSRQ=False)
@@ -41,10 +51,13 @@ class NewportEsp300(Positioner,ScpiDevice):
         else:
             raise Exception, 'Popping 10 errors was not enough to empty the Newport error queue'
 
-    def _createGroup(self,highSpeed=False):
+    def _createGroup(self,highSpeed=False,lowSpeed=False):
         if self.axesGrouped is not True:
             self._writeAndCheckError('1 HN 1,2,3',acceptErrorDescription="GROUP NUMBER ALREADY ASSIGNED") # create group 1, all axes together
-            self._writeAndCheckError('1 HV 50.0') # max velocity, must be defined!
+            if lowSpeed:            
+                self._writeAndCheckError('1 HV 2.0') # max velocity, must be defined!
+            else:
+                self._writeAndCheckError('1 HV 50.0') # max velocity, must be defined!
             if highSpeed:            
                 self._writeAndCheckError('1 HA 200.0') #30.0') # max acceleration
                 self._writeAndCheckError('1 HD 200.0') #10.0') # max deceleration
@@ -54,9 +67,9 @@ class NewportEsp300(Positioner,ScpiDevice):
             self._writeAndCheckError('1 HO') # activate
             self.axesGrouped = True
     def _deleteGroup(self):
-        if self.axesGrouped is not False:
-            self._writeAndCheckError('1 HX')
-            self.axesGrouped = False
+#        if self.axesGrouped is not False:
+        self._writeAndCheckError('1 HX')
+        self.axesGrouped = False
 
     def putOnline(self):
         ScpiDevice.putOnline(self)
@@ -74,13 +87,13 @@ class NewportEsp300(Positioner,ScpiDevice):
             self._deviceHandle.stop_bits = 1
             self._deviceHandle.clear()
             
-            self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_READ_BUF_DISCARD)
-            self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_WRITE_BUF_DISCARD)            
             
             # TODO: remove dirty nobody-knows-why flushing by having one timeout
             for tryNumber in range(10):            
                 try:
                     print 'Trying to get serial interface in a well-known state'
+                    self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_READ_BUF_DISCARD)
+                    self._deviceHandle._vpp43.flush(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_WRITE_BUF_DISCARD)                 
                     print self._deviceHandle.ask('*IDN?')
                     break
                 except:
@@ -109,7 +122,8 @@ class NewportEsp300(Positioner,ScpiDevice):
         if error and error.errorDescription != acceptErrorDescription:
             raise Exception, '{error} upon command "{command}"'.format(error=error,command=command)
             
-            
+
+        
     def _write(self,command,useSRQ=False,timeout=3):
         if type(self._deviceHandle).__name__ == 'GpibInstrument':
             if useSRQ:
@@ -127,17 +141,31 @@ class NewportEsp300(Positioner,ScpiDevice):
         self._raiseIfError(acceptErrorDescription,command)
     def _turnOnAndHome(self,axis=None):
         self._deleteGroup()
-        def homeAxis(axis):
+        def homeAxis(axis):        
             if axis:
+#                print 'Homing axis',axis
                 self._writeAndCheckError('{axis} MO'.format(axis=axis))
                 self._writeAndCheckError('{axis} OR'.format(axis=axis))
                 self._waitUntilMotionDone(axis)
+#                time.sleep(10.0)                
+#                print 'Going to safe position'
+                axisData = self._positionToAxesData(self.safePosition)[axis-1]
+                self._writeAndCheckError('{axis} PA {axisData:.3f}'.format(axis=axis,axisData=axisData))
+                self._waitUntilMotionDone(axis)
             else:
-                homeAxis(3)
-                homeAxis(2)
+#                self._writeAndCheckError('3 MO') # motor 3 on
+#                self._writeAndCheckError('3 MT -') # move completely up
+#                self._waitUntilMotionDone()
+                raw_input('Move probe point to safe height and press enter to start homing...')                    
                 homeAxis(1)
+                homeAxis(2)
+                homeAxis(3)
+#                self._writeAndCheckError('3 MT +' #PR 110')
+                              
+                
+                
         homeAxis(axis)
-        self.homed = True
+        self._homed = True
         self.getLocation()
     def _motionDone(self,axis):
         if axis:
@@ -165,21 +193,32 @@ class NewportEsp300(Positioner,ScpiDevice):
    
     def getLocation(self,useBuffer=False):
         if not useBuffer or type(self._lastPosition) is type(None):
-            if self.homed is not True:
+            if self._homed is not True:
                 self._turnOnAndHome()
-            self._createGroup()
-            self._lastPosition = self._readLocation()
-            self._deleteGroup()
+            if self._motionDone(None):
+                self._createGroup()
+                self._lastPosition = self._readLocation()
+                self._deleteGroup()
+            else:
+                self._lastPosition = self._readLocation()
         return self._lastPosition
     def _readLocation(self):
         coordinateStrings = self.ask('1 HP?').split(', ')
-        return quantities.Position([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])],'mm')
-    def setLocation(self,newLocation,safeMovementZ=False,highSpeed=False):
-        if self.homed is not True:
+        axesData = numpy.array([float(coordinateStrings[0]),float(coordinateStrings[1]),float(coordinateStrings[2])])
+        return self._axesDataToPosition(axesData)
+    def _positionToAxesData(self,position):
+        return numpy.dot(numpy.linalg.inv(self.axisMapping),position.asUnit('mm'))
+    def _axesDataToPosition(self,axesData):
+        return quantities.Position(numpy.dot(self.axisMapping,axesData),'mm')
+    def setLocation(self,newLocation,safeMovementZ=True,highSpeed=False,lowSpeed=False):
+        self._setLocationStart(newLocation,safeMovementZ=safeMovementZ,highSpeed=highSpeed,lowSpeed=lowSpeed,waitUntilDone=True)
+        self._setLocationFinish(newLocation)
+    def _setLocationStart(self,newLocation,safeMovementZ,highSpeed,lowSpeed,waitUntilDone):
+        if self._homed is not True:
             self._turnOnAndHome()
         oldLocation = self.getLocation(useBuffer=True)
         
-        self._createGroup(highSpeed=highSpeed)
+        self._createGroup(highSpeed=highSpeed,lowSpeed=lowSpeed)
         #print(newLocation)
         #print(oldLocation)
         if safeMovementZ and (newLocation[2] != oldLocation[2]):
@@ -188,25 +227,48 @@ class NewportEsp300(Positioner,ScpiDevice):
             else:
                 self._gotoLocation(quantities.Position([oldLocation[0],oldLocation[1],newLocation[2]]))
             
-        self._gotoLocation(newLocation)
+        self._gotoLocation(newLocation,waitUntilDone=waitUntilDone)
+    def _setLocationFinish(self,newLocation):
         self._lastPosition = newLocation
-
         self._deleteGroup()
-    def _gotoLocation(self,newLocation):
-        self.write('1 HL {newLocation[0]:f}, {newLocation[1]:f}, {newLocation[2]:f}'.format(newLocation=newLocation.asUnit('mm')))
-        self._waitUntilMotionDone()
+    def _gotoLocation(self,newLocation,waitUntilDone=True):
+        axesData = self._positionToAxesData(newLocation)
+        self.write('1 HL {axesData[0]:.3f}, {axesData[1]:.3f}, {axesData[2]:.3f}'.format(axesData=axesData))
+        if waitUntilDone:
+            self._waitUntilMotionDone()
+    def goSafe(self):
+        self.setLocation(self.safePosition)
+    def strobeLowGpio1(self,duration=0.1):
+        oldBitDirections = self.ask('BO?')
+        self.write('BO 1H') # set port A direction to out (bit 0 high by default)
+        self.write('SB 0feH') # clear bit 0 of port A (GPIO 1)
+        #print self.ask('SB?')
+        time.sleep(duration)
+        self.write('SB 0ffH') # set bit 0 of port A
+        self.write('BO'+oldBitDirections+'H') # set port A direction to in (4k7 pulled-up)
         
         
 if __name__ == '__main__':
     device = NewportEsp300()
 #    device.reset()
 #    while True:
-    device.setLocation(quantities.Position([150.0,-8.0,0.0],'mm'))
+#    device.setLocation(quantities.Position([42.0,-8.0,0.0],'mm'))
 #        for y in numpy.linspace(0,20,5):
 #            device.setLocation(quantities.Position([165,-53-y,28],'mm'))
 #            device.setLocation(quantities.Position([185,-53-y,28],'mm'))
 #        device.tearDown()
 #    device.putOnline()
+#    startLocation = device.getLocation()
+#    newLocation = startLocation + quantities.Position([-100,0,0],'mm')
+#    device._setLocationStart(newLocation,safeMovementZ=False,highSpeed=False,lowSpeed=True,waitUntilDone=False)
+#    print 'Started...'
+#    while not(device._motionDone(None)):
+#        print device.getLocation()[0]
+#        time.sleep(0.1)
+#    device._setLocationFinish(newLocation)
+    while True:
+        print device.getLocation()
+        print device.ask('TB?')
 #    
 ##===============================================================================
 ##    test.setLocation(quantities.Position([115.,60.,50.],'mm'))

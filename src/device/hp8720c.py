@@ -30,6 +30,10 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
         self.frontPanelLockout = frontPanelLockout
         
         self._lastFrequency = None
+        self._lastLearnString = None
+        self._hardPresetMethod = None
+        
+                
     
     def putOnline(self):
         ScpiDevice.putOnline(self)
@@ -39,16 +43,52 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
                 self.gtl()
             #self.write('FORM{0:d};'.format(self.dataFormat))
             self._setGpibRemote(True)
+            self._gotoNullStatus()            
+            if not self._lastLearnString:
+                self._obtainLearnString()
+            self._restoreLearnString()
+            
+    def _gotoNullStatus(self):
+        for tryNumber in range(10):
+            statusByte = self.readStatusByte()
+
+            if statusByte & 0x04:
+                self.ask('ESB?')
+            elif statusByte & 0x08:
+                print self.popError()
+            elif statusByte & 0x10:
+                self.ask('ESR?')
+            elif statusByte & 0x40:
+                self.readStatusByte()
+            elif statusByte:
+                print "Don't know what to do with this status:"
+                self.printStatusByte()
+            else:
+                break
+            
+            time.sleep(0.5)
+        else:
+            self.printStatusByte()
+            raise IOError, 'Could not get status null'
             
     def beep(self):
         self.write('EMIB')
+        
+    def _obtainLearnString(self):
+        print 'Obtain learn string'
+        self._lastLearnString = self.ask('OUTPLEAS')
+    def _restoreLearnString(self):
+        print 'Restore learn string'
+        assert self._lastLearnString, 'No learn string to restore'
+        self.write('INPULEAS '+self._lastLearnString)
     
-#    def write(self,message):
-#        if self._deviceHandle:
-#            print "STB",self._deviceHandle.stb
-#        ScpiDevice.write(self,message)
-
-
+    def _hardPresetAndRestore(self):
+        print 'Resetting...'
+        self._setGpibRemote(False)
+        self._hardPresetMethod()
+        time.sleep(10)
+        print 'Restoring state'
+        self.putOnline()
         
     def _setGpibRemote(self,remote=True):
         if remote:
@@ -69,7 +109,22 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
         else:
             raise(ValueError('takes a boolean'))
     
-    def measure(self,portB=None,portA=None,**kwargs):
+    def measure(self,*args,**kwargs):
+        try:
+            return self._measure(*args,**kwargs)
+        except (vpp43.VisaIOError, IOError) as ioError:
+            print 'IO Error...',ioError
+            if self._hardPresetMethod:
+                self._hardPresetAndRestore()
+                print 'Trying to measure again...'
+                return self._measure(*args,**kwargs)
+            else:
+                print 'No hard preset method available'
+                raise
+
+    
+    def _measure(self,portB=None,portA=None,**kwargs):
+#        raise IOError
         if portB == None and portA == None:
             s11 = self.measure(0,0,**kwargs).s[:,0,0]
             s12 = self.measure(0,1,**kwargs).s[:,0,0]
@@ -181,11 +236,30 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
         print 'Status: ' + ', '.join(statusByteDescription)
 
     def popError(self):
-        return self.ask('OUTPERRO;')
+        return self.ask('OUTPERRO')
 
     @property
     def sweepTime(self):
         return quantities.Time(float(self.ask('SWET?')))
+        
+    @property 
+    def attenuatorPort1(self):
+        return self._getAttenuator(1)
+    @attenuatorPort1.setter
+    def attenuatorPort1(self,value):
+        self._setAttenuator(1,value)
+        
+    @property 
+    def attenuatorPort2(self):
+        return self._getAttenuator(2)
+    @attenuatorPort2.setter
+    def attenuatorPort2(self,value):
+        self._setAttenuator(2,value)
+        
+    def _getAttenuator(self,port):
+        return quantities.PowerRatio(float(self.ask('ATTP{port:d}?'.format(port=port))),unit='dB')
+    def _setAttenuator(self,port,value):
+        self.write('ATTP{port:d} {attenuation}'.format(port=port,attenuation=value.asUnit('dB')))
         
     # scikit-rf API compatibility
     @property
@@ -212,7 +286,7 @@ class Hp8753e(Hp8720c):
 
 class Hp8753c(Hp8720c):
     defaultName = 'HP8753C Vector Network Analyzer'
-    defaultAddress = 'GPIB9::8::INSTR' #'GPIB2::8::INSTR'
+    defaultAddress = 'GPIB0::8::INSTR' #'GPIB2::8::INSTR'
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8753C,0,4.01'
 
              
@@ -229,27 +303,29 @@ if __name__ == '__main__':
 #    measurement = analyzer.measure(1,0,dataFormat='all')
 #    numpy.testing.assert_almost_equal(measurement['FORM1'].s,measurement['FORM4'].s,err_msg='The FORM1 and FORM4 data do not correspond.')
     
-    ## duration measurement
-    durations = []
-    for tryNumber in range(3):
-        print tryNumber
-        start =time.clock()
-        measurement = analyzer.measure(1,0)#,dataFormat='all')
-#        analyzer._deviceHandle.clear()
-        durations += [time.clock()-start]
-    durations = durations[1:]
-    print numpy.mean(durations),numpy.std(durations)
+#    ## duration measurement
+#    durations = []
+#    for tryNumber in range(3):
+#        print tryNumber
+#        start =time.clock()
+#        measurement = analyzer.measure(1,0)#,dataFormat='all')
+##        analyzer._deviceHandle.clear()
+#        durations += [time.clock()-start]
+#    durations = durations[1:]
+#    print numpy.mean(durations),numpy.std(durations)
     
-##    measurement = analyzer.measure()
+    measurement2 = analyzer.measure(0,0)
+    measurement2.name = 'open'
 #    print 'Done'
 ##    measurement.write_touchstone('Picosecond_5545_114-RF-short2')
     
 #    measurement.plot_z_mag() 
 #    pylab.gca().set_xscale('log')
 #    pylab.gca().set_yscale('log')
-#    measurement.plot_s_db()
+    measurement.plot_s_db()
+    measurement2.plot_s_db()
 #    measurement.plot_s_smith()
-#    pylab.show()
+    pylab.show()
     
 #    for repetition in range(1000):
 #        analyzer.write('*CLS; *ESE 1; *SRE 32; HOLD; REST; OPC; WAIT; EMIB;')

@@ -6,20 +6,22 @@ from utility import quantities
 
 import time
 import subprocess
+import skrf
 
 class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     defaultName = 'Agilent N9010A Vector Signal Analyzer'
-    defaultAddress = 'TCPIP0::192.168.18.179::inst0::INSTR'
+    defaultAddress = 'TCPIP0::192.168.10.30::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N9010A,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/N9060-90027.pdf','Specifications':'http://cp.literature.agilent.com/litweb/pdf/N9010-90025.pdf'}
     
     def putOnline(self):
+#        try:
         ScpiDevice.putOnline(self)
-        if not self._deviceHandle:
-            subprocess.call(['C:\Program Files\Agilent\SignalAnalysis\Infrastructure\LaunchXSA.exe','-s'])
-            time.sleep(90)
-            ScpiDevice.putOnline(self)
-            assert self._deviceHandle is not None
+#        except: 
+#            subprocess.call(['C:\Program Files\Agilent\SignalAnalysis\Infrastructure\LaunchXSA.exe','-s'])
+#            time.sleep(90)
+#            ScpiDevice.putOnline(self)
+#            assert self._deviceHandle is not None
             
     def reset(self):
         ScpiDevice.reset(self)
@@ -43,7 +45,23 @@ class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     @span.setter
     def span(self,value):
         self.write(':SENS:FREQ:SPAN {span:e}HZ'.format(span=value.asUnit('Hz')))
-        
+
+    @property
+    def numberOfPoints(self):   
+        return int(self.ask(':SENSe:SWEep:POINts?'))
+    @numberOfPoints.setter
+    def numberOfPoints(self,value):
+        self.write(':SENSe:SWEep:POINts {value:d}'.format(value=value))
+    
+    @property
+    def frequency(self):
+        return skrf.Frequency.from_f(self.frequencies, unit='Hz')
+    @property
+    def frequencies(self):
+        return numpy.linspace(self.centerFrequency-self.span/2.0,
+                              self.centerFrequency+self.span/2.0,
+                              self.numberOfPoints)
+    
     @property
     def resolutionBandwidth(self):
         return quantities.Frequency(float(self.ask(':SENS:BAND:RES?')),'Hz')
@@ -121,19 +139,26 @@ class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
         
         return numpy.average(complexValues)
     
+    def measure(self):
+        self.write('INIT:IMMediate')
+#        print 'wait for done'
+        self.waitUntilReady()
+#        print 'Reading values'
+        return numpy.array(self.ask_for_values('TRAC:DATA? TRACE1'))
+    
 if __name__ == '__main__':
     from utility.quantities import Frequency,PowerRatio   
     
     analyzer = AgilentN9010a()
     analyzer.reset()
     
-    analyzer.span = Frequency(100,'kHz')
-    analyzer.resolutionBandwidth = Frequency(3,'kHz')
-    analyzer.videoBandwidth = Frequency(10,'kHz')
-    analyzer.centerFrequency = Frequency(40,'MHz')
-    analyzer.attenuation = PowerRatio(20,'dB')
-    analyzer.referenceLevel = PowerRatio(0,'dB')
-    analyzer.numberOfAveragingPoints = 1000
+    analyzer.span = Frequency(100,'MHz')
+#    analyzer.resolutionBandwidth = Frequency(3,'kHz')
+#    analyzer.videoBandwidth = Frequency(10,'kHz')
+    analyzer.centerFrequency = Frequency(50,'MHz')
+#    analyzer.attenuation = PowerRatio(20,'dB')
+#    analyzer.referenceLevel = PowerRatio(0,'dB')
+    analyzer.numberOfAveragingPoints = 100
     
     print 'Span',analyzer.span
     print 'RBW',analyzer.resolutionBandwidth
@@ -143,8 +168,8 @@ if __name__ == '__main__':
     print 'ref',analyzer.referenceLevel
     print '#avg',analyzer.numberOfAveragingPoints
     
-    print analyzer.powerAt(Frequency(80,'MHz'))
-    print '#avg',analyzer.numberOfAveragingPoints
+#    print analyzer.powerAt(Frequency(80,'MHz'))
+#    print '#avg',analyzer.numberOfAveragingPoints
 #    analyzer.reset()
 #    
 #    analyzer.align()

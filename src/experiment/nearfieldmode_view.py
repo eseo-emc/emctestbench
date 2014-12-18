@@ -6,7 +6,7 @@ import numpy
 import tables
 
 ## read file
-nfsFile = tables.openFile('D1C-common-50Ohm-500MHz.h5',mode = 'r')
+nfsFile = tables.openFile('D1C-common-50Ohm-3GHz.h5',mode = 'r')
 
 xGrid = nfsFile.getNode(nfsFile.root,'xCoords')
 yGrid = nfsFile.getNode(nfsFile.root,'yCoords')

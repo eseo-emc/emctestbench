@@ -85,7 +85,20 @@ class ScpiDevice(Device):
     def _write(self,message):
         self._deviceHandle.write(message)
         
-    def ask(self,message):
+    def ask(self,*args,**kwargs):
+        try:
+            return self._sureAsk(*args,**kwargs)
+        except visa.VisaIOError,error:
+            print 'Got',error,'while asking',args[0],'from',self,', waiting 10 seconds...'
+            time.sleep(10)
+            print 'Clearing...'
+            self.clear()
+            print 'Trying once more...'
+            answerData = self._sureAsk(*args,**kwargs)
+            print 'That went well!'
+            return answerData        
+        
+    def _sureAsk(self,message):
         self.write(message)
         try:
             readData = self._deviceHandle.read()
@@ -141,7 +154,7 @@ class ScpiDevice(Device):
                 if self.readStatusByte() & 0x40:
                     break
             else:
-                raise Exception,'Waiting for Service ReQuest bit to be set took longer than {timeOut}s'.format(timeOut=maxPolls*pollInterval)
+                raise IOError,'Waiting for Service ReQuest bit to be set took longer than {timeOut}s'.format(timeOut=maxPolls*pollInterval)
             
             assert int(self.ask('ESR?')) & 0x01,"OPC bit of Event Status Register A should be set"
 
@@ -149,10 +162,10 @@ class ScpiDevice(Device):
                 if self.readStatusByte() == 0:
                     break
             else:
-                raise Exception,'Waiting for Status Byte to become NULL longer than {timeOut}s'.format(timeOut=maxPolls*pollInterval)
+                raise IOError,'Waiting for Status Byte to become NULL longer than {timeOut}s'.format(timeOut=maxPolls*pollInterval)
 
             
-            print 'Polled',srqPollNumber,'times for SRQ, ',zeroStatusPollNumber,'times for 0 status byte.'
+#            print 'Polled',srqPollNumber,'times for SRQ, ',zeroStatusPollNumber,'times for 0 status byte.'
 
         else:            
             self._deviceHandle.wait_for_srq()

@@ -5,13 +5,20 @@ import string
 from datetime import datetime
 import numpy
 
+from xml.dom.minidom import parseString
+
+
+
 class Dommable(object):
     def asDom(self,parent):
         return self.appendChildTag(parent,self.__class__.__name__)
         
     @classmethod
     def fromDom(cls,dom):
-        raise NotImplementedError
+        newObject = cls()
+        for (objectId,objectItself) in cls.childObjects(dom,byId=True):
+            setattr(newObject,objectId,objectItself)
+        return newObject
     @classmethod
     def castToDommable(cls,anything):
         if hasattr(anything,'asDom'):
@@ -24,7 +31,7 @@ class Dommable(object):
         elif type(anything) == datetime:
             from timestamp import Timestamp
             return Timestamp(anything)
-        elif isinstance(anything,float) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'f' ):
+        elif isinstance(anything,float) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind in ['f','c'] ):
             from utility.quantities import UnitLess
             return UnitLess(anything)
         elif isinstance(anything,int) or ( isinstance(anything,numpy.ndarray) and anything.dtype.kind == 'i' ):
@@ -148,6 +155,18 @@ class Dommable(object):
         elif element.tagName == 'SweepRange':
             from experiment.experiment import SweepRange
             factory = SweepRange
+        elif element.tagName == 'MechanicalProbeCalibration':
+            from probecalibration import MechanicalProbeCalibration
+            factory = MechanicalProbeCalibration
+        elif element.tagName == 'ElectricalProbeCalibration':
+            from probecalibration import ElectricalProbeCalibration
+            factory = ElectricalProbeCalibration
+        elif element.tagName == 'ProbeCalibration':
+            from probecalibration import ProbeCalibration
+            factory = ProbeCalibration
+        elif element.tagName == 'SampledValues':
+            from utility.sampledvalues import SampledValues
+            factory = SampledValues        
         else:
             raise ValueError("Tag name {tagName} unknown.".format(tagName=element.tagName))
             
@@ -157,6 +176,29 @@ class Dommable(object):
         document = getDOMImplementation().createDocument(None,'EmcTestbench',None)
         self.asDom(document.documentElement)
         return document.toprettyxml(encoding='utf-8')
+    def printXml(self):
+        print self.toXml()
+    def toFile(self,filename):
+        with open(filename,'w') as filePointer:
+            filePointer.write(self.toXml())
+    @classmethod
+    def fromXml(cls,xml):
+        parsedDom = parseString(xml)
+        resultElement = parsedDom.documentElement.getElementsByTagName(cls.__name__)[0]
+        return cls.fromDom(resultElement)
+    @classmethod
+    def fromFile(cls,filename):
+        with open(filename,'r') as filePointer:
+            return cls.fromXml(filePointer.read())
+    
+class SmartDommable(Dommable):
+    def asDom(self,parent):
+        element = Dommable.asDom(self,parent)
+        for (attributeName,attributeValue) in self.__dict__.iteritems():
+            self.appendChildObject(element,attributeValue,attributeName)  
+   
+        return element   
+
         
 
         
