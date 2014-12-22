@@ -9,6 +9,7 @@ import subprocess
 import skrf
 
 class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
+    visaLibrary = 'agilent'
     defaultName = 'Agilent N9010A Vector Signal Analyzer'
     defaultAddress = 'TCPIP0::192.168.10.30::inst0::INSTR'
     visaIdentificationStartsWith = 'Agilent Technologies,N9010A,'
@@ -36,6 +37,7 @@ class AgilentN9010a(SpectrumAnalyzer,ScpiDevice):
     
     def align(self):
         self.write(':CAL') 
+        time.sleep(20)
         
 
     

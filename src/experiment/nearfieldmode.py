@@ -19,12 +19,16 @@ import time
 from mayavi import mlab
 import sys
 
+import os
+import shutil
+import zipfile
 
 import device
 from device.spectrumanalyzer import SpectrumAnalyzer
 from utility.quantities import Amplitude,Voltage,Current,Position,Frequency
 import device
 from probecalibration import LaserPositioner,ProbeCalibration
+from nfsfile import NfsFile
 
 import vtk
 from enthought.traits import api
@@ -228,10 +232,12 @@ class NearFieldMode:
         lastProbeLaserPosition[2] = safeHeight
         self.laserPositioner.setProbeLocation(lastProbeLaserPosition)        
         
-        return (origin.mlab_source,scanZone)
+        originPosition = Position(origin.mlab_source.points[0][:],'m')  
+        
+        return (originPosition,scanZone)
     
 
-    def sweep(self,probeZone):
+    def sweep(self,origin,probeZone,resultPath):
         if self.powerSupply:
             self.powerSupply.turnChannelOn(1)
             self.powerSupply.turnChannelOn(2)
@@ -243,6 +249,7 @@ class NearFieldMode:
             self.analyzer.align()  
         else:
             self.analyzer.measure(1,0) # just to check that it responds
+        frequencies = self.analyzer.frequency.f  
                 
         pitch = 0.001
         (xGrid,yGrid) = numpy.meshgrid(numpy.arange(probeZone.bottomLeft[0],probeZone.topRight[0],pitch),
@@ -250,7 +257,9 @@ class NearFieldMode:
         zPosition = probeZone.height
         
         xGrid = xGrid.T
-        yGrid = yGrid.T        
+        yGrid = yGrid.T    
+        
+        
         
         try:
             for corner in [(0,0),(-1,0),(-1,-1),(0,-1)]:
@@ -258,22 +267,29 @@ class NearFieldMode:
             
             complexVoltages = []
             startTime = time.clock()
-            for (pointNumber,xPosition,yPosition) in zip(range(xGrid.size),xGrid.flat,yGrid.flat):
-                pointStart = time.clock()                
-                self.laserPositioner.setProbeLocation(Position(numpy.array([xPosition,yPosition,zPosition]),'m'),
-                                       highSpeed=True)
-                if isinstance(self.analyzer,SpectrumAnalyzer):
-                    naturalPowers = numpy.power(10.0,self.analyzer.measure()/10.0)
-                    naturalVoltages = numpy.sqrt(naturalPowers * 50.0)
+            
+            (resultFolder,fileName) = os.path.split(resultPath)
+            imageName = fileName.split('-')[0]
+            
+            with NfsFile(resultFolder,fileName,imageName=imageName,calibration=self.laserPositioner.calibration.electrical,frequencies=frequencies) as nfsFile:
+                for (pointNumber,xPosition,yPosition) in zip(range(xGrid.size),xGrid.flat,yGrid.flat):
+                    pointStart = time.clock()                
+                    newPosition = Position(numpy.array([xPosition,yPosition,zPosition]),'m')
+                    self.laserPositioner.setProbeLocation(newPosition, highSpeed=True)
+                    if isinstance(self.analyzer,SpectrumAnalyzer):
+                        naturalPowers = numpy.power(10.0,self.analyzer.measure()/10.0)
+                        naturalVoltages = numpy.sqrt(naturalPowers * 50.0)
+                    else:
+                        naturalVoltages = numpy.sqrt(50.0) * self.analyzer.measure(1,0).s[:,0,0]
                     complexVoltages.append(naturalVoltages)
-                else:
-                    complexVoltages.append(numpy.sqrt(50.0) * self.analyzer.measure(1,0).s[:,0,0])
-                
-                pointDuration = time.clock() - pointStart
-                remainingTime = pointDuration * (xGrid.size - (pointNumber+1))
-                sys.stdout.write('\r{0:.1f}m remaining...'.format(remainingTime/60.0))
+                        
+                    nfsFile.writePoint(newPosition-origin,naturalVoltages)
                     
-            print 'Sweep took {0:.1f}s'.format(time.clock()-startTime)
+                    pointDuration = time.clock() - pointStart
+                    remainingTime = pointDuration * (xGrid.size - (pointNumber+1))
+                    sys.stdout.write('\r{0:.1f}m remaining...'.format(remainingTime/60.0))
+                        
+                print 'Sweep took {0:.1f}s'.format(time.clock()-startTime)
             
         finally:
             print 'Shutting down...'
@@ -284,7 +300,6 @@ class NearFieldMode:
                 self.powerSupply.turnChannelOff(4)
 #            self.laserPositioner.robot.goSafe()        
         
-        frequencies = self.analyzer.frequency.f             
         complexVoltagesGrid = numpy.array(complexVoltages).reshape(xGrid.shape + frequencies.shape)                     
         return (xGrid,yGrid,zPosition,complexVoltagesGrid,frequencies)
         
@@ -297,103 +312,77 @@ if __name__ == '__main__':
     
     (x,y,z) = test.scanRelief()
     substrateHeight = test.estimateSubstrateHeight(z)
-    scanHeight = 0.004
+    scanHeight = 0.010
     (origin,scanZone) = test.pickOriginAndZone(x,y,z,substrateHeight,scanHeight)
 
     (xGrid,yGrid,zPosition,complexVoltagesGrid,frequencies) = \
-        test.sweep(scanZone)
+        test.sweep(origin,scanZone,'Z:/Measurements/NFSE-in/D3-FAQ15-Hy-'+time.strftime('%H%M%S'))
 
     test.tearDown()
 
 
 
 #%% export XML
-resultFolder = 'Y:/Measurements/NFSE-in'
-fileName = 'D2-Hy-2'
-imageName = 'D2'
+#resultFolder = 'Z:/Measurements/NFSE-in'
+#fileName = 'D2-Hy-2'
+#imageName = 'D2'
+#
+#xGridUserOrigin = xGrid -origin.points[0][0]
+#yGridUserOrigin = yGrid - origin.points[0][1]
+#zPositionUserOrigin = zPosition - origin.points[0][2]
+#
 
-xGridUserOrigin = xGrid -origin.points[0][0]
-yGridUserOrigin = yGrid - origin.points[0][1]
-zPositionUserOrigin = zPosition - origin.points[0][2]
 
-
-class DutImage(object):
-    def __init__(self,name,dimensions,anchorPosition):
-        self.name = name
-        self.dimensions = dimensions
-        self.anchorPosition = anchorPosition
-    def nfsXml(self):
-        return '''<Image>
-      <Path>'''+self.name+'''.png</Path>
-      <Unit>m</Unit>
-      <Xoffset>'''+str(-self.anchorPosition[0].asUnit('m'))+'''</Xoffset>
-      <Yoffset>'''+str(+self.anchorPosition[1].asUnit('m'))+'''</Yoffset>
-      <Zoffset>0</Zoffset>
-      <Xsize>'''+str(+self.dimensions[0].asUnit('m'))+'''</Xsize>
-      <Ysize>'''+str(+self.dimensions[1].asUnit('m'))+'''</Ysize>
-    </Image>'''
-    
-dutImages = {
-    'D1A': DutImage('D1A',Position([120,78],'mm'),Position([30.36,38.07],'mm')), 
-    'D1B': DutImage('D1B',Position([120,78],'mm'),Position([27.34,35.54],'mm')),
-    'D1C': DutImage('D1C',Position([120,78],'mm'),Position([15.15,30.45],'mm')),
-    'D1D': DutImage('D1D',Position([120,78],'mm'),Position([32.38,30.93],'mm')),
-    'D2': DutImage('D2',Position([127,127],'mm'),Position([12.5,60],'mm')),
-    'D3-F6151': DutImage('D3-F6151',Position([120,78],'mm'),Position([0,0],'mm')),
-    'D3-FAQ15': DutImage('D3-FAQ15',Position([120,78],'mm'),Position([0,0],'mm')),
-    'D4': DutImage('D4',Position([120,78],'mm'),Position([0,0],'mm'))
-}
-
-## create simple XML
-samplesList = ''
-for (xCoordinate,yCoordinate,complexVoltage) in zip(xGridUserOrigin.flat,yGridUserOrigin.flat,complexVoltagesGrid.reshape(xGridUserOrigin.size,frequencies.size).tolist()):
-    samplesList += '{x:.6f} {y:.6f} {z:.6f}'.format(x=xCoordinate,y=yCoordinate,z=zPositionUserOrigin)
-    complexVoltageArray = numpy.array(complexVoltage)
-    for (realVoltage,imaginaryVoltage) in zip(complexVoltageArray.real.flat,complexVoltageArray.imag.flat):
-        samplesList += ' {realVoltage:.6e} {imaginaryVoltage:.6e}'.format(realVoltage=realVoltage,imaginaryVoltage=imaginaryVoltage)
-    samplesList += '\n'
-    
-   
-xmlText = '''<?xml version="1.0" encoding="UTF-8"?>
-<EmissionScan>
-  <Nfs_ver>0.4</Nfs_ver>
-  <Filename>'''+fileName+'''</Filename>
-  <File_ver>1.0</File_ver>
-  <Date>24 avr. 2014</Date>
-  <Source>ESEO-EMC</Source>
-  <Disclaimer>This file saves result of near field measurement. Others using is not guaranteed.</Disclaimer>
-  <Copyright>This document is the property of ESEO</Copyright>
-  <Notes>Built by EMC TestBench</Notes>
-'''+test.laserPositioner.calibration.electrical.nfsXml()+'''
-  <Component>
-    <Name>'''+fileName+'''</Name>
-    '''+dutImages[fileName.split('-')[0]].nfsXml()+'''
-  </Component>
-  <Data>
-    <Coordinates>xyz</Coordinates>
-    <X0>0</X0>
-    <Y0>0</Y0>
-    <Z0>0</Z0>
-    <Frequencies>
-      <Unit>Hz</Unit>
-      <List>''' + ' '.join(map(str,frequencies.tolist())) + '''</List>
-    </Frequencies>
-    <Measurement>
-      <Unit>v</Unit>
-      <Unit_x>m</Unit_x>
-      <Unit_y>m</Unit_y>
-      <Unit_z>m</Unit_z>
-      <Format>ri</Format>
-      <List>'''+samplesList+'''</List>
-    </Measurement>
-  </Data>
-</EmissionScan>
-'''
-
-## writout
-fileHandle = open(resultFolder + '/' + fileName+'.xml','w')
-fileHandle.write(xmlText)
-fileHandle.close()
+### create simple XML
+#samplesList = ''
+#for (xCoordinate,yCoordinate,complexVoltage) in zip(xGridUserOrigin.flat,yGridUserOrigin.flat,complexVoltagesGrid.reshape(xGridUserOrigin.size,frequencies.size).tolist()):
+#    samplesList += '{x:.6f} {y:.6f} {z:.6f}'.format(x=xCoordinate,y=yCoordinate,z=zPositionUserOrigin)
+#    complexVoltageArray = numpy.array(complexVoltage)
+#    for (realVoltage,imaginaryVoltage) in zip(complexVoltageArray.real.flat,complexVoltageArray.imag.flat):
+#        samplesList += ' {realVoltage:.6e} {imaginaryVoltage:.6e}'.format(realVoltage=realVoltage,imaginaryVoltage=imaginaryVoltage)
+#    samplesList += '\n'
+#    
+#   
+#xmlText = '''<?xml version="1.0" encoding="UTF-8"?>
+#<EmissionScan>
+#  <Nfs_ver>0.4</Nfs_ver>
+#  <Filename>'''+fileName+'''</Filename>
+#  <File_ver>1.0</File_ver>
+#  <Date>24 avr. 2014</Date>
+#  <Source>ESEO-EMC</Source>
+#  <Disclaimer>This file saves result of near field measurement. Others using is not guaranteed.</Disclaimer>
+#  <Copyright>This document is the property of ESEO</Copyright>
+#  <Notes>Built by EMC TestBench</Notes>
+#'''+test.laserPositioner.calibration.electrical.nfsXml()+'''
+#  <Component>
+#    <Name>'''+fileName+'''</Name>
+#    '''+dutImages[fileName.split('-')[0]].nfsXml()+'''
+#  </Component>
+#  <Data>
+#    <Coordinates>xyz</Coordinates>
+#    <X0>0</X0>
+#    <Y0>0</Y0>
+#    <Z0>0</Z0>
+#    <Frequencies>
+#      <Unit>Hz</Unit>
+#      <List>''' + ' '.join(map(str,frequencies.tolist())) + '''</List>
+#    </Frequencies>
+#    <Measurement>
+#      <Unit>v</Unit>
+#      <Unit_x>m</Unit_x>
+#      <Unit_y>m</Unit_y>
+#      <Unit_z>m</Unit_z>
+#      <Format>ri</Format>
+#      <List>'''+samplesList+'''</List>
+#    </Measurement>
+#  </Data>
+#</EmissionScan>
+#'''
+#
+### writeout
+#fileHandle = open(resultFolder + '/' + fileName+'.xml','w')
+#fileHandle.write(xmlText)
+#fileHandle.close()
 
 #    import tables
 #    nfsFile = tables.openFile('D1C-common-50Ohm-3GHz-sticker-quick.h5', mode='w', title="Near-Field Scan")

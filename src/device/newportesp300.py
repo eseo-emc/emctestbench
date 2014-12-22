@@ -5,8 +5,6 @@ from device import ScpiDevice
 from positioner import Positioner
 from utility import quantities
 
-from pyvisa import visa
-
 class NewportEsp300Error(object):
     def __init__(self,errorCode,errorDescription,timeStamp):
         self.errorCode = errorCode
@@ -16,6 +14,7 @@ class NewportEsp300Error(object):
         return 'Newport error {errorCode}: "{errorDescription}"'.format(errorCode=self.errorCode,errorDescription=self.errorDescription)
 
 class NewportEsp300(Positioner,ScpiDevice):
+    terminationCharacters = u'\r\n'
     defaultName = 'Newport ESP300 Motion Controller'
     defaultAddress = 'GPIB0::4::INSTR' #'ASRL1::INSTR' 
     visaIdentificationStartsWith = 'ESP300 '
@@ -250,6 +249,7 @@ class NewportEsp300(Positioner,ScpiDevice):
         
 if __name__ == '__main__':
     device = NewportEsp300()
+    device.strobeLowGpio1()
 #    device.reset()
 #    while True:
 #    device.setLocation(quantities.Position([42.0,-8.0,0.0],'mm'))
@@ -266,9 +266,9 @@ if __name__ == '__main__':
 #        print device.getLocation()[0]
 #        time.sleep(0.1)
 #    device._setLocationFinish(newLocation)
-    while True:
-        print device.getLocation()
-        print device.ask('TB?')
+#    while True:
+#        print device.getLocation()
+#        print device.ask('TB?')
 #    
 ##===============================================================================
 ##    test.setLocation(quantities.Position([115.,60.,50.],'mm'))

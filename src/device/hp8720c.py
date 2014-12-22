@@ -10,10 +10,13 @@ import time
 import subprocess
 
 import skrf
-from skrf.vi import vna
-from visa import vpp43
+#from skrf.vi import vna
+#from visa import vpp43
+import visa
+import pyvisa
+from StringIO import StringIO
 
-class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
+class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     defaultName = 'HP8720C Vector Network Analyzer'
     defaultAddress = 'GPIB9::2::INSTR'
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8720C,0,1.04'
@@ -76,11 +79,11 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
         
     def _obtainLearnString(self):
         print 'Obtain learn string'
-        self._lastLearnString = self.ask('OUTPLEAS')
+        self._lastLearnString = self.ask_raw('OUTPLEAS')
     def _restoreLearnString(self):
         print 'Restore learn string'
         assert self._lastLearnString, 'No learn string to restore'
-        self.write('INPULEAS '+self._lastLearnString)
+        self.write_raw('INPULEAS '+self._lastLearnString)
     
     def _hardPresetAndRestore(self):
         print 'Resetting...'
@@ -91,10 +94,12 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
         self.putOnline()
         
     def _setGpibRemote(self,remote=True):
+        visalib = self._deviceHandle.visalib
+        
         if remote:
-            vpp43.gpib_control_ren(self._deviceHandle.vi,vpp43.VI_GPIB_REN_ASSERT)
+            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.VI_GPIB_REN_ASSERT)
         else:
-            vpp43.gpib_control_ren(self._deviceHandle.vi,vpp43.VI_GPIB_REN_DEASSERT)
+            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.VI_GPIB_REN_DEASSERT)
 
     
     @property
@@ -112,7 +117,7 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
     def measure(self,*args,**kwargs):
         try:
             return self._measure(*args,**kwargs)
-        except (vpp43.VisaIOError, IOError) as ioError:
+        except (visa.VisaIOError, IOError) as ioError:
             print 'IO Error...',ioError
             if self._hardPresetMethod:
                 self._hardPresetAndRestore()
@@ -162,13 +167,14 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
                 sValues =  s[:,0]+1j*s[:,1]
             elif dataFormat == 1:
                 #http://www.vnahelp.com/tip23.html
-                rawData = self.ask('OUTPDATA')
+                rawData = self.ask_raw('OUTPDATA')
                 assert rawData[0] == '#', 'OUTPDATA should start with "#"'
-                assert len(rawData) == 4+numpy.frombuffer(rawData[2:4],numpy.dtype('>i2'))[0],'Buffer length does not correspond with header field'
+                lengthFromHeader = 4+numpy.frombuffer(rawData[2:4],numpy.dtype('>i2'))[0]
+                assert len(rawData) == lengthFromHeader,'Buffer length {0} does not correspond with length {1} announced in the header field'.format(len(rawData),lengthFromHeader)
                 
                 tupleData = numpy.frombuffer(rawData[4:],numpy.dtype(">i2,>i2,i1,i1"))
                 fieldData = numpy.array(tupleData.tolist())
-                assert (fieldData[:,2] == 0).all(),'The fifth byte should was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
+                assert (fieldData[:,2] == 0).all(),'The fifth byte was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
                 sValues = (1.0*fieldData[:,1] + 1.0j*fieldData[:,0]) * (2.0**(fieldData[:,3]-15))
                
             network = skrf.Network(name='S_{bNatural:d}{aNatural:d}'.format(bNatural=portB+1,aNatural=portA+1))
@@ -180,11 +186,17 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice,vna.HP8720):
     def frequency(self):
         if self.frontPanelLockout:
             if type(self._lastFrequency) == type(None):
-                self._lastFrequency = vna.HP8720.frequency.fget(self)
+                self._lastFrequency = self._fget()
             return self._lastFrequency
         else:
-            return vna.HP8720.frequency.fget(self)
+            return self._fget(self)
 
+    def _fget(self):
+        valuesString = self.ask_raw('OUTPLIML')
+        valuesStringFile = StringIO(valuesString)
+        f = numpy.loadtxt(valuesStringFile,delimiter=',')
+        assert f.shape[1] == 4,'OUTPLIML should return a CSV table with 4 columns'
+        return skrf.Frequency.from_f(f[:,0],unit='hz')
       
     def _triggerAndWait(self):
 #        # Wait by polling for Hold state
@@ -295,8 +307,14 @@ if __name__ == '__main__':
 
     import pylab    
     import time
+    
     analyzer = Hp8753c()#Hp8720c()
-#    analyzer.putOnline()
+    analyzer.putOnline()    
+
+    from configuration import knownDevices
+    analyzer._hardPresetMethod = knownDevices['positioner'].strobeLowGpio1
+
+    
 ##    analyzer.ifBandwidth = quantities.Frequency(10,'Hz')
     
 #    ## 5th byte test   
@@ -322,7 +340,7 @@ if __name__ == '__main__':
 #    measurement.plot_z_mag() 
 #    pylab.gca().set_xscale('log')
 #    pylab.gca().set_yscale('log')
-    measurement.plot_s_db()
+#    measurement.plot_s_db()
     measurement2.plot_s_db()
 #    measurement.plot_s_smith()
     pylab.show()

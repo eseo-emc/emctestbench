@@ -2,9 +2,8 @@
 @author: Sjoerd Op 't Land
 '''
 
-from pyvisa import visa
-#import visa
-from pyvisa import vpp43
+
+import visa
 
 import time
 from gui import log
@@ -50,6 +49,9 @@ class Device(QObject):
         log.LogItem(str(self)+' has no drawAttention implementation.',log.warning)
     
 class ScpiDevice(Device):
+    terminationCharacters = '\n' 
+    visaLibrary = 'agilent'
+    
     def __init__(self,visaAddress=None,name=None):
         super(ScpiDevice,self).__init__(name)
         if visaAddress == None:
@@ -97,7 +99,21 @@ class ScpiDevice(Device):
             answerData = self._sureAsk(*args,**kwargs)
             print 'That went well!'
             return answerData        
-        
+    
+    # TODO : deprecate this and replace with pyvisa 1.6 query binary values        
+    def ask_raw(self,message):
+        self.write(message)
+        oldTermination = self._deviceHandle.read_termination
+        self._deviceHandle.read_termination = ''
+        try:
+            answer = self._deviceHandle.read_raw()
+        finally:
+            self._deviceHandle.read_termination = oldTermination
+
+        return answer
+    def write_raw(self,message):
+        self._deviceHandle.write_raw(message)
+      
     def _sureAsk(self,message):
         self.write(message)
         try:
@@ -134,7 +150,17 @@ class ScpiDevice(Device):
             self.online = False
      
     def createHandle(self):
-        self._deviceHandle = visa.instrument(self.visaAddress)
+        if self.visaLibrary == 'agilent':            
+            resourceManager = visa.ResourceManager('C:\\WINDOWS\\system32\\agvisa32.dll')
+        elif self.visaLibrary == 'ni':
+            resourceManager = visa.ResourceManager('C:\\WINDOWS\\system32\\visa32.dll')
+        else:
+            raise ValueError,"VISA Library name not recognised"
+            
+        self._deviceHandle = resourceManager.get_instrument(self.visaAddress)
+        if self._deviceHandle:
+            self._deviceHandle.write_termination = self.terminationCharacters
+            self._deviceHandle.read_termination = self.terminationCharacters
             
     def popError(self):
         return self.ask('SYSTem:ERRor?')
@@ -183,7 +209,7 @@ class ScpiDevice(Device):
             else:
                 raise Exception,'Waiting for OPeration Complete bit to be set took longer than {timeOut}s'.format(timeOut=timeOut)
     def readStatusByte(self):
-        return self._deviceHandle._vpp43.read_stb(self._deviceHandle.vi)
+        return self._deviceHandle.stb
 
     def interface(self):
         interfaceName = self._deviceHandle._vpp43.get_attribute(self._deviceHandle.vi,self._deviceHandle._vpp43.VI_ATTR_RSRC_NAME).split('::')[0] + '::INTFC'
