@@ -14,7 +14,7 @@ class NewportEsp300Error(object):
         return 'Newport error {errorCode}: "{errorDescription}"'.format(errorCode=self.errorCode,errorDescription=self.errorDescription)
 
 class NewportEsp300(Positioner,ScpiDevice):
-    terminationCharacters = u'\r\n'
+    terminationCharacters = u'\n'
     defaultName = 'Newport ESP300 Motion Controller'
     defaultAddress = 'GPIB0::4::INSTR' #'ASRL1::INSTR' 
     visaIdentificationStartsWith = 'ESP300 '

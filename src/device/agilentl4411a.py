@@ -20,5 +20,5 @@ class AgilentL4411a(Multimeter,ScpiDevice):
 if __name__ == '__main__':
     device = AgilentL4411a()
 
-    print 'Average power %0.2e V' % (device.measure())
+    print 'Average voltage %0.2e V' % (device.measure())
  

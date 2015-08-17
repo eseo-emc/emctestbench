@@ -4,12 +4,13 @@ import pylab
 
 substrateHeight = 1.55
 probeSpotHeight = 5.0
+yCenter = 21.55
 
 def printFieldStrenght(field,component):
     X,Y,Z,fieldXReal,fieldYReal,fieldZReal,fieldXImag,fieldYImag,fieldZImage = numpy.loadtxt('microstrip_standard-'+field.lower()+'-600MHz.txt',skiprows=2,unpack=True)
     
     xValues = numpy.unique(X)
-    yValues = numpy.unique(Y)
+    yValues = numpy.unique(Y)-yCenter
     zValues = numpy.unique(Z)
     
     newShape = (len(xValues),len(yValues),len(zValues))
@@ -36,10 +37,10 @@ def printFieldStrenght(field,component):
     pylab.ylabel(fieldUnits)
     pylab.show()
     
-    print 'max('+fieldTitle+'):',numpy.abs(fieldCut).max(),fieldUnits
+    print 'max('+fieldTitle+'):',numpy.abs(fieldCut).max(),fieldUnits,'at',yValues[numpy.abs(fieldCut).argmax()],'mm'
 
 print 'Height above substrate',probeSpotHeight,'mm'
-printFieldStrenght('E','y')
-printFieldStrenght('E','z')
+#printFieldStrenght('E','y')
+#printFieldStrenght('E','z')
 printFieldStrenght('H','y')
 printFieldStrenght('H','z')

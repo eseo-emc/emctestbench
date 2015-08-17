@@ -18,7 +18,8 @@ from StringIO import StringIO
 
 class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     defaultName = 'HP8720C Vector Network Analyzer'
-    defaultAddress = 'GPIB9::2::INSTR'
+    defaultAddress = 'GPIB4::2::INSTR'
+    visaLibrary = 'ni'
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8720C,0,1.04'
     documentation = {'Programmers Manual':'http://na.tm.agilent.com/pna/help/latest/whnjs.htm'}
     
@@ -308,11 +309,11 @@ if __name__ == '__main__':
     import pylab    
     import time
     
-    analyzer = Hp8753c()#Hp8720c()
-    analyzer.putOnline()    
+    analyzer = Hp8720c()
+#    analyzer.putOnline()    
 
-    from configuration import knownDevices
-    analyzer._hardPresetMethod = knownDevices['positioner'].strobeLowGpio1
+#    from configuration import knownDevices
+#    analyzer._hardPresetMethod = knownDevices['positioner'].strobeLowGpio1
 
     
 ##    analyzer.ifBandwidth = quantities.Frequency(10,'Hz')
@@ -332,8 +333,8 @@ if __name__ == '__main__':
 #    durations = durations[1:]
 #    print numpy.mean(durations),numpy.std(durations)
     
-    measurement2 = analyzer.measure(0,0)
-    measurement2.name = 'open'
+#    measurement2 = analyzer.measure(0,0)
+#    measurement2.name = 'open'
 #    print 'Done'
 ##    measurement.write_touchstone('Picosecond_5545_114-RF-short2')
     
@@ -341,9 +342,9 @@ if __name__ == '__main__':
 #    pylab.gca().set_xscale('log')
 #    pylab.gca().set_yscale('log')
 #    measurement.plot_s_db()
-    measurement2.plot_s_db()
+#    measurement2.plot_s_db()
 #    measurement.plot_s_smith()
-    pylab.show()
+#    pylab.show()
     
 #    for repetition in range(1000):
 #        analyzer.write('*CLS; *ESE 1; *SRE 32; HOLD; REST; OPC; WAIT; EMIB;')

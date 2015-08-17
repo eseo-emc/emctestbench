@@ -289,12 +289,12 @@ All measurement data was stored at ''' + document.texEscape(self.connectionsDire
         
         
 if __name__ == '__main__':
-#    # MEASUREMENT
-#    measurement = QualifySwitchMeasurement()
-#    measurement.start()
-#    print repr(measurement.qualificationDirectory)
+    # MEASUREMENT
+    measurement = QualifySwitchMeasurement()
+    measurement.start()
+    print repr(measurement.qualificationDirectory)
 
-    # REPORT
-    report = QualifySwitchReport('D:\\User_My_Documents\\Instrument\\My Documents\\EmcTestbench\\Qualification\\L4490 2013-09-24 100249 26 GHz calibration tightened')
-    report.writeReport()
+#    # REPORT
+#    report = QualifySwitchReport('D:\\User_My_Documents\\Instrument\\My Documents\\EmcTestbench\\Qualification\\L4490 2013-09-24 100249 26 GHz calibration tightened')
+#    report.writeReport()
     

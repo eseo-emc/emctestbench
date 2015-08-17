@@ -3,9 +3,8 @@ from amplifier import Amplifier
 
 class PranaAP32DT120(Amplifier,ScpiDevice):
     defaultName = 'Prana AP32 DT120 Power Amplifier'
-    defaultAddress = 'GPIB1::5::INSTR'
+    defaultAddress = 'GPIB0::5::INSTR'
     visaIdentificationStartsWith = 'AP32 DT120'
-
         
     def _turnRfOn(self):
         self.write('MHF')

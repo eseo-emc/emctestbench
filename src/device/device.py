@@ -4,6 +4,7 @@
 
 
 import visa
+import pyvisa
 
 import time
 from gui import log
@@ -157,10 +158,16 @@ class ScpiDevice(Device):
         else:
             raise ValueError,"VISA Library name not recognised"
             
-        self._deviceHandle = resourceManager.get_instrument(self.visaAddress)
+        self._deviceHandle = resourceManager.get_instrument(self.visaAddress)#          ,lock=pyvisa.constants.VI_EXCLUSIVE_LOCK)
         if self._deviceHandle:
-            self._deviceHandle.write_termination = self.terminationCharacters
-            self._deviceHandle.read_termination = self.terminationCharacters
+            if type(self.terminationCharacters) != dict:
+                terminationCharacters = {'read':self.terminationCharacters,
+                                         'write':self.terminationCharacters}
+            else:
+                terminationCharacters = self.terminationCharacters
+                                         
+            self._deviceHandle.write_termination = terminationCharacters['write']
+            self._deviceHandle.read_termination = terminationCharacters['read']
             
     def popError(self):
         return self.ask('SYSTem:ERRor?')
@@ -266,12 +273,18 @@ class ScpiDevice(Device):
         self.write('DISP:TEXT "'+message+'";')
 
 if __name__ == '__main__':
-    from agilent33 import Agilent33220A,Agilent33250A
-    from agilentl4411a import AgilentL4411a
-    from agilentn6700b import AgilentN6700b
-    testDevice = Agilent33220A('TCPIP0::172.20.1.204::inst0::INSTR','33220 LF Generator top')
-#    testDevice = Agilent33250A('GPIB1::10::INSTR')
-#    testDevice = AgilentL4411a('TCPIP0::172.20.1.207::inst0::INSTR')
-#    testDevice = AgilentN6700b('TCPIP0::172.20.1.203::inst0::INSTR')
-    print testDevice
-    testDevice.drawAttention()
+    resourceManager = visa.ResourceManager('C:\\WINDOWS\\system32\\agvisa32.dll')  
+    
+#    deviceHandle = resourceManager.get_instrument('GPIB4::2::INSTR') #,lock=pyvisa.constants.VI_EXCLUSIVE_LOCK)
+
+#            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.VI_GPIB_REN_DEASSERT)
+
+#    from agilent33 import Agilent33220A,Agilent33250A
+#    from agilentl4411a import AgilentL4411a
+#    from agilentn6700b import AgilentN6700b
+#    testDevice = Agilent33220A('TCPIP0::172.20.1.204::inst0::INSTR','33220 LF Generator top')
+##    testDevice = Agilent33250A('GPIB1::10::INSTR')
+##    testDevice = AgilentL4411a('TCPIP0::172.20.1.207::inst0::INSTR')
+##    testDevice = AgilentN6700b('TCPIP0::172.20.1.203::inst0::INSTR')
+#    print testDevice
+#    testDevice.drawAttention()
