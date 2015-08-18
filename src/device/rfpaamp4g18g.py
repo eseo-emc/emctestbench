@@ -42,7 +42,7 @@ if __name__ == '__main__':
     import time    
     
     amplifier = RfpaAmp4g18g()
-#    amplifier._deviceHandle.timeout = 10.0
+#    amplifier._deviceHandle.timeout = 10000
     
     print amplifier.askIdentity()
     

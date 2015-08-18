@@ -1,0 +1,11 @@
+Dependencies
+============
+Install scikit-rf for some VNA drivers and Touchstone file support.
+
+Configuration
+=============
+Copy src/device/configuration.template.py to src/device/configuration.py (not versioned) and customize to your local configuration by uncommenting.
+
+Spyder
+======
+Add src/ to your PYTHONPATH for things to work.

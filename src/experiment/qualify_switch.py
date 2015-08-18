@@ -16,11 +16,10 @@ import ConfigParser
 
 
 # sequence parameters
-switchNames = ['Gen Out','DUT','E4419 Pi','E4419 Pr']
+switchNames = ['generator','DUT','powerMeterIncident','powerMeterReflected']
 oppositeSuffices = ['In','Out','Pi','Pr']
 
-positions = ['86205A','773D','Prana','Milmega']
-measureIncidents = [False,False,True,True]
+positions = ['Amplifier 1','coupler','Amplifier 2','Amplifier 3']
 
 def prompt(message,showOptions = False):
 #    print message
@@ -58,7 +57,12 @@ class Connection(object):
         return ''
             
     def measureAndSave(self,vna,switch,resultDirectory):
-        switch.setPreset(self.switchPosition)
+        for switchName in switchNames:
+            if switchName == self.switchName:
+                switch[switchName].setPosition(self.switchPosition)
+            else:
+                switch[switchName].setPosition('open')
+#        switch.setPreset(self.switchPosition)
         self.measurement = vna.measure()
         self.measurement.name = self.fileName
         self.measurement.write_touchstone(dir=resultDirectory)
@@ -116,11 +120,9 @@ class QualifySwitch(object):
     
     def platformConnections(self):
         for (switchName,oppositeSuffix) in zip(switchNames,oppositeSuffices):
-            for (oppositePort,measureIncident) in zip(positions,measureIncidents):
-                if not(switchName == 'E4419 Pi' and not(measureIncident)):
-                    for (switchPosition,measureIncident) in zip(positions,measureIncidents):
-                        if not(switchName == 'E4419 Pi' and not(measureIncident)):                    
-                            yield Connection(switchName,oppositePort,oppositeSuffix,switchPosition)
+            for oppositePort in positions:
+                for switchPosition in positions:
+                    yield Connection(switchName,oppositePort,oppositeSuffix,switchPosition)
     
     def connectionsPerSwitch(self):
         connections = dict()
@@ -137,7 +139,8 @@ class QualifySwitch(object):
             
     @property
     def connectionsDirectory(self):
-        return os.path.realpath(os.path.join(self.qualificationDirectory,'connections')) 
+        return os.path.realpath(os.path.join(self.qualificationDirectory,'connections'))
+        
 class QualifySwitchMeasurement(QualifySwitch):
     def __init__(self):
         self.startMoment = datetime.datetime.now()              
@@ -295,6 +298,6 @@ if __name__ == '__main__':
     print repr(measurement.qualificationDirectory)
 
 #    # REPORT
-#    report = QualifySwitchReport('D:\\User_My_Documents\\Instrument\\My Documents\\EmcTestbench\\Qualification\\L4490 2013-09-24 100249 26 GHz calibration tightened')
+#    report = QualifySwitchReport('\\Users\\Administrateur.PC-GRACE\\Documents\\EmcTestbench\\Qualification\\L4490 2015-08-17 183544')
 #    report.writeReport()
     

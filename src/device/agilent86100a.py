@@ -20,7 +20,7 @@ class Agilent86100a(Oscilloscope,FrequencyCounter,ScpiDevice):
             assert self.firmwareVersion < 5.0
             
             # Prepare for downloading waveforms
-            self.deviceHandle.timeout = 30.0
+            self.deviceHandle.timeout = 30000
             #visa.vpp43.gpib_control_ren(self.deviceHandle, visa.VI_GPIB_REN_ASSERT_ADDRESS_LLO)
             return True
         else:
