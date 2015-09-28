@@ -174,7 +174,7 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
                 
                 tupleData = numpy.frombuffer(rawData[4:],numpy.dtype(">i2,>i2,i1,i1"))
                 fieldData = numpy.array(tupleData.tolist())
-                assert (fieldData[:,2] == 0).all(),'The fifth byte was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
+#                assert (fieldData[:,2] == 0).all(),'The fifth byte was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
                 sValues = (1.0*fieldData[:,1] + 1.0j*fieldData[:,0]) * (2.0**(fieldData[:,3]-15))
                
             network = skrf.Network(name='S_{bNatural:d}{aNatural:d}'.format(bNatural=portB+1,aNatural=portA+1))

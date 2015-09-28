@@ -274,7 +274,7 @@ All measurement data was stored at ''' + document.texEscape(self.connectionsDire
                 thruConnection.loadFromNetworkSet(self.touchStones)
                 thruConnection.measurement.plot_s_db(1,0)
             pylab.legend(loc='upper right')
-            document.appendGraph(graph,name,switchName+' transmission parameters in the different preset positions.')
+            document.appendGraph(graph,name,switchName+' transmission parameters for each position.')
 
             graph = pylab.figure()
             name = switchName + '_reflection'
@@ -283,7 +283,7 @@ All measurement data was stored at ''' + document.texEscape(self.connectionsDire
                 thruConnection.measurement.plot_s_db(0,0)
                 thruConnection.measurement.plot_s_db(1,1)
             pylab.legend(loc='lower right')
-            document.appendGraph(graph,name,switchName+' reflection parameters in the different preset positions.')
+            document.appendGraph(graph,name,switchName+' reflection parameters for each position.')
 
 
         document.writeOut()
@@ -292,12 +292,12 @@ All measurement data was stored at ''' + document.texEscape(self.connectionsDire
         
         
 if __name__ == '__main__':
-    # MEASUREMENT
-    measurement = QualifySwitchMeasurement()
-    measurement.start()
-    print repr(measurement.qualificationDirectory)
+#    # MEASUREMENT
+#    measurement = QualifySwitchMeasurement()
+#    measurement.start()
+#    print repr(measurement.qualificationDirectory)
 
-#    # REPORT
-#    report = QualifySwitchReport('\\Users\\Administrateur.PC-GRACE\\Documents\\EmcTestbench\\Qualification\\L4490 2015-08-17 183544')
-#    report.writeReport()
+    # REPORT
+    report = QualifySwitchReport('C:\\Users\\Administrateur.PC-GRACE\\Documents\\EmcTestbench/Qualification/L4490 2015-08-19 142319 tightened')
+    report.writeReport()
     
