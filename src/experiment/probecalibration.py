@@ -218,7 +218,7 @@ class LaserPositioner(object):
                                   (x < substrateHeightZone.topRight[0]) &
                                   (y > substrateHeightZone.bottomLeft[1]) &
                                   (y < substrateHeightZone.topRight[1])]
-                print 'Estimating subtrate height based on',zValuesInZone.shape,'values...'
+                print 'Estimating substrate height based on',zValuesInZone.shape,'values...'
                 if len(zValuesInZone) > 0:                
                     heightEstimate = self.estimateSubstrateHeight(zValuesInZone)
                     updateSubstrateHeight(heightEstimate)
@@ -303,7 +303,7 @@ class LaserPositionerCalibrator(LaserPositioner):
         
     def prepare(self):
         LaserPositioner.prepare(self)
-        self.powerSupply.setChannelParameters(4,Voltage(12.0,'V'),Current(0.7,'A'))
+        self.powerSupply.setChannelParameters(4,Voltage(12.0,'V'),Current(1.4,'A'))
         self.powerSupply.turnChannelOn(4)
         
     def tearDown(self):
@@ -495,7 +495,7 @@ class ElectricalProbeCalibration(SmartDommable):
          
  
 if __name__ == '__main__':
-#    probeName = 'Hz'
+#    probeName = 'Hy'
 #    spotZ = {'Ez' : Position(0),
 #             'Hy' : Position(-0.0015,'m'),
 #             'Hx' : Position(-0.0015,'m'),
@@ -513,10 +513,10 @@ if __name__ == '__main__':
         calibration = ProbeCalibration.fromFile(name)
         calibration.electrical.plot(label=label)
         
-#    plotFile('Hy-until-21jul2015.xml','Before crash')
-    plotFile('Hz-candidate.xml','After crash')
+    plotFile('Hy-before.xml','Original Hy (+2x 25dB)')
+    plotFile('Hy-candidate.xml','Repaired Hy2 (+2x 25dB)')
     
-    pylab.title('Hy damage 21 July 2015 crash')
+    pylab.title('Hy 30 June repair check')
     pylab.legend()
     pylab.show()
 

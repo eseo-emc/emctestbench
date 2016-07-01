@@ -40,8 +40,14 @@ dutImages = {
     'D3_FAQ15': DutImage('D3-FAQ15.png',Position([277,182],'mm'),Position([77,95],'mm')),
     'D4': DutImage('D4.png',Position([205.6,71],'mm'),Position([102.8,48],'mm')),
     'Patch2GHz': DutImage('Patch2GHz.png',Position([100,100],'mm'),Position([33,33],'mm')),
-    'Patch2GHzOrEcran': DutImage('Patch2GHzOrienteEcran.png',Position([100,100],'mm'),Position([33,33],'mm'))
+    'Patch2GHzOrEcran': DutImage('Patch2GHzOrienteEcran.png',Position([100,100],'mm'),Position([33,33],'mm')),
+    'Piste20cm':DutImage('Piste20cm.png',Position([194,100],'mm'),Position([10,10],'mm')),
+    'TMC01':DutImage('TMC01.png',Position([126,57],'mm'),Position([20,33],'mm')),
+    'CarteTransfoIntegre_V1':DutImage('CarteTransfoIntegre_V1.png',Position([200,140],'mm'),Position([200-25,140-35],'mm')),
+    'CarteTransfoBobine':DutImage('CarteTransfoBobine.png',Position([120,110],'mm'),Position([120-12,68],'mm')),
+    'CarteTransfoDeporte':DutImage('CarteTransfoDeporte.png',Position([133,160],'mm'),Position([133-23,70],'mm')),
 }
+
 
 
 #%% export XML newstyle
@@ -53,6 +59,7 @@ class NfsFile(object):
         self._calibration = calibration
         self._resultFolder = resultFolder
         self._imageName = imageName
+        
         
     def __enter__(self):
         self._archiveFolder = self._resultFolder + '/' + self._fileName

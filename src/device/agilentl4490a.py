@@ -101,7 +101,7 @@ if __name__ == '__main__':
     switchPlatform.setPreset('Milmega')
     time.sleep(1)
     switchPlatform.setPreset('RFPA')
-    time.sleep(1)
-    switchPlatform.setPreset('open')
+    #time.sleep(1)
+    #switchPlatform.setPreset('open')
 
 #    print switchPlatform['DUT'].getPosition()

@@ -47,13 +47,14 @@ class NearFieldMode:
         else:
             raise ValueError, 'Analyser choice not recognised'
         
-#        self.powerSupply = None
-        self.powerSupply = device.knownDevices['powerSupply']
-        self.powerSupply.setChannelParameters(4,Voltage(12.0,'V'),Current(0.7,'A'))
-        self.powerSupply.setChannelParameters(3,Voltage(9.0,'V'),Current(0.25,'A'))
-        self.powerSupply.setChannelParameters(2,Voltage(5.0,'V'),Current(1.00,'A'))
-        self.powerSupply.setChannelParameters(1,Voltage(3.3,'V'),Current(0.7,'A'))
-        
+        self.powerSupply = None
+#        self.powerSupply = device.knownDevices['powerSupply']
+#        self.powerSupply.setChannelParameters(4,Voltage(12.0,'V'),Current(1.4,'A'))
+#        self.powerSupply.setChannelParameters(3,Voltage(9.0,'V'),Current(0.25,'A'))
+#        self.powerSupply.setChannelParameters(2,Voltage(5.0,'V'),Current(1.00,'A'))
+#        self.powerSupply.setChannelParameters(1,Voltage(3.3,'V'),Current(0.7,'A'))
+        if not(self.powerSupply):
+            print "Warning: the power supply is not remote controlled. If you need an LNA, switch it on manually."
         
 #        self.switchPlatform = device.knownDevices['switchPlatform']
 #        self.switchPlatform.closeSwitch('DUTtoSAorVNA')
@@ -72,6 +73,9 @@ class NearFieldMode:
     
 
     def sweep(self,origin,probeZone,resultPath,pitch):
+        if pitch.size != 2:
+            pitch = Position([pitch,pitch])
+            
         if self.powerSupply:
             self.powerSupply.turnChannelOn(1)
             self.powerSupply.turnChannelOn(2)
@@ -80,14 +84,14 @@ class NearFieldMode:
             
         if isinstance(self.analyzer,SpectrumAnalyzer):
             self.analyzer.measure() # just to check that it responds
-            self.analyzer.align()  
+#            self.analyzer.align()  
         else:
             self.analyzer.measure(1,0) # just to check that it responds
         frequencies = self.analyzer.frequency.f  
                 
         
-        (xGrid,yGrid) = numpy.meshgrid(numpy.arange(probeZone.bottomLeft[0],probeZone.topRight[0],pitch.asUnit('m')),
-                                       numpy.arange(probeZone.bottomLeft[1],probeZone.topRight[1],pitch.asUnit('m')))                                       
+        (xGrid,yGrid) = numpy.meshgrid(numpy.arange(probeZone.bottomLeft[0],probeZone.topRight[0],pitch[0].asUnit('m')),
+                                       numpy.arange(probeZone.bottomLeft[1],probeZone.topRight[1],pitch[1].asUnit('m')))                                       
         zPosition = probeZone.height
         
         xGrid = xGrid.T
@@ -144,24 +148,24 @@ class NearFieldMode:
  
 if __name__ == '__main__':
     print 'Start mode scan'
-    test = NearFieldMode('Hy.xml',analyser='VNA')
+    test = NearFieldMode('Hy.xml',analyser='SA')
     test.prepare()
     
-    initialAltitude = 0.003
+    initialAltitude = 0.00125 + 0.016
     while True:
         (origin,scanZone) = test.laserPositioner.scanAndPickOriginAndZone(altitude=initialAltitude)
-        if raw_input('Retry?') != 'y':
+        if raw_input('Retry (y/n) [n]?') != 'y':
             break
 
     for altitude in [initialAltitude]:    
         scanZone.height = float(origin[2] + altitude)
         (xGrid,yGrid,zPosition,complexVoltagesGrid,frequencies) = \
             test.sweep(origin,scanZone,
-               'D:/Measurements/NFSE-in/Patch2GHz-{probe}-{altitudeMm}mm-{timestamp}-throwaway'.format(
+               'D:/Measurements/NFSE-in/CarteTransfoDeporte-transfo400-30W-{probe}-{altitudeMm}mm-{timestamp}'.format(
                timestamp=time.strftime('%H%M%S'),
                altitudeMm = altitude*1000.0,
                probe=test.laserPositioner.calibration.name),
-               pitch=Position(2,'mm'))
+               pitch=Position([2,2],'mm'))
 
     test.tearDown()
 

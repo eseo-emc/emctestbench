@@ -181,5 +181,7 @@ if __name__ == '__main__':
 #    print 'Average power %0.2f dBm, %0.1f degrees' % (amplitude.dBm(),numpy.angle(averageVoltage,deg=True))
         
     #calculate power in dBm and phase in degrees...
-    
+    import pylab
+    pylab.plot(analyzer.measure())
+    pylab.show()
     

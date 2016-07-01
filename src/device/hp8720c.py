@@ -18,7 +18,7 @@ from StringIO import StringIO
 
 class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     defaultName = 'HP8720C Vector Network Analyzer'
-    defaultAddress = 'GPIB4::2::INSTR'
+    defaultAddress = 'GPIB0::2::INSTR'
     visaLibrary = 'ni'
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8720C,0,1.04'
     documentation = {'Programmers Manual':'http://na.tm.agilent.com/pna/help/latest/whnjs.htm'}
@@ -309,8 +309,8 @@ if __name__ == '__main__':
     import pylab    
     import time
     
-    analyzer = Hp8720c()
-#    analyzer.putOnline()    
+    analyzer = Hp8753c()
+    analyzer.putOnline()    
 
 #    from configuration import knownDevices
 #    analyzer._hardPresetMethod = knownDevices['positioner'].strobeLowGpio1
@@ -319,7 +319,7 @@ if __name__ == '__main__':
 ##    analyzer.ifBandwidth = quantities.Frequency(10,'Hz')
     
 #    ## 5th byte test   
-#    measurement = analyzer.measure(1,0,dataFormat='all')
+    measurement = analyzer.measure(1,0,dataFormat='all')
 #    numpy.testing.assert_almost_equal(measurement['FORM1'].s,measurement['FORM4'].s,err_msg='The FORM1 and FORM4 data do not correspond.')
     
 #    ## duration measurement
@@ -341,10 +341,10 @@ if __name__ == '__main__':
 #    measurement.plot_z_mag() 
 #    pylab.gca().set_xscale('log')
 #    pylab.gca().set_yscale('log')
-#    measurement.plot_s_db()
+    measurement['FORM1'].plot_s_db()
 #    measurement2.plot_s_db()
 #    measurement.plot_s_smith()
-#    pylab.show()
+    pylab.show()
     
 #    for repetition in range(1000):
 #        analyzer.write('*CLS; *ESE 1; *SRE 32; HOLD; REST; OPC; WAIT; EMIB;')
