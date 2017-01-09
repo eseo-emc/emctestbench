@@ -18,7 +18,7 @@ from llt_scanControlDataTypes import *
 stringBufferSize = 200
 dummyValue = 42
 
-llt = windll.LoadLibrary("D:/User_My_Documents/Administrator/My Documents/ScanControl SDK\LLT.dll")
+llt = windll.LoadLibrary("C:/Program Files (x86)/scanCONTROL Configuration Tools 4.1/LLT.dll")
 
 def raiseIfError(unprotectedFunction):
 #    print 'Wrapping...'

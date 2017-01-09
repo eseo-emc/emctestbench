@@ -303,7 +303,7 @@ class Hp8753e(Hp8720c):
 
 class Hp8753c(Hp8720c):
     defaultName = 'HP8753C Vector Network Analyzer'
-    defaultAddress = 'GPIB0::8::INSTR' #'GPIB2::8::INSTR'
+    defaultAddress = 'GPIB0::16::INSTR' #'GPIB2::8::INSTR'
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8753C,0,4.01'
 
              

@@ -506,9 +506,9 @@ if __name__ == '__main__':
 #    test.calibration.toFile(test.calibration.name+'-candidate.xml')
         
 #    laserPositioner = LaserPositioner(ProbeCalibration.fromFile('Hy3.xml'))
-#    print laserPositioner.calibration.electrical.nfsXml()
+#    #print laserPositioner.calibration.electrical.nfsXml()
 #    laserPositioner.testMechanicalCalibration()
-#
+
     def plotFile(name,label):
         calibration = ProbeCalibration.fromFile(name)
         calibration.electrical.plot(label=label)

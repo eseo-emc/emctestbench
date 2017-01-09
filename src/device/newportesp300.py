@@ -17,6 +17,7 @@ class NewportEsp300(Positioner,ScpiDevice):
     terminationCharacters = u'\n'
     defaultName = 'Newport ESP300 Motion Controller'
     defaultAddress = 'GPIB0::4::INSTR' #'ASRL1::INSTR' 
+    visaLibrary = 'ni'
     visaIdentificationStartsWith = 'ESP300 '
     documentation = {'Programmers Manual':'http://phubner.eng.ua.edu/Files/ESP300.pdf'}
     dangerousVectorZ = -1 # lower Z is closer to the DUT    
