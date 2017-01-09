@@ -100,14 +100,8 @@ if __name__ == '__main__':
     time.sleep(1)
     switchPlatform.setPreset('Amplifier 2')
     time.sleep(1)
-<<<<<<< HEAD
-    switchPlatform.setPreset('RFPA')
-    #time.sleep(1)
-    #switchPlatform.setPreset('open')
-=======
     switchPlatform.setPreset('Amplifier 3')
     time.sleep(1)
     switchPlatform.setPreset('open')
->>>>>>> 6960a01a85b4e270fa0a460a3af9b8cde2af6aea
 
 #    print switchPlatform['DUT'].getPosition()

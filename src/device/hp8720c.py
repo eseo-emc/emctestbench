@@ -17,13 +17,13 @@ from StringIO import StringIO
 
 class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     defaultName = 'HP8720C Vector Network Analyzer'
-<<<<<<< HEAD
+
     defaultAddress = 'GPIB0::2::INSTR'
     visaLibrary = 'ni'
-=======
-    defaultAddress = 'GPIB1::2::INSTR'
-    visaLibrary = 'agilent'
->>>>>>> 6960a01a85b4e270fa0a460a3af9b8cde2af6aea
+
+    #defaultAddress = 'GPIB1::2::INSTR'
+    #visaLibrary = 'agilent'
+
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8720C,0,1.04'
     documentation = {'Programmers Manual':'http://na.tm.agilent.com/pna/help/latest/whnjs.htm'}
     
