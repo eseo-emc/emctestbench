@@ -1,4 +1,4 @@
-pdfLatexBinaryPath = 'C:\\Program Files\\MiKTeX 2.9\\miktex\\bin\\pdflatex.exe'
+pdfLatexBinaryPath = 'C:\\Program Files\\MiKTeX 2.9\\miktex\\bin\\x64\\pdflatex.exe'
 
 
 import debugging

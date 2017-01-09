@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 
 class AgilentE4419b(WattMeter,ScpiDevice):
-    defaultAddress = 'GPIB2::11::INSTR'
+    defaultAddress = 'GPIB0::11::INSTR'
     defaultName = 'Agilent E4419B Power Meter'
     visaIdentificationStartsWith = 'Agilent Technologies,E4419B,'
     documentation = {'Programmers Manual':'http://cp.literature.agilent.com/litweb/pdf/E4418-90029.pdf'}

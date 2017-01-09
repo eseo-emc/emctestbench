@@ -12,14 +12,18 @@ import subprocess
 import skrf
 #from skrf.vi import vna
 #from visa import vpp43
-import visa
 import pyvisa
 from StringIO import StringIO
 
 class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     defaultName = 'HP8720C Vector Network Analyzer'
+<<<<<<< HEAD
     defaultAddress = 'GPIB0::2::INSTR'
     visaLibrary = 'ni'
+=======
+    defaultAddress = 'GPIB1::2::INSTR'
+    visaLibrary = 'agilent'
+>>>>>>> 6960a01a85b4e270fa0a460a3af9b8cde2af6aea
     visaIdentificationStartsWith = 'HEWLETT PACKARD,8720C,0,1.04'
     documentation = {'Programmers Manual':'http://na.tm.agilent.com/pna/help/latest/whnjs.htm'}
     
@@ -42,7 +46,7 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     def putOnline(self):
         ScpiDevice.putOnline(self)
         if self._deviceHandle:
-            self._deviceHandle.timeout = 20.0
+            self._deviceHandle.timeout = 20000
             if not self.frontPanelLockout:
                 self.gtl()
             #self.write('FORM{0:d};'.format(self.dataFormat))
@@ -98,9 +102,9 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
         visalib = self._deviceHandle.visalib
         
         if remote:
-            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.VI_GPIB_REN_ASSERT)
+            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.constants.VI_GPIB_REN_ASSERT)
         else:
-            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.VI_GPIB_REN_DEASSERT)
+            visalib.gpib_control_ren(self._deviceHandle.session,pyvisa.constants.VI_GPIB_REN_DEASSERT)
 
     
     @property
@@ -118,7 +122,7 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
     def measure(self,*args,**kwargs):
         try:
             return self._measure(*args,**kwargs)
-        except (visa.VisaIOError, IOError) as ioError:
+        except (pyvisa.VisaIOError, IOError) as ioError:
             print 'IO Error...',ioError
             if self._hardPresetMethod:
                 self._hardPresetAndRestore()
@@ -175,7 +179,7 @@ class Hp8720c(NetworkAnalyzer,ScpiDevice): #,vna.HP8720):
                 
                 tupleData = numpy.frombuffer(rawData[4:],numpy.dtype(">i2,>i2,i1,i1"))
                 fieldData = numpy.array(tupleData.tolist())
-                assert (fieldData[:,2] == 0).all(),'The fifth byte was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
+#                assert (fieldData[:,2] == 0).all(),'The fifth byte was supposed to be zero, but is not always. Maybe there is supplementary precision to exploit...'
                 sValues = (1.0*fieldData[:,1] + 1.0j*fieldData[:,0]) * (2.0**(fieldData[:,3]-15))
                
             network = skrf.Network(name='S_{bNatural:d}{aNatural:d}'.format(bNatural=portB+1,aNatural=portA+1))
@@ -352,4 +356,6 @@ if __name__ == '__main__':
 #        analyzer._deviceHandle.wait_for_srq()
 #        print "Clean sweep Done, fetching data..."
 #        analyzer.ask_for_values('OUTPDATA')
-    
+    measurement = analyzer.measure(1,0)
+    measurement.plot_s_db()
+    pylab.show()

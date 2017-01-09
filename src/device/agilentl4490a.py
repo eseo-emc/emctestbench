@@ -22,32 +22,32 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice):
         ScpiDevice.__init__(self,*args,**kwargs)
         SwitchPlatform.__init__(self,{ \
             'generator':AgilentSwitch(self,{ \
-                'Prana':   1102,
-                'coupler': 1103, 
-                'Milmega':         1105, 
-                'RFPA':       1106, 
-                'open':          1108 \
+                'Amplifier 1':  1102,
+                'coupler':      1103, 
+                'Amplifier 2':  1105, 
+                'Amplifier 3':  1106, 
+                'open':         1108 \
             }),
             'DUT':AgilentSwitch(self,{ \
-                'Prana':   1112,
-                'coupler': 1113, 
-                'Milmega':         1115, 
-                'RFPA':       1116, 
-                'open':          1118 \
+                'Amplifier 1': 1112,
+                'coupler':     1113, 
+                'Amplifier 2': 1115, 
+                'Amplifier 3': 1116, 
+                'open':        1118 \
             }),
             'powerMeterIncident':AgilentSwitch(self,{ \
-                'Prana':         1122,
-                'coupler':           1123,
-                'Milmega':         1125, 
-                'RFPA':       1126, 
-                'open':          1128 \
+                'Amplifier 1': 1122,
+                'coupler':     1123,
+                'Amplifier 2': 1125, 
+                'Amplifier 3': 1126, 
+                'open':        1128 \
             }),
             'powerMeterReflected':AgilentSwitch(self,{ \
-                'Prana':   1132,                
-                'coupler': 1133, 
-                'Milmega':         1135, 
-                'RFPA':       1136, 
-                'open':          1138 \
+                'Amplifier 1': 1132,                
+                'coupler':     1133, 
+                'Amplifier 2': 1135, 
+                'Amplifier 3': 1136, 
+                'open':        1138 \
             })
         })
         
@@ -60,11 +60,11 @@ class AgilentL4490a(SwitchPlatform,ScpiDevice):
             }
         
         self._presets = { \
-            'open'    : allSamePosition('open'),            
-            'coupler' : allSamePosition('coupler'),
-            'RFPA'    : allSamePosition('RFPA'),
-            'Prana'   : allSamePosition('Prana'),
-            'Milmega' : allSamePosition('Milmega') \
+            'open':        allSamePosition('open'),            
+            'coupler':     allSamePosition('coupler'),
+            'Amplifier 3': allSamePosition('Amplifier 3'),
+            'Amplifier 1': allSamePosition('Amplifier 1'),
+            'Amplifier 2': allSamePosition('Amplifier 2') \
         }
         
     def setPreset(self,presetName):
@@ -93,15 +93,21 @@ if __name__ == '__main__':
 #    switchPlatform['DUT'].openSwitch() #
 #    switchPlatform['DUT'].setPosition('SAorVNA')
     
-    switchPlatform.setPreset('Prana')
+    switchPlatform.setPreset('Amplifier 1')
 
     time.sleep(1)
     switchPlatform.setPreset('coupler')
     time.sleep(1)
-    switchPlatform.setPreset('Milmega')
+    switchPlatform.setPreset('Amplifier 2')
     time.sleep(1)
+<<<<<<< HEAD
     switchPlatform.setPreset('RFPA')
     #time.sleep(1)
     #switchPlatform.setPreset('open')
+=======
+    switchPlatform.setPreset('Amplifier 3')
+    time.sleep(1)
+    switchPlatform.setPreset('open')
+>>>>>>> 6960a01a85b4e270fa0a460a3af9b8cde2af6aea
 
 #    print switchPlatform['DUT'].getPosition()

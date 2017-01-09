@@ -123,7 +123,7 @@ class NewportEsp300(Positioner,ScpiDevice):
             
 
         
-    def _write(self,command,useSRQ=False,timeout=3):
+    def _write(self,command,useSRQ=False,timeout=3000):
         if type(self._deviceHandle).__name__ == 'GpibInstrument':
             if useSRQ:
                 ScpiDevice._write(self,command + '; RQ')

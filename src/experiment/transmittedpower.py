@@ -18,12 +18,22 @@ class TransmittedPower(Experiment,persistance.Dommable):
 
         self._physicalAmplifier = None
         
-        self.amplifiers = {'None (86205A)':'86205A', 'None (773D)':'773D', 'Prana':'Prana', 'Milmega 1':'Milmega', 'Milmega 2':'Milmega'}
-        self.amplifier = EnumerateProperty('Automatic (coupler)',['Automatic (coupler)','Automatic (amplifier)'] + self.amplifiers.keys())
+        self.amplifierSwitchPositions = {
+            'None (773D)':                  'coupler', 
+            'Amplifier 1 (Prana)':          'Amplifier 1', 
+            'Amplifier 2 (Milmega band 1)': 'Amplifier 2', 
+            'Amplifier 2 (Milmega band 2)': 'Amplifier 2'}
+        self.amplifierDevices = {
+            'None (773D)':                  None, 
+            'Amplifier 1 (Prana)':          knownDevices['Prana'], 
+            'Amplifier 2 (Milmega band 1)': knownDevices['Milmega'], 
+            'Amplifier 2 (Milmega band 2)': knownDevices['Milmega']}
+            
+        self.amplifier = EnumerateProperty('Automatic (coupler)',['Automatic (coupler)','Automatic (amplifier)'] + self.amplifierSwitchPositions.keys())
         self.amplifier.changed.connect(self.setAmplifier)
 
         self.amplifierCorrections = {}        
-        for amplifier in self.amplifiers.keys():
+        for amplifier in self.amplifierSwitchPositions.keys():
             self.amplifierCorrections.update({amplifier:BestBenchCorrections(amplifier)})
     
     def connect(self):
@@ -31,7 +41,7 @@ class TransmittedPower(Experiment,persistance.Dommable):
         self.rfGenerator = knownDevices['rfGenerator']
         
         self.switchPlatform = knownDevices['switchPlatform']
-        self.physicalAmplifier = 'None (86205A)'        
+        self.physicalAmplifier = 'None (773D)'        
         
         self.setAmplifier()
 
@@ -53,33 +63,30 @@ class TransmittedPower(Experiment,persistance.Dommable):
     def generatorPower(self,newPower):    
         self.rfGenerator.setPower(newPower)
         if self.physicalAmplifier and not self.physicalAmplifier.startswith('None'):
-            if newPower.negligible:
-                knownDevices[self.amplifiers[self.physicalAmplifier]].turnRfOff()
-            else:
-                knownDevices[self.amplifiers[self.physicalAmplifier]].turnRfOn()
+            self.amplifierDevices[self.physicalAmplifier].rfOn = not(newPower.negligible)
     
     def setAmplifier(self):
         if self.amplifier.value == 'Automatic (coupler)':
             frequency = self.generatorFrequency
-            if frequency <= Frequency(2,'GHz'):
-                self.physicalAmplifier = 'None (86205A)'
-            else:
-                self.physicalAmplifier = 'None (773D)'
+#            if frequency <= Frequency(2,'GHz'):
+#                self.physicalAmplifier = 'None (86205A)'
+#            else:
+            self.physicalAmplifier = 'None (773D)'
         elif self.amplifier.value == 'Automatic (amplifier)':
             frequency = self.generatorFrequency
             if frequency <= Frequency(1,'GHz'):
-                self.physicalAmplifier = 'Prana'
+                self.physicalAmplifier = 'Amplifier 1 (Prana)'
             elif frequency <= Frequency(2,'GHz'):
-                self.physicalAmplifier = 'Milmega 1'
+                self.physicalAmplifier = 'Amplifier 2 (Milmega band 1)'
             else:
-                self.physicalAmplifier = 'Milmega 2'
+                self.physicalAmplifier = 'Amplifier 2 (Milmega band 2)'
         else:
             self.physicalAmplifier = self.amplifier.value
             
     @property
     def physicalAmplifier(self):
         if self._physicalAmplifier:
-            correctPosition = self.amplifiers[self._physicalAmplifier]
+            correctPosition = self.amplifierSwitchPositions[self._physicalAmplifier]
             assert self.switchPlatform.checkPreset(correctPosition),'The switch platform is not in the {position} position'.format(position=correctPosition)
         return self._physicalAmplifier   
     @physicalAmplifier.setter         
@@ -90,11 +97,11 @@ class TransmittedPower(Experiment,persistance.Dommable):
         oldPower = self.generatorPower
         self.generatorPower = Power(0,'W')
         
-        self.switchPlatform.setPreset(self.amplifiers[newAmplifierName])
-        if newAmplifierName == 'Milmega 1':
-            knownDevices[self.amplifiers[newAmplifierName]].switchToBand1()
-        elif newAmplifierName == 'Milmega 2':
-            knownDevices[self.amplifiers[newAmplifierName]].switchToBand2()
+        self.switchPlatform.setPreset(self.amplifierSwitchPositions[newAmplifierName])
+        if newAmplifierName == 'Amplifier 2 (Milmega band 1)':
+            self.amplifierDevices[newAmplifierName].switchToBand1()
+        elif newAmplifierName == 'Amplifier 2 (Milmega band 2)':
+            self.amplifierDevices[newAmplifierName].switchToBand2()
         
         self._physicalAmplifier = newAmplifierName
         self.generatorPower = oldPower
@@ -167,7 +174,7 @@ if __name__ == '__main__':
     experiment.prepare()
 #    experiment.switchPlatform.setPreset('bridge')
 #    print experiment.tryTransmittedPower(Power(0,'dBm'))
-    experiment.amplifier.setValue('None (86205A)')
+    experiment.amplifier.setValue('None (773D)')
     experiment.generatorFrequency = Frequency(150000,'Hz')
     experiment.generatorPower = Power(-60,'dBm')
 #    experiment.rfGenerator.enableOutput()
