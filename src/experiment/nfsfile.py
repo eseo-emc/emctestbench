@@ -7,7 +7,7 @@ from utility.quantities import Position
 from probecalibration import ProbeCalibration
 
 class DutImage(object):
-    imagesFolder = 'Z:/measurements/NFSE-in'
+    imagesFolder = 'D:/measurements/NFSE-in-Photo'
     
     def __init__(self,sourceFileName,dimensions,anchorPosition):
         self.fileNameAndExtension = sourceFileName

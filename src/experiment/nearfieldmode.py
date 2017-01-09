@@ -1,12 +1,4 @@
 """
-Quick test to scan a single tone along the X-axis in nearfield
-
-Manual:
-- power on the preamp (12V/0.5A)
-- route the preamp to the VSA
-- set the VSA to basic I/Q
-- center the VSA on the tone
-
 preamp
 http://www.everythingrf.com/rf-microwave-amplifiers/p/Planar-Monolithics-Industries-82_PEC_60_0R14R0_5R0_10_12_SFF
 
@@ -147,24 +139,33 @@ class NearFieldMode:
         
  
 if __name__ == '__main__':
+    import pickle    
+    
     print 'Start mode scan'
     test = NearFieldMode('Hy.xml',analyser='SA')
     test.prepare()
     
-    initialAltitude = 0.00125 + 0.016
+    initialAltitude = 0.005 + 0.0015
+    
+#    if raw_input('Re-use last zone (y/n) [n]?') != 'y':
     while True:
         (origin,scanZone) = test.laserPositioner.scanAndPickOriginAndZone(altitude=initialAltitude)
         if raw_input('Retry (y/n) [n]?') != 'y':
             break
-
+#        with open('lastScanZone.pickled','wb') as pickledZoneFile:
+#            pickle.dump((origin,scanZone),pickledZoneFile)
+#    else:
+#        with open('lastScanZone.pickled','rb') as pickledZoneFile:
+#            (origin,scanZone) = pickle.load(pickledZoneFile)
+            
     for altitude in [initialAltitude]:    
         scanZone.height = float(origin[2] + altitude)
         (xGrid,yGrid,zPosition,complexVoltagesGrid,frequencies) = \
             test.sweep(origin,scanZone,
-               'D:/Measurements/NFSE-in/CarteTransfoDeporte-transfo400-30W-{probe}-{altitudeMm}mm-{timestamp}'.format(
-               timestamp=time.strftime('%H%M%S'),
-               altitudeMm = altitude*1000.0,
-               probe=test.laserPositioner.calibration.name),
+               'D:/Measurements/NFSE-out/D2-{probe}-{altitudeMm}mm-{timestamp}'.format(
+                   timestamp=time.strftime('%H%M%S'),
+                   altitudeMm = altitude*1000.0,
+                   probe=test.laserPositioner.calibration.name),
                pitch=Position([2,2],'mm'))
 
     test.tearDown()

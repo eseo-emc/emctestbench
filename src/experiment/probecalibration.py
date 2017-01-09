@@ -413,8 +413,8 @@ class LaserPositionerCalibrator(LaserPositioner):
 
         
         #Electrical calibration
-        # standard:
-        height = 5.0 #2.0 #mm, 1.0 
+        # standard values are calculated with interpolate_fields.py:
+        height = 5.0 #mm
         yOffsetMm = {'Hx':0.0,
                      'Hy':0.0,
                      'Hz':4.2,
@@ -508,15 +508,15 @@ if __name__ == '__main__':
 #    laserPositioner = LaserPositioner(ProbeCalibration.fromFile('Hy3.xml'))
 #    print laserPositioner.calibration.electrical.nfsXml()
 #    laserPositioner.testMechanicalCalibration()
-
+#
     def plotFile(name,label):
         calibration = ProbeCalibration.fromFile(name)
         calibration.electrical.plot(label=label)
         
-    plotFile('Hy-before.xml','Original Hy (+2x 25dB)')
-    plotFile('Hy-candidate.xml','Repaired Hy2 (+2x 25dB)')
+    plotFile('Hy-candidate.xml','Hy (+2x 25dB)')
+#    plotFile('Hy-before.xml','Hz (+2x 25dB)')
     
-    pylab.title('Hy 30 June repair check')
+    pylab.title('Hz calibration check')
     pylab.legend()
     pylab.show()
 

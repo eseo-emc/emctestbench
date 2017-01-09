@@ -31,16 +31,29 @@ def printFieldStrenght(field,component):
     fieldTitle = field+component
     fieldUnits = ('V/m' if field=='E' else 'A/m') + '/sqrt(W)'
     
+    #Maximum calculation
+    maxIndex = numpy.abs(fieldCut).argmax()
+    maxField = fieldCut[maxIndex]
+    maxY = yValues[maxIndex]
+    print 'max({fieldTitle}): {maxField:.3f} {unit} at y = {maxY} mm (z = {z} mm)'.format(
+        fieldTitle = fieldTitle,
+        maxField = abs(maxField),
+        maxY = maxY,
+        unit = fieldUnits,
+        z = probeSpotHeight)
+
+    
+    
     pylab.plot(yValues,fieldCut)
-    pylab.title(fieldTitle)
+    pylab.plot([maxY],[maxField],'ro')    
+    pylab.title('{field} at {height} mm above substrate'.format(field=fieldTitle, height=probeSpotHeight))
     pylab.xlabel('y (mm)')
     pylab.ylabel(fieldUnits)
     pylab.show()
     
-    print 'max('+fieldTitle+'):',numpy.abs(fieldCut).max(),fieldUnits,'at',yValues[numpy.abs(fieldCut).argmax()],'mm'
+    
 
-print 'Height above substrate',probeSpotHeight,'mm'
 #printFieldStrenght('E','y')
-#printFieldStrenght('E','z')
+printFieldStrenght('E','z')
 printFieldStrenght('H','y')
 printFieldStrenght('H','z')

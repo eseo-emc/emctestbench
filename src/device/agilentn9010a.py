@@ -152,15 +152,19 @@ if __name__ == '__main__':
     from utility.quantities import Frequency,PowerRatio   
     
     analyzer = AgilentN9010a()
-    analyzer.reset()
-    
-    analyzer.span = Frequency(100,'MHz')
-#    analyzer.resolutionBandwidth = Frequency(3,'kHz')
-#    analyzer.videoBandwidth = Frequency(10,'kHz')
-    analyzer.centerFrequency = Frequency(50,'MHz')
-#    analyzer.attenuation = PowerRatio(20,'dB')
-#    analyzer.referenceLevel = PowerRatio(0,'dB')
-    analyzer.numberOfAveragingPoints = 100
+#    analyzer.reset()
+#    
+#    analyzer.span = Frequency(100,'MHz')
+##    analyzer.resolutionBandwidth = Frequency(3,'kHz')
+##    analyzer.videoBandwidth = Frequency(10,'kHz')
+#    analyzer.centerFrequency = Frequency(50,'MHz')
+##    analyzer.attenuation = PowerRatio(20,'dB')
+##    analyzer.referenceLevel = PowerRatio(0,'dB')
+#    analyzer.numberOfAveragingPoints = 100
+    analyzer.reset()    
+    analyzer.span = Frequency(1000,'MHz')
+    analyzer.centerFrequency = Frequency(500,'MHz')
+    analyzer.numberOfAveragingPoints = 100 
     
     print 'Span',analyzer.span
     print 'RBW',analyzer.resolutionBandwidth
